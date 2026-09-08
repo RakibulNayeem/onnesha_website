@@ -18,7 +18,7 @@ from .models import (
     Payment, PaymentCategory, Program, Student, StudentStatus, Subject,
     Teacher, TeacherPayment, add_months, month_start,
 )
-from .utils import month_options, parse_month
+from .utils import month_options, months_between, parse_month, range_context
 
 ZERO = Decimal("0")
 
@@ -377,17 +377,19 @@ def payment_create(request):
 
 @login_required
 def payment_list(request):
-    month, options = _month_context(request)
+    rng = range_context(request.GET)
     scope = request.GET.get("scope", "paid_on")
     category = request.GET.get("category", "")
     q = request.GET.get("q", "").strip()
 
     payments = Payment.objects.select_related("student", "student__batch")
     if scope == "for_month":
-        payments = payments.filter(month=month)
+        payments = payments.filter(
+            month__gte=rng["start_month"], month__lt=rng["end_exclusive"]
+        )
     else:
         payments = payments.filter(
-            paid_on__gte=month, paid_on__lt=add_months(month, 1)
+            paid_on__gte=rng["start_month"], paid_on__lt=rng["end_exclusive"]
         )
     if category:
         payments = payments.filter(category=category)
@@ -396,14 +398,14 @@ def payment_list(request):
             Q(student__name__icontains=q) | Q(student__student_id__icontains=q)
         )
 
-    return render(request, "core/payment_list.html", {
+    context = {
         "payments": payments[:500], "total": _sum(payments),
         "count": payments.count(),
-        "month": month, "month_options": options,
-        "month_value": month.strftime("%Y-%m"),
         "categories": PaymentCategory.choices, "category": category,
         "scope": scope, "q": q,
-    })
+    }
+    context.update(rng)
+    return render(request, "core/payment_list.html", context)
 
 
 @login_required
@@ -430,9 +432,9 @@ def payment_delete(request, pk):
 # ============================================================ EXPENSES
 @login_required
 def expense_list(request):
-    month, options = _month_context(request)
+    rng = range_context(request.GET)
     expenses = Expense.objects.filter(
-        spent_on__gte=month, spent_on__lt=add_months(month, 1)
+        spent_on__gte=rng["start_month"], spent_on__lt=rng["end_exclusive"]
     ).select_related("batch")
     category = request.GET.get("category", "")
     if category:
@@ -443,17 +445,20 @@ def expense_list(request):
         if form.is_valid():
             e = form.save()
             messages.success(request, f"Recorded \u09f3{e.amount:,.0f}.")
-            return redirect(f"{reverse('expense_list')}?month={month:%Y-%m}")
+            return redirect(
+                f"{reverse('expense_list')}"
+                f"?from={rng['start_value']}&to={rng['end_value']}"
+            )
     else:
         form = ExpenseForm(initial={"spent_on": date.today()})
 
     from .models import ExpenseCategory
-    return render(request, "core/expense_list.html", {
+    context = {
         "expenses": expenses, "total": _sum(expenses), "form": form,
-        "month": month, "month_options": options,
-        "month_value": month.strftime("%Y-%m"),
         "categories": ExpenseCategory.choices, "category": category,
-    })
+    }
+    context.update(rng)
+    return render(request, "core/expense_list.html", context)
 
 
 @login_required
@@ -468,7 +473,12 @@ def expense_delete(request, pk):
         else:
             e.delete()
             messages.success(request, "Expense deleted.")
-    return redirect(f"{reverse('expense_list')}?month={month:%Y-%m}")
+    params = request.POST if request.method == "POST" else request.GET
+    start = parse_month(params.get("from"), month)
+    end = parse_month(params.get("to"), month)
+    return redirect(
+        f"{reverse('expense_list')}?from={start:%Y-%m}&to={end:%Y-%m}"
+    )
 
 
 # ============================================================ TEACHERS
@@ -574,10 +584,11 @@ def attendance_mark(request):
 
 @login_required
 def attendance_report(request):
-    month, options = _month_context(request)
-    nxt = add_months(month, 1)
+    rng = range_context(request.GET)
     batch_id = request.GET.get("batch", "")
-    qs = Attendance.objects.filter(on_date__gte=month, on_date__lt=nxt)
+    qs = Attendance.objects.filter(
+        on_date__gte=rng["start_month"], on_date__lt=rng["end_exclusive"]
+    )
     if batch_id:
         qs = qs.filter(batch_id=batch_id)
 
@@ -591,25 +602,31 @@ def attendance_report(request):
     )
     for r in rows:
         r["percent"] = (r["present"] / r["held"] * 100) if r["held"] else 0
-    return render(request, "core/attendance_report.html", {
-        "rows": rows, "month": month, "month_options": options,
-        "month_value": month.strftime("%Y-%m"),
+    context = {
+        "rows": rows,
         "batches": Batch.objects.all(), "batch_id": batch_id,
-    })
+    }
+    context.update(rng)
+    return render(request, "core/attendance_report.html", context)
 
 
 # ============================================================ REPORTS
 @login_required
 def due_report(request):
-    month_param = request.GET.get("month", "")
+    rng = range_context(request.GET)
     batch_id = request.GET.get("batch", "")
     scope = request.GET.get("scope", "all")
+    # "month" is what the old one-month links called it.
+    if scope == "month":
+        scope = "range"
 
     enrollments = MonthlyEnrollment.objects.select_related(
         "student", "batch"
     ).order_by("student__student_id", "month")
-    if scope == "month":
-        enrollments = enrollments.filter(month=parse_month(month_param))
+    if scope == "range":
+        enrollments = enrollments.filter(
+            month__gte=rng["start_month"], month__lt=rng["end_exclusive"]
+        )
     if batch_id:
         enrollments = enrollments.filter(batch_id=batch_id)
 
@@ -636,20 +653,23 @@ def due_report(request):
             ])
         return response
 
-    return render(request, "core/due_report.html", {
+    context = {
         "rows": rows, "total": total, "scope": scope,
-        "month_options": month_options(), "month_value": month_param,
         "batches": Batch.objects.all(), "batch_id": batch_id,
-    })
+    }
+    context.update(rng)
+    return render(request, "core/due_report.html", context)
 
 
 @login_required
 def monthly_report(request):
-    month, options = _month_context(request)
-    nxt = add_months(month, 1)
-    payments = Payment.objects.filter(paid_on__gte=month, paid_on__lt=nxt)
-    expenses = Expense.objects.filter(spent_on__gte=month, spent_on__lt=nxt)
-    enrollments = MonthlyEnrollment.objects.filter(month=month)
+    rng = range_context(request.GET)
+    start, nxt = rng["start_month"], rng["end_exclusive"]
+    payments = Payment.objects.filter(paid_on__gte=start, paid_on__lt=nxt)
+    expenses = Expense.objects.filter(spent_on__gte=start, spent_on__lt=nxt)
+    enrollments = MonthlyEnrollment.objects.filter(
+        month__gte=start, month__lt=nxt
+    )
 
     from .models import ExpenseCategory
     income_rows = []
@@ -664,24 +684,38 @@ def monthly_report(request):
             expense_rows.append({"label": label, "total": t})
 
     course_rows = (
-        Course.objects.filter(enrollments__month=month)
+        Course.objects.filter(
+            enrollments__month__gte=start, enrollments__month__lt=nxt
+        )
         .annotate(students=Count("enrollments"))
         .order_by("-students")
     )
     for c in course_rows:
         c.expected = c.students * c.monthly_fee
 
+    # Over a span, the single set of totals hides the shape of it.
+    month_rows = []
+    if rng["is_range"]:
+        for m in months_between(start, rng["end_month"]):
+            m_next = add_months(m, 1)
+            m_in = _sum(Payment.objects.filter(paid_on__gte=m, paid_on__lt=m_next))
+            m_out = _sum(Expense.objects.filter(spent_on__gte=m, spent_on__lt=m_next))
+            month_rows.append({
+                "month": m, "income": m_in, "expense": m_out,
+                "profit": m_in - m_out,
+                "students": MonthlyEnrollment.objects.filter(month=m).count(),
+            })
+
     context = {
-        "month": month, "month_options": options,
-        "month_value": month.strftime("%Y-%m"),
         "income_rows": income_rows, "expense_rows": expense_rows,
         "income_total": _sum(payments), "expense_total": _sum(expenses),
         "profit": _sum(payments) - _sum(expenses),
         "charged": _sum(enrollments, "fee_charged"),
         "collected": _sum(payments.filter(category=PaymentCategory.MONTHLY_FEE)),
-        "enrolled": enrollments.count(),
-        "course_rows": course_rows,
+        "enrolled": enrollments.values("student").distinct().count(),
+        "course_rows": course_rows, "month_rows": month_rows,
     }
+    context.update(rng)
     return render(request, "core/monthly_report.html", context)
 
 

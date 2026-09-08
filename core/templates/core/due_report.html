@@ -3,15 +3,14 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h4 class="mb-0" style="color:#0f6e6e">Due list <span class="text-muted fs-6">৳{{ total|floatformat:0|intcomma }} outstanding</span></h4>
-  <a class="btn btn-sm btn-outline-secondary" href="?export=csv&scope={{ scope }}&month={{ month_value }}&batch={{ batch_id }}"><i class="bi bi-download"></i> CSV</a>
+  <a class="btn btn-sm btn-outline-secondary" href="?export=csv&scope={{ scope }}&from={{ start_value }}&to={{ end_value }}&batch={{ batch_id }}"><i class="bi bi-download"></i> CSV</a>
 </div>
 <form class="row g-2 mb-3 no-print" method="get">
   <div class="col-md-3"><select name="scope" class="form-select form-select-sm">
     <option value="all" {% if scope == 'all' %}selected{% endif %}>Every month</option>
-    <option value="month" {% if scope == 'month' %}selected{% endif %}>One month only</option></select></div>
-  <div class="col-md-3"><select name="month" class="form-select form-select-sm">
-    {% for v,l in month_options %}<option value="{{ v }}" {% if v == month_value %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
-  <div class="col-md-3"><select name="batch" class="form-select form-select-sm"><option value="">All batches</option>
+    <option value="range" {% if scope == 'range' %}selected{% endif %}>Selected months only</option></select></div>
+  <div class="col-md-5">{% include "core/_month_range.html" %}</div>
+  <div class="col-md-2"><select name="batch" class="form-select form-select-sm"><option value="">All batches</option>
     {% for b in batches %}<option value="{{ b.pk }}" {% if batch_id == b.pk|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>{% endfor %}</select></div>
   <div class="col-md-2"><button class="btn btn-sm btn-outline-secondary w-100">Apply</button></div>
 </form>

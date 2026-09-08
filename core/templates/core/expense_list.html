@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}{% load humanize %}
 {% block title %}Expenses{% endblock %}
 {% block content %}
-<h4 class="mb-3" style="color:#0f6e6e">Expenses <span class="text-muted fs-6">{{ month|date:"F Y" }} · ৳{{ total|floatformat:0|intcomma }}</span></h4>
+<h4 class="mb-3" style="color:#0f6e6e">Expenses <span class="text-muted fs-6">{{ range_label }} · ৳{{ total|floatformat:0|intcomma }}</span></h4>
 <div class="row g-3">
   <div class="col-lg-4"><div class="card"><div class="card-header">Record a new expense</div><div class="card-body">
     <form method="post" class="row g-2">{% csrf_token %}
@@ -13,9 +13,8 @@
   </div></div></div>
   <div class="col-lg-8">
     <form class="row g-2 mb-3 no-print" method="get">
-      <div class="col-md-4"><select name="month" class="form-select form-select-sm" onchange="this.form.submit()">
-        {% for v,l in month_options %}<option value="{{ v }}" {% if v == month_value %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
-      <div class="col-md-4"><select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
+      <div class="col-md-7">{% include "core/_month_range.html" %}</div>
+      <div class="col-md-5"><select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
         <option value="">All categories</option>
         {% for v,l in categories %}<option value="{{ v }}" {% if category == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
     </form>
@@ -27,8 +26,9 @@
         <td class="small">{{ e.batch.name|default:"—" }}</td>
         <td class="text-end tk">৳{{ e.amount|floatformat:0|intcomma }}</td>
         <td class="text-end no-print"><form method="post" action="{% url 'expense_delete' e.pk %}" onsubmit="return confirm('Delete this expense?')">{% csrf_token %}
+          <input type="hidden" name="from" value="{{ start_value }}"><input type="hidden" name="to" value="{{ end_value }}">
           <button class="btn btn-sm btn-outline-danger py-0">×</button></form></td>
-      </tr>{% empty %}<tr><td colspan="7" class="text-center text-muted py-4">No expense recorded in this month.</td></tr>{% endfor %}</tbody>
+      </tr>{% empty %}<tr><td colspan="7" class="text-center text-muted py-4">No expense recorded in this range.</td></tr>{% endfor %}</tbody>
     </table></div></div>
   </div>
 </div>
