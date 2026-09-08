@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}{% load humanize %}
+{% block title %}Collect fee{% endblock %}
+{% block content %}
+<h4 class="mb-3" style="color:#0f6e6e">Collect a fee</h4>
+<div class="row g-3">
+  <div class="col-lg-6"><div class="card"><div class="card-body">
+    {% if outstanding is not None %}
+      <div class="alert py-2 {% if outstanding > 0 %}alert-warning{% else %}alert-success{% endif %}">
+        Outstanding for this month: <strong class="tk">৳{{ outstanding|floatformat:0|intcomma }}</strong></div>
+    {% endif %}
+    <form method="post" class="row g-3">{% csrf_token %}
+      {% for f in form %}
+        <div class="col-md-{% if f.name == 'note' %}12{% else %}6{% endif %}">
+          <label class="form-label small mb-1">{{ f.label }}</label>{{ f }}
+          {% for e in f.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+      {% endfor %}
+      <div class="col-12">
+        <button class="btn text-white" style="background:#0f6e6e" name="save">Save payment</button>
+        <button class="btn btn-outline-secondary" name="save_and_print">Save &amp; print receipt</button>
+      </div>
+    </form>
+  </div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header">Last 15 payments</div>
+    <div class="table-responsive"><table class="table table-sm mb-0">
+      <thead><tr><th>Date</th><th>Student</th><th>For</th><th class="text-end">Amount</th><th></th></tr></thead>
+      <tbody>{% for p in recent %}<tr>
+        <td>{{ p.paid_on|date:"d M" }}</td>
+        <td>{{ p.student.name|default:"—" }}</td>
+        <td class="small">{{ p.get_category_display }}{% if p.month %}<br><span class="text-muted">{{ p.month|date:"M Y" }}</span>{% endif %}</td>
+        <td class="text-end tk">৳{{ p.amount|floatformat:0|intcomma }}</td>
+        <td><a class="small" href="{% url 'receipt' p.pk %}">receipt</a></td>
+      </tr>{% empty %}<tr><td colspan="5" class="text-muted small p-3">No payments yet.</td></tr>{% endfor %}</tbody>
+    </table></div></div></div>
+</div>
+{% endblock %}

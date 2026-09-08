@@ -1,0 +1,31 @@
+{% extends "core/base.html" %}{% load humanize %}
+{% block title %}Teachers{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0" style="color:#0f6e6e">Teachers <span class="text-muted fs-6">{{ month|date:"F Y" }}</span></h4>
+  <div><a class="btn btn-sm btn-outline-secondary" href="{% url 'teacher_create' %}">Add teacher</a>
+    <a class="btn btn-sm text-white" style="background:#0f6e6e" href="{% url 'teacher_pay' %}?month={{ month_value }}">Record a payment</a></div>
+</div>
+<form class="mb-3 no-print" method="get" style="max-width:220px">
+  <select name="month" class="form-select form-select-sm" onchange="this.form.submit()">
+    {% for v,l in month_options %}<option value="{{ v }}" {% if v == month_value %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></form>
+<div class="row g-3 mb-3">
+  <div class="col-md-4"><div class="stat"><div class="lbl">Owed this month</div><div class="val tk">৳{{ total_expected|floatformat:0|intcomma }}</div></div></div>
+  <div class="col-md-4"><div class="stat"><div class="lbl">Paid</div><div class="val tk">৳{{ total_paid|floatformat:0|intcomma }}</div></div></div>
+</div>
+<div class="card"><div class="table-responsive"><table class="table table-sm mb-0">
+<thead><tr><th>Teacher</th><th>Subjects</th><th>Pay type</th><th class="text-end">Should get</th><th class="text-end">Paid</th><th class="text-end">Due</th><th></th></tr></thead>
+<tbody>{% for r in rows %}<tr>
+  <td class="fw-semibold">{{ r.t.name }}<div class="small text-muted">{{ r.t.phone }}</div></td>
+  <td class="small">{% for s in r.t.subjects.all %}{{ s.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
+  <td class="small">{{ r.t.get_pay_type_display }}{% if r.t.pay_type == 'per_student' %} ({{ r.t.share_percent }}%){% endif %}</td>
+  <td class="text-end tk">৳{{ r.expected|floatformat:0|intcomma }}</td>
+  <td class="text-end tk">৳{{ r.paid|floatformat:0|intcomma }}</td>
+  <td class="text-end tk {% if r.due > 0 %}text-danger fw-semibold{% endif %}">৳{{ r.due|floatformat:0|intcomma }}</td>
+  <td class="text-end text-nowrap no-print">
+    <a class="btn btn-sm py-0 text-white" style="background:#0f6e6e" href="{% url 'teacher_pay' %}?teacher={{ r.t.pk }}&month={{ month_value }}">Pay</a>
+    <a class="btn btn-sm btn-outline-secondary py-0" href="{% url 'teacher_edit' r.t.pk %}">Edit</a></td>
+</tr>{% empty %}<tr><td colspan="7" class="text-center text-muted py-4">No teacher added yet.</td></tr>{% endfor %}</tbody>
+</table></div></div>
+<p class="small text-muted mt-2">Every teacher payment is written into Expenses automatically, so the profit figure always includes it.</p>
+{% endblock %}

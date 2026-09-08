@@ -1,0 +1,20 @@
+{% extends "website/base.html" %}{% load pub %}
+{% block title %}{% bt notice "title" %}{% endblock %}
+{% block body %}
+<section class="sec"><div class="container"><div class="row g-4">
+  <div class="col-lg-8">
+    <a class="small text-muted" href="{% url 'pub_notices' %}">← {% t "notices" %}</a>
+    <h1 class="mt-3 mb-2">{% bt notice "title" %}</h1>
+    <div class="small text-muted mb-4">{% t "published_on" %} {{ notice.published_at|date:"d M Y" }}</div>
+    <div class="prose">{% bt notice "body" %}</div>
+    {% if notice.file_link %}<a class="btn btn-ons mt-4" href="{{ notice.file_link }}">
+      <i class="bi bi-download me-1"></i>{% t "download" %}</a>{% endif %}
+  </div>
+  <div class="col-lg-4"><div class="card-ons p-4">
+    <h6 class="mb-3">{% t "latest_notices" %}</h6>
+    {% for n in others %}<div class="mb-3 pb-3 border-bottom">
+      <a href="{{ n.get_absolute_url }}" class="small fw-semibold" style="color:var(--ink)">{% bt n "title" %}</a>
+      <div class="small text-muted">{{ n.published_at|date:"d M Y" }}</div></div>{% endfor %}
+  </div></div>
+</div></div></section>
+{% endblock %}

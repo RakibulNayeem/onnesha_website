@@ -1,0 +1,26 @@
+{% extends "core/base.html" %}
+{% block content %}
+<h4 class="mb-3" style="color:#0f6e6e">Attendance</h4>
+<form class="row g-2 mb-3 no-print" method="get">
+  <div class="col-md-4"><label class="form-label small mb-1">Batch</label>
+    <select name="batch" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="">Choose a batch…</option>
+      {% for b in batches %}<option value="{{ b.pk }}" {% if batch and batch.pk == b.pk %}selected{% endif %}>{{ b.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-3"><label class="form-label small mb-1">Date</label>
+    <input type="date" name="date" value="{{ on_date }}" class="form-control form-control-sm" onchange="this.form.submit()"></div>
+</form>
+{% if batch %}
+<form method="post"><div class="card">{% csrf_token %}
+  <input type="hidden" name="batch" value="{{ batch.pk }}"><input type="hidden" name="date" value="{{ on_date }}">
+  <div class="card-header d-flex justify-content-between"><span>{{ batch.name }} — {{ on_date }}</span>
+    <span class="small text-muted">{{ rows|length }} students</span></div>
+  <div class="table-responsive"><table class="table table-sm mb-0">
+    <thead><tr><th style="width:60px">Present</th><th>ID</th><th>Student</th></tr></thead>
+    <tbody>{% for r in rows %}<tr>
+      <td class="text-center"><input type="checkbox" class="form-check-input" name="present" value="{{ r.s.pk }}" {% if r.present %}checked{% endif %}></td>
+      <td class="text-muted small">{{ r.s.student_id }}</td><td>{{ r.s.name }}</td>
+    </tr>{% empty %}<tr><td colspan="3" class="text-muted p-3">No active student in this batch.</td></tr>{% endfor %}</tbody></table></div>
+  <div class="card-body no-print"><button class="btn text-white" style="background:#0f6e6e">Save attendance</button></div>
+</div></form>
+{% else %}<p class="text-muted">Pick a batch to mark attendance.</p>{% endif %}
+{% endblock %}

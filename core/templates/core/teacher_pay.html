@@ -1,0 +1,20 @@
+{% extends "core/base.html" %}{% load humanize %}
+{% block content %}
+<h4 class="mb-3" style="color:#0f6e6e">Pay a teacher</h4>
+<div class="row g-3">
+  <div class="col-lg-5"><div class="card"><div class="card-body">
+    <form method="post" class="row g-3">{% csrf_token %}
+      {% for f in form %}<div class="col-md-6">
+        <label class="form-label small mb-1">{{ f.label }}</label>{{ f }}
+        {% for e in f.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>{% endfor %}
+      <div class="col-12"><button class="btn text-white" style="background:#0f6e6e">Save payment</button></div>
+    </form>
+  </div></div></div>
+  <div class="col-lg-7"><div class="card"><div class="card-header">Recent teacher payments</div>
+    <table class="table table-sm mb-0"><thead><tr><th>Paid on</th><th>Teacher</th><th>For month</th><th class="text-end">Amount</th></tr></thead>
+    <tbody>{% for p in recent %}<tr><td>{{ p.paid_on|date:"d M Y" }}</td><td>{{ p.teacher.name }}</td>
+      <td>{{ p.month|date:"M Y" }}</td><td class="text-end tk">৳{{ p.amount|floatformat:0|intcomma }}</td></tr>
+    {% empty %}<tr><td colspan="4" class="text-muted small p-3">Nothing recorded yet.</td></tr>{% endfor %}</tbody></table>
+  </div></div>
+</div>
+{% endblock %}

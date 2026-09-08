@@ -1,0 +1,21 @@
+{% extends "core/base.html" %}
+{% block title %}{% if student %}Edit student{% else %}New student{% endif %}{% endblock %}
+{% block content %}
+<h4 class="mb-3" style="color:#0f6e6e">{% if student %}Edit {{ student.name }}{% else %}Enroll a new student{% endif %}</h4>
+<div class="card"><div class="card-body">
+<form method="post" class="row g-3">{% csrf_token %}
+  {% for f in form %}
+    <div class="col-md-{% if f.name in 'note,address' %}12{% else %}4{% endif %}">
+      <label class="form-label small mb-1">{{ f.label }}{% if f.field.required %} <span class="text-danger">*</span>{% endif %}</label>
+      {{ f }}
+      {% if f.help_text %}<div class="form-text small">{{ f.help_text }}</div>{% endif %}
+      {% for e in f.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+  {% endfor %}
+  <div class="col-12">
+    <button class="btn text-white" style="background:#0f6e6e">Save student</button>
+    <a class="btn btn-outline-secondary" href="{% url 'student_list' %}">Cancel</a>
+  </div>
+</form>
+</div></div>
+{% endblock %}

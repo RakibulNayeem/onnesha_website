@@ -1,0 +1,51 @@
+{% extends "core/base.html" %}{% load humanize %}
+{% block title %}{{ student.name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <div><h4 class="mb-0" style="color:#0f6e6e">{{ student.name }}</h4>
+    <div class="text-muted small">{{ student.student_id }} · {{ student.get_class_level_display }} · {{ student.batch.name|default:"no batch" }} · {{ student.get_status_display }}</div></div>
+  <div>
+    <a class="btn btn-sm text-white" style="background:#0f6e6e" href="{% url 'payment_create' %}?student={{ student.pk }}">Collect fee</a>
+    <a class="btn btn-sm btn-outline-secondary" href="{% url 'enrollment_create' %}?student={{ student.pk }}">Enroll in a month</a>
+    <a class="btn btn-sm btn-outline-secondary" href="{% url 'student_edit' student.pk %}">Edit</a>
+  </div>
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-md-4"><div class="stat"><div class="lbl">Charged all-time</div><div class="val tk">৳{{ charged|floatformat:0|intcomma }}</div></div></div>
+  <div class="col-md-4"><div class="stat"><div class="lbl">Paid</div><div class="val tk">৳{{ paid|floatformat:0|intcomma }}</div></div></div>
+  <div class="col-md-4"><div class="stat"><div class="lbl">Outstanding</div><div class="val tk" style="color:{% if due > 0 %}#b02a2a{% else %}#186418{% endif %}">৳{{ due|floatformat:0|intcomma }}</div></div></div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-7"><div class="card"><div class="card-header">Month-by-month</div>
+    <div class="table-responsive"><table class="table table-sm mb-0">
+    <thead><tr><th>Month</th><th>Subjects</th><th class="text-end">Fee</th><th class="text-end">Paid</th><th class="text-end">Due</th><th></th></tr></thead>
+    <tbody>{% for r in rows %}<tr>
+      <td>{{ r.e.month|date:"M Y" }}</td>
+      <td class="small">{% for c in r.e.courses.all %}{{ c.subject.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
+      <td class="text-end tk">৳{{ r.e.fee_charged|floatformat:0|intcomma }}</td>
+      <td class="text-end tk">৳{{ r.paid|floatformat:0|intcomma }}</td>
+      <td class="text-end tk">৳{{ r.due|floatformat:0|intcomma }}</td>
+      <td><span class="badge badge-{{ r.status }}">{{ r.label }}</span></td>
+    </tr>{% empty %}<tr><td colspan="6" class="text-muted small p-3">Not enrolled in any month yet.</td></tr>{% endfor %}</tbody>
+    </table></div></div></div>
+  <div class="col-lg-5">
+    <div class="card mb-3"><div class="card-header">Contact</div><div class="card-body small">
+      <div><strong>Guardian:</strong> {{ student.guardian_name|default:"—" }}</div>
+      <div><strong>Guardian phone:</strong> {{ student.guardian_phone|default:"—" }}</div>
+      <div><strong>Student phone:</strong> {{ student.phone|default:"—" }}</div>
+      <div><strong>School:</strong> {{ student.school|default:"—" }}</div>
+      <div><strong>Address:</strong> {{ student.address|default:"—" }}</div>
+      <div><strong>Joined:</strong> {{ student.joining_date|date:"d M Y" }}</div>
+      {% if student.note %}<div class="mt-2 text-muted">{{ student.note }}</div>{% endif %}
+    </div></div>
+    <div class="card"><div class="card-header">Payment history</div>
+      <table class="table table-sm mb-0"><tbody>
+      {% for p in payments %}<tr>
+        <td>{{ p.paid_on|date:"d M Y" }}<div class="small text-muted">{{ p.get_category_display }}{% if p.month %} · {{ p.month|date:"M Y" }}{% endif %}</div></td>
+        <td class="text-end tk">৳{{ p.amount|floatformat:0|intcomma }}
+          <div class="small"><a href="{% url 'receipt' p.pk %}">receipt</a></div></td>
+      </tr>{% empty %}<tr><td class="text-muted small p-3">No payment recorded.</td></tr>{% endfor %}
+      </tbody></table></div>
+  </div>
+</div>
+{% endblock %}

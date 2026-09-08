@@ -1,0 +1,194 @@
+{% load pub %}<!doctype html>
+<html lang="{{ LANG }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ site.hero_title_en }}{% endblock %} · Onnesha</title>
+<meta name="description" content="{% block meta_desc %}Onnesha — academic and admission care coaching centre. Class 8–12, SSC, HSC and admission test preparation.{% endblock %}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ons:#0f6e6e; --ons-dark:#0a4f4f; --ons-light:#d8edec; --ons-soft:#f2f8f8;
+    --ink:#12312f; --muted:#63807e;
+  }
+  body{
+    font-family:{% if IS_BN %}'Hind Siliguri','Inter'{% else %}'Inter','Hind Siliguri'{% endif %},system-ui,sans-serif;
+    color:var(--ink); {% if IS_BN %}font-size:1.02rem;{% endif %}
+    background:#eef4f4;
+    background-image:
+      radial-gradient(900px 420px at 88% -8%, rgba(15,110,110,.09), transparent 60%),
+      radial-gradient(760px 380px at -10% 22%, rgba(26,163,154,.08), transparent 62%);
+    background-attachment:fixed;
+  }
+  h1,h2,h3,h4,h5{font-weight:700;letter-spacing:-.01em;}
+  a{text-decoration:none;}
+  .navbar{background:rgba(255,255,255,.92);backdrop-filter:blur(10px);
+    box-shadow:0 2px 16px rgba(18,49,47,.07);}
+  .navbar .nav-link{color:var(--ink);font-weight:500;padding:.4rem .75rem!important;border-radius:.4rem;}
+  .navbar .nav-link:hover{background:var(--ons-soft);color:var(--ons);}
+  .navbar .nav-link.active{color:var(--ons);font-weight:600;}
+  .brand-mark{width:38px;height:38px;border-radius:50%;background:var(--ons);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:1.05rem;}
+  .btn-ons{background:var(--ons);color:#fff;border:none;}
+  .btn-ons:hover{background:var(--ons-dark);color:#fff;}
+  .btn-ons-out{border:1.5px solid var(--ons);color:var(--ons);background:transparent;}
+  .btn-ons-out:hover{background:var(--ons);color:#fff;}
+  .hero{background:linear-gradient(135deg,var(--ons) 0%,#12857f 55%,#1aa39a 100%);color:#fff;}
+  .hero .lead{color:#d6efee;}
+  .soft{background:#fff;box-shadow:inset 0 1px 0 #e2ecec, inset 0 -1px 0 #e2ecec;}
+  .sec{padding:3.5rem 0;}
+  .sec-title{font-size:1.7rem;margin-bottom:.35rem;}
+  .sec-sub{color:var(--muted);margin-bottom:2rem;}
+  .card-ons{border:1px solid #e6eeee;border-radius:.9rem;background:#fff;height:100%;
+    box-shadow:0 1px 2px rgba(18,49,47,.04), 0 6px 18px rgba(18,49,47,.06);
+    transition:box-shadow .2s ease, transform .2s ease, border-color .2s ease;}
+  .card-ons:hover{box-shadow:0 4px 10px rgba(15,110,110,.10), 0 18px 38px rgba(15,110,110,.14);
+    transform:translateY(-3px);border-color:#cfe3e2;}
+  .pill{display:inline-block;background:var(--ons-light);color:var(--ons-dark);
+    border-radius:999px;padding:.15rem .7rem;font-size:.78rem;font-weight:600;}
+  .icon-round{width:46px;height:46px;border-radius:.7rem;background:var(--ons-light);
+    color:var(--ons);display:grid;place-items:center;font-size:1.3rem;}
+  .stat-num{font-size:2rem;font-weight:800;color:var(--ons);}
+  .thumb{aspect-ratio:16/10;object-fit:cover;width:100%;border-radius:.6rem;background:#e9f1f1;
+    box-shadow:0 2px 10px rgba(18,49,47,.08);}
+  .avatar{width:96px;height:96px;border-radius:50%;object-fit:cover;background:var(--ons-light);
+    box-shadow:0 4px 14px rgba(15,110,110,.18);}
+  .footer{background:var(--ons-dark);color:#bcd9d7;}
+  .footer a{color:#bcd9d7;}
+  .footer a:hover{color:#fff;}
+  .lang-btn{border:1px solid #d6e3e2;border-radius:999px;padding:.15rem .6rem;
+    font-size:.8rem;font-weight:600;color:var(--muted);}
+  .lang-btn.on{background:var(--ons);color:#fff;border-color:var(--ons);}
+  .prose{line-height:1.85;white-space:pre-line;}
+  .page-head{background:linear-gradient(180deg,#ffffff 0%,#f4f9f9 100%);
+    box-shadow:0 4px 16px rgba(18,49,47,.05);border-bottom:1px solid #e6eeee;}
+  .form-control,.form-select{background:#fff;border-color:#dbe7e6;}
+  .form-control:focus,.form-select:focus{border-color:var(--ons);
+    box-shadow:0 0 0 .2rem rgba(15,110,110,.14);}
+  .btn-ons{box-shadow:0 4px 14px rgba(15,110,110,.28);}
+  .btn-ons:hover{box-shadow:0 6px 20px rgba(15,110,110,.34);}
+  .footer{box-shadow:0 -8px 30px rgba(10,79,79,.18);}
+  .table-merit thead th{background:var(--ons);color:#fff;font-weight:600;}
+  .ticker{background:var(--ons-light);border-radius:.6rem;padding:.55rem 1rem;}
+  .slide{height:clamp(320px,52vh,520px);background-size:cover;background-position:center;position:relative;}
+  .slide::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(90deg,rgba(10,79,79,.92) 0%,rgba(10,79,79,.72) 45%,rgba(10,79,79,.28) 100%);}
+  .slide-body{position:relative;z-index:2;height:100%;display:flex;align-items:center;color:#fff;}
+  .carousel-indicators [data-bs-target]{width:26px;height:4px;border-radius:2px;}
+  .stat-strip{background:#fff;box-shadow:0 6px 18px rgba(18,49,47,.06);
+    position:relative;z-index:3;}
+  a.card-link{color:inherit;display:block;height:100%;}
+  a.card-link:hover h5,a.card-link:hover h6{color:var(--ons);}
+  .anchor{scroll-margin-top:90px;}
+</style>
+{% block head %}{% endblock %}
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg sticky-top">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'pub_home' %}">
+      <span class="brand-mark">অ</span>
+      <span>
+        <span class="d-block fw-bold" style="color:var(--ons);line-height:1.1">{% bt site "hero_title" %}</span>
+        <span class="d-block text-muted" style="font-size:.72rem">একাডেমিক এন্ড এডমিশন কেয়ার</span>
+      </span>
+    </a>
+    <button class="navbar-toggler border-0" data-bs-toggle="collapse" data-bs-target="#nav">
+      <span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        <li class="nav-item"><a class="nav-link {% if nav == 'home' %}active{% endif %}" href="{% url 'pub_home' %}">{% t "home" %}</a></li>
+        <li class="nav-item"><a class="nav-link {% if nav == 'programs' %}active{% endif %}" href="{% url 'pub_programs' %}">{% t "programs" %}</a></li>
+        <li class="nav-item"><a class="nav-link {% if nav == 'teachers' %}active{% endif %}" href="{% url 'pub_teachers' %}">{% t "teachers" %}</a></li>
+        <li class="nav-item"><a class="nav-link {% if nav == 'results' %}active{% endif %}" href="{% url 'pub_results' %}">{% t "results" %}</a></li>
+        <li class="nav-item"><a class="nav-link {% if nav == 'notices' %}active{% endif %}" href="{% url 'pub_notices' %}">{% t "notices" %}</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">{% t "view_all" %}</a>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+            <li><a class="dropdown-item" href="{% url 'pub_videos' %}">{% t "videos" %}</a></li>
+            <li><a class="dropdown-item" href="{% url 'pub_gallery' %}">{% t "gallery" %}</a></li>
+            <li><a class="dropdown-item" href="{% url 'pub_downloads' %}">{% t "downloads" %}</a></li>
+            <li><a class="dropdown-item" href="{% url 'pub_blog' %}">{% t "blog" %}</a></li>
+            <li><a class="dropdown-item" href="{% url 'pub_about' %}">{% t "about_us" %}</a></li>
+            <li><a class="dropdown-item" href="{% url 'pub_contact' %}">{% t "contact" %}</a></li>
+          </ul>
+        </li>
+        <li class="nav-item ms-lg-2 my-2 my-lg-0">
+          <a href="{% url 'pub_set_language' 'en' %}" class="lang-btn {% if not IS_BN %}on{% endif %}">EN</a>
+          <a href="{% url 'pub_set_language' 'bn' %}" class="lang-btn {% if IS_BN %}on{% endif %}">বাং</a>
+        </li>
+        <li class="nav-item ms-lg-3 my-2 my-lg-0">
+          <a class="btn btn-ons btn-sm px-3" href="{% url 'pub_admission' %}">{% t "apply_now" %}</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+{% if messages %}
+<div class="container mt-3">
+  {% for m in messages %}
+  <div class="alert alert-success alert-dismissible fade show">{{ m }}
+    <button class="btn-close" data-bs-dismiss="alert"></button></div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% block body %}{% endblock %}
+
+<footer class="footer mt-5 pt-5 pb-4">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="brand-mark" style="background:#fff;color:var(--ons)">অ</span>
+          <span class="fw-bold text-white fs-5">{% bt site "hero_title" %}</span>
+        </div>
+        <p class="small mb-3">{% bt site "hero_subtitle" %}</p>
+        {% if site.facebook_url or site.youtube_url %}
+        <div class="d-flex gap-3 fs-5">
+          {% if site.facebook_url %}<a href="{{ site.facebook_url }}"><i class="bi bi-facebook"></i></a>{% endif %}
+          {% if site.youtube_url %}<a href="{{ site.youtube_url }}"><i class="bi bi-youtube"></i></a>{% endif %}
+          {% if site.whatsapp %}<a href="https://wa.me/{{ site.whatsapp }}"><i class="bi bi-whatsapp"></i></a>{% endif %}
+        </div>{% endif %}
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6 class="text-white mb-3">{% t "quick_links" %}</h6>
+        <div class="d-flex flex-column gap-2 small">
+          <a href="{% url 'pub_programs' %}">{% t "programs" %}</a>
+          <a href="{% url 'pub_teachers' %}">{% t "teachers" %}</a>
+          <a href="{% url 'pub_results' %}">{% t "results" %}</a>
+          <a href="{% url 'pub_notices' %}">{% t "notices" %}</a>
+        </div>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6 class="text-white mb-3">{% t "downloads" %}</h6>
+        <div class="d-flex flex-column gap-2 small">
+          <a href="{% url 'pub_videos' %}">{% t "videos" %}</a>
+          <a href="{% url 'pub_gallery' %}">{% t "gallery" %}</a>
+          <a href="{% url 'pub_downloads' %}">{% t "downloads" %}</a>
+          <a href="{% url 'pub_blog' %}">{% t "blog" %}</a>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <h6 class="text-white mb-3">{% t "contact" %}</h6>
+        <p class="small mb-1"><i class="bi bi-geo-alt me-2"></i>{% bt site "address" %}</p>
+        {% if site.phone %}<p class="small mb-1"><i class="bi bi-telephone me-2"></i>{{ site.phone }}</p>{% endif %}
+        {% if site.email %}<p class="small mb-1"><i class="bi bi-envelope me-2"></i>{{ site.email }}</p>{% endif %}
+      </div>
+    </div>
+    <hr style="border-color:rgba(255,255,255,.15)">
+    <div class="d-flex flex-wrap justify-content-between small">
+      <span>© {% now "Y" %} Onnesha. All rights reserved.</span>
+      <span>{% bt site "address" %}</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+</body></html>

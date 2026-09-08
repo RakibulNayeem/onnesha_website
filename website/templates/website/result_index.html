@@ -1,0 +1,19 @@
+{% extends "website/base.html" %}{% load pub %}
+{% block title %}{% t "results" %}{% endblock %}
+{% block body %}
+<section class="py-5 page-head"><div class="container">
+  <h1 class="mb-2" style="color:var(--ons)">{% t "results" %}</h1>
+  <p class="text-muted mb-0">{% if IS_BN %}পরীক্ষা বেছে নিন, তারপর মেধা তালিকা দেখুন বা নিজের আইডি দিয়ে বিষয়ভিত্তিক নম্বর দেখুন।{% else %}Pick an exam to see the merit list, or look up your own subject-wise marks by student ID.{% endif %}</p>
+</div></section>
+<section class="sec"><div class="container"><div class="row g-3">
+  {% for e in exams %}
+  <div class="col-md-6 col-lg-4"><div class="card-ons p-4">
+    <div class="pill mb-2">{{ e.get_class_level_display }}</div>
+    <h5 class="mb-1">{% bt e "name" %}</h5>
+    <div class="small text-muted mb-3">{{ e.held_on|date:"d M Y" }} · {% t "total" %} {{ e.total_marks }}</div>
+    <a class="btn btn-ons-out btn-sm" href="{{ e.get_absolute_url }}">
+      {% if e.show_public_list %}{% t "merit_list" %}{% else %}{% t "find_result" %}{% endif %}</a>
+  </div></div>
+  {% empty %}<p class="text-muted">{% t "no_items" %}</p>{% endfor %}
+</div></div></section>
+{% endblock %}

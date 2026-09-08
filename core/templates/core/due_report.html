@@ -1,0 +1,34 @@
+{% extends "core/base.html" %}{% load humanize %}
+{% block title %}Due list{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0" style="color:#0f6e6e">Due list <span class="text-muted fs-6">৳{{ total|floatformat:0|intcomma }} outstanding</span></h4>
+  <a class="btn btn-sm btn-outline-secondary" href="?export=csv&scope={{ scope }}&month={{ month_value }}&batch={{ batch_id }}"><i class="bi bi-download"></i> CSV</a>
+</div>
+<form class="row g-2 mb-3 no-print" method="get">
+  <div class="col-md-3"><select name="scope" class="form-select form-select-sm">
+    <option value="all" {% if scope == 'all' %}selected{% endif %}>Every month</option>
+    <option value="month" {% if scope == 'month' %}selected{% endif %}>One month only</option></select></div>
+  <div class="col-md-3"><select name="month" class="form-select form-select-sm">
+    {% for v,l in month_options %}<option value="{{ v }}" {% if v == month_value %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="col-md-3"><select name="batch" class="form-select form-select-sm"><option value="">All batches</option>
+    {% for b in batches %}<option value="{{ b.pk }}" {% if batch_id == b.pk|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><button class="btn btn-sm btn-outline-secondary w-100">Apply</button></div>
+</form>
+<div class="card"><div class="table-responsive"><table class="table table-sm mb-0">
+<thead><tr><th>ID</th><th>Student</th><th>Batch</th><th>Month</th><th>Guardian phone</th>
+<th class="text-end">Charged</th><th class="text-end">Paid</th><th class="text-end">Due</th><th></th></tr></thead>
+<tbody>{% for r in rows %}<tr>
+  <td class="text-muted small">{{ r.e.student.student_id }}</td>
+  <td><a href="{{ r.e.student.get_absolute_url }}" class="text-decoration-none">{{ r.e.student.name }}</a></td>
+  <td class="small">{{ r.e.batch.name|default:"—" }}</td>
+  <td class="small">{{ r.e.month|date:"M Y" }}</td>
+  <td class="small">{{ r.e.student.guardian_phone|default:"—" }}</td>
+  <td class="text-end tk">৳{{ r.e.fee_charged|floatformat:0|intcomma }}</td>
+  <td class="text-end tk">৳{{ r.paid|floatformat:0|intcomma }}</td>
+  <td class="text-end tk text-danger fw-semibold">৳{{ r.due|floatformat:0|intcomma }}</td>
+  <td class="no-print"><a class="btn btn-sm py-0 text-white" style="background:#0f6e6e"
+      href="{% url 'payment_create' %}?student={{ r.e.student.pk }}&month={{ r.e.month|date:'Y-m' }}">Take fee</a></td>
+</tr>{% empty %}<tr><td colspan="9" class="text-center text-muted py-4">Nothing outstanding. 🎉</td></tr>{% endfor %}</tbody>
+</table></div></div>
+{% endblock %}

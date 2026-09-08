@@ -1,0 +1,54 @@
+{% extends "core/base.html" %}{% load humanize %}
+{% block title %}Enroll{% endblock %}
+{% block content %}
+<h4 class="mb-1" style="color:#0f6e6e">{% if enrollment %}Edit enrollment{% else %}Enroll a student{% endif %}</h4>
+<p class="text-muted small mb-3">Month: <strong>{{ month|date:"F Y" }}</strong> — tick every subject this student is taking this month. The fee adds itself up.</p>
+<form method="post">{% csrf_token %}
+{{ form.month }}
+{% if form.non_field_errors %}<div class="alert alert-danger py-2">{{ form.non_field_errors }}</div>{% endif %}
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card"><div class="card-body">
+      <label class="form-label small mb-1">Student</label>{{ form.student }}
+      {% for e in form.student.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      <label class="form-label small mb-1 mt-3">Discount (৳)</label>{{ form.discount }}
+      <div class="form-text small">Waiver or sibling discount, taken off the total.</div>
+      <label class="form-label small mb-1 mt-3">Note</label>{{ form.note }}
+      <div class="mt-3 p-2 rounded" style="background:#d8edec">
+        <div class="small text-muted">Monthly fee</div>
+        <div class="fs-4 fw-bold tk" id="total">৳0</div>
+      </div>
+      <button class="btn text-white w-100 mt-3" style="background:#0f6e6e">Save enrollment</button>
+      <a class="btn btn-outline-secondary w-100 mt-2" href="{% url 'enrollment_month' %}?month={{ month|date:'Y-m' }}">Cancel</a>
+    </div></div>
+  </div>
+  <div class="col-lg-8"><div class="card"><div class="card-header">Courses</div><div class="card-body">
+    <div class="row">
+    {% for c in form.courses %}
+      <div class="col-md-6 mb-1">
+        <label class="d-flex align-items-center gap-2 p-2 border rounded">
+          {{ c.tag }} <span>{{ c.choice_label }}</span>
+        </label>
+      </div>
+    {% endfor %}
+    </div>
+    {% if not form.courses.field.queryset %}<p class="text-muted small mb-0">No courses set up yet — add them under <a href="{% url 'course_list' %}">Courses &amp; fees</a> first.</p>{% endif %}
+  </div></div></div>
+</div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+const fees = { {% for c in courses %}"{{ c.pk }}": {{ c.monthly_fee }}{% if not forloop.last %},{% endif %}{% endfor %} };
+function recalc(){
+  let total = 0;
+  document.querySelectorAll('input[name="courses"]:checked').forEach(el => total += (fees[el.value]||0));
+  const d = parseFloat(document.querySelector('#id_discount')?.value || 0) || 0;
+  total = Math.max(0, total - d);
+  document.querySelector('#total').textContent = '৳' + total.toLocaleString();
+}
+document.addEventListener('change', recalc);
+document.addEventListener('keyup', recalc);
+recalc();
+</script>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "core/base.html" %}{% load humanize %}
+{% block title %}Students{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0" style="color:#0f6e6e">Students <span class="text-muted fs-6">{{ total }}</span></h4>
+  <a class="btn btn-sm text-white" style="background:#0f6e6e" href="{% url 'student_create' %}"><i class="bi bi-plus-lg"></i> New student</a>
+</div>
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-4"><input name="q" value="{{ q }}" class="form-control form-control-sm" placeholder="Name, student ID or phone"></div>
+  <div class="col-md-2"><select name="batch" class="form-select form-select-sm"><option value="">All batches</option>
+    {% for b in batches %}<option value="{{ b.pk }}" {% if batch_id == b.pk|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><select name="class_level" class="form-select form-select-sm"><option value="">All classes</option>
+    {% for v,l in class_levels %}<option value="{{ v }}" {% if class_level == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><select name="status" class="form-select form-select-sm"><option value="">Any status</option>
+    {% for v,l in statuses %}<option value="{{ v }}" {% if status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><button class="btn btn-sm btn-outline-secondary w-100">Search</button></div>
+</form>
+<div class="card"><div class="table-responsive"><table class="table table-sm table-hover mb-0">
+<thead><tr><th>ID</th><th>Name</th><th>Class</th><th>Batch</th><th>Guardian phone</th><th>Status</th><th class="text-end">Total due</th><th></th></tr></thead>
+<tbody>{% for r in rows %}<tr>
+  <td class="text-muted">{{ r.s.student_id }}</td>
+  <td><a href="{{ r.s.get_absolute_url }}" class="text-decoration-none fw-semibold">{{ r.s.name }}</a></td>
+  <td>{{ r.s.get_class_level_display }}</td>
+  <td>{{ r.s.batch.name|default:"—" }}</td>
+  <td>{{ r.s.guardian_phone|default:"—" }}</td>
+  <td><span class="badge {% if r.s.status == 'active' %}badge-paid{% else %}badge-free{% endif %}">{{ r.s.get_status_display }}</span></td>
+  <td class="text-end tk {% if r.due > 0 %}text-danger fw-semibold{% endif %}">৳{{ r.due|floatformat:0|intcomma }}</td>
+  <td class="text-end"><a class="btn btn-sm btn-outline-secondary py-0" href="{% url 'student_edit' r.s.pk %}">Edit</a></td>
+</tr>{% empty %}<tr><td colspan="8" class="text-center text-muted py-4">No students match. <a href="{% url 'student_create' %}">Add one</a>.</td></tr>{% endfor %}</tbody>
+</table></div></div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "website/base.html" %}{% load pub %}
+{% block title %}{% t "contact" %}{% endblock %}
+{% block body %}
+<section class="py-5 page-head"><div class="container">
+  <h1 class="mb-0" style="color:var(--ons)">{% t "contact" %}</h1></div></section>
+<section class="sec"><div class="container"><div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card-ons p-4 mb-3">
+      <div class="d-flex gap-3 mb-3"><div class="icon-round"><i class="bi bi-geo-alt"></i></div>
+        <div><div class="small text-muted">{% t "address" %}</div><div>{% bt site "address" %}</div></div></div>
+      {% if site.phone %}<div class="d-flex gap-3 mb-3"><div class="icon-round"><i class="bi bi-telephone"></i></div>
+        <div><div class="small text-muted">{% t "phone" %}</div><div>{{ site.phone }}</div></div></div>{% endif %}
+      {% if site.email %}<div class="d-flex gap-3"><div class="icon-round"><i class="bi bi-envelope"></i></div>
+        <div><div class="small text-muted">Email</div><div>{{ site.email }}</div></div></div>{% endif %}
+    </div>
+    {% if site.map_embed_url %}
+    <div class="card-ons overflow-hidden"><div class="ratio ratio-4x3">
+      <iframe src="{{ site.map_embed_url }}" style="border:0" loading="lazy" allowfullscreen></iframe></div></div>
+    {% endif %}
+  </div>
+  <div class="col-lg-7"><div class="card-ons p-4 p-lg-5">
+    <h5 class="mb-3">{% t "message" %}</h5>
+    <form method="post" class="row g-3">{% csrf_token %}
+      {{ form.website }}
+      <div class="col-md-6"><label class="form-label small">{% t "name" %}</label>{{ form.name }}
+        {% for e in form.name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+      <div class="col-md-6"><label class="form-label small">{% t "phone" %}</label>{{ form.phone }}</div>
+      <div class="col-12"><label class="form-label small">Email</label>{{ form.email }}</div>
+      <div class="col-12"><label class="form-label small">{% t "message" %}</label>{{ form.message }}
+        {% for e in form.message.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+      <div class="col-12"><button class="btn btn-ons px-4">{% t "send" %}</button></div>
+    </form>
+  </div></div>
+</div></div></section>
+{% endblock %}

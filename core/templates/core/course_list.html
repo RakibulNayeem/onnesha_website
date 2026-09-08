@@ -1,0 +1,26 @@
+{% extends "core/base.html" %}{% load humanize %}
+{% block title %}Courses & fees{% endblock %}
+{% block content %}
+<h4 class="mb-3" style="color:#0f6e6e">Courses &amp; fees</h4>
+<p class="text-muted small">One row per subject, per class, per programme, with its own monthly fee. This is the price list the enrollment form adds up.</p>
+<div class="row g-3">
+  <div class="col-lg-4"><div class="card"><div class="card-header">Add a course</div><div class="card-body">
+    <form method="post" class="row g-2">{% csrf_token %}
+      {% for f in form %}<div class="col-12"><label class="form-label small mb-1">{{ f.label }}</label>{{ f }}
+        {% for e in f.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>{% endfor %}
+      <div class="col-12"><button class="btn text-white w-100" style="background:#0f6e6e">Save course</button></div>
+    </form>
+    <p class="small text-muted mt-3 mb-0">Subjects, programmes and batches themselves are managed in
+      <a href="/django-admin/">the admin area</a>.</p>
+  </div></div></div>
+  <div class="col-lg-8"><div class="card"><div class="table-responsive"><table class="table table-sm mb-0">
+    <thead><tr><th>Subject</th><th>Class</th><th>Programme</th><th>Teacher</th><th class="text-end">Monthly fee</th><th></th></tr></thead>
+    <tbody>{% for c in courses %}<tr class="{% if not c.is_active %}text-muted{% endif %}">
+      <td>{{ c.subject.name }}</td><td>{{ c.get_class_level_display }}</td><td>{{ c.program.name }}</td>
+      <td class="small">{{ c.teacher.name|default:"—" }}</td>
+      <td class="text-end tk">৳{{ c.monthly_fee|floatformat:0|intcomma }}</td>
+      <td class="text-end"><a class="btn btn-sm btn-outline-secondary py-0" href="{% url 'course_edit' c.pk %}">Edit</a></td>
+    </tr>{% empty %}<tr><td colspan="6" class="text-center text-muted py-4">No course yet. Add your first one on the left.</td></tr>{% endfor %}</tbody>
+  </table></div></div></div>
+</div>
+{% endblock %}

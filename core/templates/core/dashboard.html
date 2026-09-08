@@ -1,0 +1,84 @@
+{% extends "core/base.html" %}{% load humanize %}
+{% block title %}Dashboard · {{ CENTRE_NAME }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0" style="color:#0f6e6e">Dashboard <span class="text-muted fs-6">{{ month|date:"F Y" }}</span></h4>
+  <form method="get"><select name="month" class="form-select form-select-sm" onchange="this.form.submit()">
+    {% for v,l in month_options %}<option value="{{ v }}" {% if v == month_value %}selected{% endif %}>{{ l }}</option>{% endfor %}
+  </select></form>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Cash received</div>
+    <div class="val tk">৳{{ cash_in|floatformat:0|intcomma }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Cash spent</div>
+    <div class="val tk">৳{{ cash_out|floatformat:0|intcomma }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Profit / loss</div>
+    <div class="val tk" style="color:{% if profit < 0 %}#b02a2a{% else %}#186418{% endif %}">৳{{ profit|floatformat:0|intcomma }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Students enrolled</div>
+    <div class="val">{{ enrolled }}</div><div class="small text-muted">{{ courses_taken }} course seats</div></div></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card mb-3"><div class="card-header">Fees for {{ month|date:"F Y" }}</div>
+      <div class="card-body">
+        <table class="table table-sm mb-2"><tbody>
+          <tr><td>Charged</td><td class="text-end tk">৳{{ charged|floatformat:0|intcomma }}</td></tr>
+          <tr><td>Collected</td><td class="text-end tk">৳{{ collected|floatformat:0|intcomma }}</td></tr>
+          <tr class="fw-bold"><td>Still due</td><td class="text-end tk" style="color:#b02a2a">৳{{ due|floatformat:0|intcomma }}</td></tr>
+        </tbody></table>
+        <div class="progress mb-2" style="height:8px">
+          <div class="progress-bar" style="width:{{ collection_rate|floatformat:0 }}%;background:#0f6e6e"></div></div>
+        <div class="small text-muted mb-3">{{ collection_rate|floatformat:1 }}% collected</div>
+        <span class="badge badge-paid">{{ status_counts.paid }} paid</span>
+        <span class="badge badge-part">{{ status_counts.part }} part paid</span>
+        <span class="badge badge-unpaid">{{ status_counts.unpaid }} unpaid</span>
+        <div class="mt-3"><a class="btn btn-sm text-white" style="background:#0f6e6e" href="{% url 'payment_create' %}?month={{ month_value }}">Collect a fee</a>
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'due_report' %}?scope=month&month={{ month_value }}">See the due list</a></div>
+      </div></div>
+
+    <div class="card mb-3"><div class="card-header">Batch-wise</div>
+      <div class="table-responsive"><table class="table table-sm mb-0">
+        <thead><tr><th>Batch</th><th class="text-end">Students</th><th class="text-end">Charged</th><th class="text-end">Collected</th><th class="text-end">Due</th></tr></thead>
+        <tbody>{% for r in batch_rows %}<tr>
+          <td>{{ r.batch.name }}</td><td class="text-end">{{ r.students }}</td>
+          <td class="text-end tk">৳{{ r.charged|floatformat:0|intcomma }}</td>
+          <td class="text-end tk">৳{{ r.collected|floatformat:0|intcomma }}</td>
+          <td class="text-end tk">৳{{ r.due|floatformat:0|intcomma }}</td></tr>
+        {% empty %}<tr><td colspan="5" class="text-muted small">No enrollment in this month yet.</td></tr>{% endfor %}</tbody>
+      </table></div></div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card mb-3"><div class="card-header">Income this month</div>
+      <table class="table table-sm mb-0"><tbody>
+        {% for r in income_by_cat %}<tr><td>{{ r.label }}</td>
+          <td class="text-end tk">৳{{ r.total|floatformat:0|intcomma }}</td></tr>
+        {% empty %}<tr><td class="text-muted small">Nothing yet.</td></tr>{% endfor %}
+      </tbody></table></div>
+    <div class="card mb-3"><div class="card-header">Expenses this month</div>
+      <table class="table table-sm mb-0"><tbody>
+        {% for r in expense_by_cat %}<tr><td>{{ r.label }}</td>
+          <td class="text-end tk">৳{{ r.total|floatformat:0|intcomma }}</td></tr>
+        {% empty %}<tr><td class="text-muted small">Nothing yet.</td></tr>{% endfor %}
+      </tbody></table></div>
+  </div>
+
+  <div class="col-lg-3">
+    <div class="card mb-3"><div class="card-header">Teacher payments</div>
+      <table class="table table-sm mb-0"><tbody>
+        {% for r in teacher_dues %}<tr><td>{{ r.teacher.name }}<div class="small text-muted">due ৳{{ r.due|floatformat:0|intcomma }}</div></td>
+          <td class="text-end tk">৳{{ r.paid|floatformat:0|intcomma }}<div class="small text-muted">of ৳{{ r.expected|floatformat:0|intcomma }}</div></td></tr>
+        {% empty %}<tr><td class="text-muted small">No teacher set up yet.</td></tr>{% endfor %}
+      </tbody></table>
+      <div class="card-body py-2"><a class="btn btn-sm btn-outline-secondary w-100" href="{% url 'teacher_pay' %}?month={{ month_value }}">Pay a teacher</a></div>
+    </div>
+    <div class="card"><div class="card-header">Last 6 months</div>
+      <table class="table table-sm mb-0"><thead><tr><th>Month</th><th class="text-end">Profit</th></tr></thead>
+        <tbody>{% for r in trend %}<tr><td>{{ r.month|date:"M Y" }}<div class="small text-muted">{{ r.students }} students</div></td>
+          <td class="text-end tk" style="color:{% if r.profit < 0 %}#b02a2a{% else %}#186418{% endif %}">৳{{ r.profit|floatformat:0|intcomma }}</td></tr>{% endfor %}</tbody>
+      </table></div>
+  </div>
+</div>
+{% endblock %}

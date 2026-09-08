@@ -1,0 +1,22 @@
+{% extends "website/base.html" %}{% load pub %}
+{% block title %}{% t "teachers" %}{% endblock %}
+{% block body %}
+<section class="py-5 page-head"><div class="container">
+  <h1 class="mb-2" style="color:var(--ons)">{% t "meet_teachers" %}</h1>
+</div></section>
+<section class="sec"><div class="container"><div class="row g-4">
+  {% for t in teachers %}
+  <div class="col-md-6 col-lg-4"><div class="card-ons p-4">
+    <div class="d-flex gap-3 align-items-center mb-3">
+      {% if t.photo_src %}<img src="{{ t.photo_src }}" class="avatar" style="width:72px;height:72px" alt="{{ t.name }}">
+      {% else %}<div class="avatar d-grid" style="width:72px;height:72px;place-items:center;color:var(--ons);font-size:1.5rem"><i class="bi bi-person"></i></div>{% endif %}
+      <div><h5 class="mb-1">{{ t.name }}</h5>
+        <div class="small" style="color:var(--ons)">{% bt t "designation" %}</div>
+        <div class="small text-muted">{% bt t "qualification" %}</div></div>
+    </div>
+    {% if t.bio_en or t.bio_bn %}<p class="small text-muted prose mb-2">{% bt t "bio" %}</p>{% endif %}
+    <div>{% for s in t.subjects.all %}<span class="pill me-1 mb-1">{{ s.name }}</span>{% endfor %}</div>
+  </div></div>
+  {% empty %}<p class="text-muted">{% t "no_items" %}</p>{% endfor %}
+</div></div></section>
+{% endblock %}

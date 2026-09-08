@@ -1,0 +1,258 @@
+{% extends "website/base.html" %}{% load pub %}
+{% block title %}{% bt site "hero_title" %}{% endblock %}
+{% block body %}
+
+{% if slides %}
+<div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="6000">
+  <div class="carousel-indicators">
+    {% for sl in slides %}
+    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="{{ forloop.counter0 }}"
+            {% if forloop.first %}class="active"{% endif %} aria-label="Slide {{ forloop.counter }}"></button>
+    {% endfor %}
+  </div>
+  <div class="carousel-inner">
+    {% for sl in slides %}
+    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+      <div class="slide" style="background-image:url('{{ sl.src }}')">
+        <div class="slide-body">
+          <div class="container">
+            <div style="max-width:38rem">
+              <span class="pill mb-3" style="background:rgba(255,255,255,.2);color:#fff">
+                <i class="bi bi-dot"></i>{% t "admission_open" %}</span>
+              <h1 class="display-5 fw-bold mb-3">{% bt sl "title" %}</h1>
+              <p class="lead mb-4" style="color:#d6efee">{% bt sl "subtitle" %}</p>
+              {% if sl.button_url %}
+                <a class="btn btn-light btn-lg px-4 fw-semibold" style="color:var(--ons)"
+                   href="{{ sl.button_url }}">{% bt sl "button_text" %}</a>
+              {% else %}
+                <a class="btn btn-light btn-lg px-4 fw-semibold" style="color:var(--ons)"
+                   href="{% url 'pub_admission' %}">{% t "apply_online" %}</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% if slides|length > 1 %}
+  <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon"></span></button>
+  <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon"></span></button>
+  {% endif %}
+</div>
+
+<div class="stat-strip py-4"><div class="container"><div class="row g-3 text-center">
+  {% if site.students_count %}<div class="col-6 col-lg-3">
+    <div class="stat-num">{{ site.students_count }}</div><div class="small text-muted">{% t "students" %}</div></div>{% endif %}
+  {% if site.teachers_count %}<div class="col-6 col-lg-3">
+    <div class="stat-num">{{ site.teachers_count }}</div><div class="small text-muted">{% t "teachers" %}</div></div>{% endif %}
+  {% if site.success_rate %}<div class="col-6 col-lg-3">
+    <div class="stat-num">{{ site.success_rate }}</div><div class="small text-muted">{% t "success_rate" %}</div></div>{% endif %}
+  {% if site.established_year %}<div class="col-6 col-lg-3">
+    <div class="stat-num">{{ site.established_year }}</div><div class="small text-muted">{% t "since" %}</div></div>{% endif %}
+</div></div></div>
+
+{% else %}
+<section class="hero">
+  <div class="container py-5">
+    <div class="row align-items-center g-5 py-lg-4">
+      <div class="col-lg-7">
+        <span class="pill mb-3" style="background:rgba(255,255,255,.18);color:#fff">
+          <i class="bi bi-dot"></i>{% t "admission_open" %}</span>
+        <h1 class="display-5 fw-bold mb-3">{% bt site "hero_title" %}</h1>
+        <p class="lead mb-4" style="max-width:34rem">{% bt site "hero_subtitle" %}</p>
+        <div class="d-flex flex-wrap gap-2">
+          <a class="btn btn-light btn-lg px-4 fw-semibold" style="color:var(--ons)" href="{% url 'pub_admission' %}">{% t "apply_online" %}</a>
+          <a class="btn btn-lg px-4 text-white" style="border:1.5px solid rgba(255,255,255,.6)" href="{% url 'pub_programs' %}">{% t "our_programs" %}</a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="row g-3">
+          {% if site.students_count %}<div class="col-6"><div class="p-3 rounded-3" style="background:rgba(255,255,255,.12)">
+            <div class="fs-3 fw-bold">{{ site.students_count }}</div><div class="small">{% t "students" %}</div></div></div>{% endif %}
+          {% if site.teachers_count %}<div class="col-6"><div class="p-3 rounded-3" style="background:rgba(255,255,255,.12)">
+            <div class="fs-3 fw-bold">{{ site.teachers_count }}</div><div class="small">{% t "teachers" %}</div></div></div>{% endif %}
+          {% if site.success_rate %}<div class="col-6"><div class="p-3 rounded-3" style="background:rgba(255,255,255,.12)">
+            <div class="fs-3 fw-bold">{{ site.success_rate }}</div><div class="small">{% t "success_rate" %}</div></div></div>{% endif %}
+          {% if site.established_year %}<div class="col-6"><div class="p-3 rounded-3" style="background:rgba(255,255,255,.12)">
+            <div class="fs-3 fw-bold">{{ site.established_year }}</div><div class="small">{% t "since" %}</div></div></div>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if notices %}
+<div class="container mt-4">
+  <div class="ticker d-flex align-items-center gap-3 flex-wrap">
+    <span class="pill"><i class="bi bi-megaphone me-1"></i>{% t "latest_notices" %}</span>
+    <a href="{{ notices.0.get_absolute_url }}" class="fw-semibold" style="color:var(--ons-dark)">{% bt notices.0 "title" %}</a>
+    <a href="{% url 'pub_notices' %}" class="ms-auto small" style="color:var(--ons)">{% t "view_all" %} →</a>
+  </div>
+</div>
+{% endif %}
+
+<section class="sec">
+  <div class="container">
+    <h2 class="sec-title">{% t "our_programs" %}</h2>
+    <p class="sec-sub">{% if IS_BN %}অষ্টম শ্রেণি থেকে দ্বাদশ শ্রেণি, এসএসসি, এইচএসসি ও ভর্তি পরীক্ষা{% else %}Class 8 to 12, SSC, HSC and admission test preparation{% endif %}</p>
+    <div class="row g-3">
+      {% for p in programs %}
+      <div class="col-md-6 col-lg-3">
+        <a class="card-link" href="{% url 'pub_programs' %}#program-{{ p.pk }}">
+        <div class="card-ons p-4 d-flex flex-column">
+          <div class="icon-round mb-3"><i class="bi bi-{{ p.icon|default:'book' }}"></i></div>
+          <h5 class="mb-2">{% if IS_BN and p.name_bn %}{{ p.name_bn }}{% else %}{{ p.name }}{% endif %}</h5>
+          <p class="text-muted small mb-3">{% bt p "tagline" %}</p>
+          <div class="mt-auto d-flex justify-content-between align-items-end">
+            {% with low=fee_map|get_item:p.pk %}
+              <div class="small">{% if low %}<span class="text-muted">{% t "monthly_fee" %}</span>
+                <span class="fw-bold" style="color:var(--ons)">৳{{ low|floatformat:0 }}+</span>{% endif %}</div>
+            {% endwith %}
+            <i class="bi bi-arrow-right" style="color:var(--ons)"></i>
+          </div>
+        </div></a>
+      </div>
+      {% empty %}
+      <div class="col-12"><p class="text-muted">{% t "no_items" %}</p></div>
+      {% endfor %}
+    </div>
+    <div class="mt-4"><a class="btn btn-ons-out" href="{% url 'pub_programs' %}">{% t "view_all" %}</a></div>
+  </div>
+</section>
+
+<section class="sec soft">
+  <div class="container">
+    <h2 class="sec-title">{% t "why_us" %}</h2>
+    <p class="sec-sub">{% if IS_BN %}যা আমাদের আলাদা করে{% else %}What makes us different{% endif %}</p>
+    <div class="row g-3">
+      {% if IS_BN %}
+        {% with items="ছোট ব্যাচ, ব্যক্তিগত যত্ন|নিয়মিত মডেল টেস্ট ও ফলাফল বিশ্লেষণ|অভিজ্ঞ শিক্ষকমণ্ডলী|প্রতি মাসে অভিভাবক রিপোর্ট" %}
+        {% for item in items|slice:"0" %}{% endfor %}{% endwith %}
+      {% endif %}
+      <div class="col-md-6 col-lg-3"><div class="card-ons p-4">
+        <div class="icon-round mb-3"><i class="bi bi-people"></i></div>
+        <h6>{% if IS_BN %}ছোট ব্যাচ{% else %}Small batches{% endif %}</h6>
+        <p class="small text-muted mb-0">{% if IS_BN %}প্রতিটি শিক্ষার্থী আলাদা মনোযোগ পায়।{% else %}Every student gets individual attention.{% endif %}</p></div></div>
+      <div class="col-md-6 col-lg-3"><div class="card-ons p-4">
+        <div class="icon-round mb-3"><i class="bi bi-clipboard-check"></i></div>
+        <h6>{% if IS_BN %}নিয়মিত মডেল টেস্ট{% else %}Regular model tests{% endif %}</h6>
+        <p class="small text-muted mb-0">{% if IS_BN %}ফলাফল বিশ্লেষণসহ সাপ্তাহিক পরীক্ষা।{% else %}Weekly exams with result analysis.{% endif %}</p></div></div>
+      <div class="col-md-6 col-lg-3"><div class="card-ons p-4">
+        <div class="icon-round mb-3"><i class="bi bi-mortarboard"></i></div>
+        <h6>{% if IS_BN %}অভিজ্ঞ শিক্ষক{% else %}Experienced teachers{% endif %}</h6>
+        <p class="small text-muted mb-0">{% if IS_BN %}বিশ্ববিদ্যালয় পর্যায়ের শিক্ষকমণ্ডলী।{% else %}University-level subject specialists.{% endif %}</p></div></div>
+      <div class="col-md-6 col-lg-3"><div class="card-ons p-4">
+        <div class="icon-round mb-3"><i class="bi bi-chat-dots"></i></div>
+        <h6>{% if IS_BN %}অভিভাবক রিপোর্ট{% else %}Guardian reports{% endif %}</h6>
+        <p class="small text-muted mb-0">{% if IS_BN %}প্রতি মাসে উপস্থিতি ও ফলাফলের খবর।{% else %}Monthly attendance and result updates.{% endif %}</p></div></div>
+    </div>
+  </div>
+</section>
+
+{% if teachers %}
+<section class="sec">
+  <div class="container">
+    <h2 class="sec-title">{% t "meet_teachers" %}</h2>
+    <p class="sec-sub">{% if IS_BN %}যাঁরা পড়াবেন{% else %}The people who will teach you{% endif %}</p>
+    <div class="row g-3">
+      {% for t in teachers %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card-ons p-4 text-center">
+          {% if t.photo_src %}<img src="{{ t.photo_src }}" class="avatar mb-3" alt="{{ t.name }}">
+          {% else %}<div class="avatar mb-3 mx-auto d-grid" style="place-items:center;color:var(--ons);font-size:1.8rem">
+            <i class="bi bi-person"></i></div>{% endif %}
+          <h6 class="mb-1">{{ t.name }}</h6>
+          <div class="small" style="color:var(--ons)">{% bt t "designation" %}</div>
+          <div class="small text-muted">{% bt t "qualification" %}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="mt-4"><a class="btn btn-ons-out" href="{% url 'pub_teachers' %}">{% t "view_all" %}</a></div>
+  </div>
+</section>
+{% endif %}
+
+{% if videos %}
+<section class="sec soft">
+  <div class="container">
+    <h2 class="sec-title">{% t "videos" %}</h2>
+    <p class="sec-sub">{% if IS_BN %}ফ্রি ক্লাস দেখুন যেকোনো সময়{% else %}Free classes you can watch any time{% endif %}</p>
+    <div class="row g-3">
+      {% for v in videos %}
+      <div class="col-md-4"><div class="card-ons overflow-hidden">
+        <a href="{{ v.youtube_url }}" target="_blank" rel="noopener">
+          <img src="{{ v.thumbnail }}" class="thumb" alt=""></a>
+        <div class="p-3">
+          <h6 class="mb-1">{% bt v "title" %}</h6>
+          <div class="small text-muted">{{ v.subject.name|default:"" }}{% if v.class_level %} · {{ v.get_class_level_display }}{% endif %}</div>
+        </div></div></div>
+      {% endfor %}
+    </div>
+    <div class="mt-4"><a class="btn btn-ons-out" href="{% url 'pub_videos' %}">{% t "view_all" %}</a></div>
+  </div>
+</section>
+{% endif %}
+
+{% if exams %}
+<section class="sec">
+  <div class="container">
+    <div class="card-ons p-4 p-lg-5" style="background:var(--ons-light);border:none">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <h3 class="mb-2">{% t "find_result" %}</h3>
+          <p class="text-muted mb-0">{% if IS_BN %}আপনার শিক্ষার্থী আইডি দিয়ে বিষয়ভিত্তিক নম্বর দেখুন।{% else %}Enter your student ID to see your subject-wise marks.{% endif %}</p>
+        </div>
+        <div class="col-lg-5 text-lg-end">
+          <a class="btn btn-ons btn-lg px-4" href="{% url 'pub_results' %}">{% t "results" %}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if images %}
+<section class="sec soft">
+  <div class="container">
+    <h2 class="sec-title">{% t "gallery" %}</h2>
+    <div class="row g-2">
+      {% for img in images %}
+      <div class="col-6 col-md-3"><img src="{{ img.src }}" class="thumb" alt="{% bt img 'caption' %}"></div>
+      {% endfor %}
+    </div>
+    <div class="mt-4"><a class="btn btn-ons-out" href="{% url 'pub_gallery' %}">{% t "view_all" %}</a></div>
+  </div>
+</section>
+{% endif %}
+
+{% if posts %}
+<section class="sec">
+  <div class="container">
+    <h2 class="sec-title">{% t "blog" %}</h2>
+    <div class="row g-3">
+      {% for p in posts %}
+      <div class="col-md-4"><div class="card-ons p-4">
+        <div class="small text-muted mb-2">{{ p.published_at|date:"d M Y" }}</div>
+        <h6><a href="{{ p.get_absolute_url }}" style="color:var(--ink)">{% bt p "title" %}</a></h6>
+        <p class="small text-muted">{% bt p "excerpt" %}</p>
+        <a href="{{ p.get_absolute_url }}" class="small fw-semibold" style="color:var(--ons)">{% t "read_more" %} →</a>
+      </div></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="sec" style="background:var(--ons-dark)">
+  <div class="container text-center text-white py-3">
+    <h2 class="mb-3">{% if IS_BN %}আজই ভর্তি হয়ে যান{% else %}Start your preparation today{% endif %}</h2>
+    <p class="mb-4" style="color:#bcd9d7">{% bt site "address" %}{% if site.phone %} · {{ site.phone }}{% endif %}</p>
+    <a class="btn btn-light btn-lg px-4 fw-semibold" style="color:var(--ons)" href="{% url 'pub_admission' %}">{% t "apply_online" %}</a>
+  </div>
+</section>
+{% endblock %}

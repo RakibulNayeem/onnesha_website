@@ -1,0 +1,29 @@
+{% extends "website/base.html" %}{% load pub %}
+{% block title %}{% t "about_us" %}{% endblock %}
+{% block body %}
+<section class="py-5 page-head"><div class="container">
+  <h1 class="mb-0" style="color:var(--ons)">{% t "about_us" %}</h1></div></section>
+<section class="sec"><div class="container"><div class="row g-5">
+  <div class="col-lg-7">
+    <div class="prose">{% bt site "about" %}</div>
+    <div class="row g-3 mt-4">
+      {% if site.established_year %}<div class="col-6 col-md-3"><div class="stat-num">{{ site.established_year }}</div>
+        <div class="small text-muted">{% t "since" %}</div></div>{% endif %}
+      {% if site.students_count %}<div class="col-6 col-md-3"><div class="stat-num">{{ site.students_count }}</div>
+        <div class="small text-muted">{% t "students" %}</div></div>{% endif %}
+      {% if site.teachers_count %}<div class="col-6 col-md-3"><div class="stat-num">{{ site.teachers_count }}</div>
+        <div class="small text-muted">{% t "teachers" %}</div></div>{% endif %}
+      {% if site.success_rate %}<div class="col-6 col-md-3"><div class="stat-num">{{ site.success_rate }}</div>
+        <div class="small text-muted">{% t "success_rate" %}</div></div>{% endif %}
+    </div>
+  </div>
+  <div class="col-lg-5"><div class="card-ons p-4">
+    <h6 class="mb-3">{% t "our_programs" %}</h6>
+    {% for p in programs %}<div class="d-flex gap-3 mb-3">
+      <div class="icon-round" style="width:36px;height:36px;font-size:1rem"><i class="bi bi-{{ p.icon|default:'book' }}"></i></div>
+      <div><div class="fw-semibold">{% if IS_BN and p.name_bn %}{{ p.name_bn }}{% else %}{{ p.name }}{% endif %}</div>
+        <div class="small text-muted">{% bt p "tagline" %}</div></div></div>{% endfor %}
+    <a class="btn btn-ons w-100 mt-2" href="{% url 'pub_admission' %}">{% t "apply_now" %}</a>
+  </div></div>
+</div></div></section>
+{% endblock %}

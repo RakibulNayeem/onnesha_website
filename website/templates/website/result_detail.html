@@ -1,0 +1,74 @@
+{% extends "website/base.html" %}{% load pub %}
+{% block title %}{% bt exam "name" %}{% endblock %}
+{% block body %}
+<section class="py-5 page-head"><div class="container">
+  <a class="small text-muted" href="{% url 'pub_results' %}">← {% t "results" %}</a>
+  <h1 class="mt-2 mb-1" style="color:var(--ons)">{% bt exam "name" %}</h1>
+  <p class="text-muted mb-0">{{ exam.get_class_level_display }} · {{ exam.held_on|date:"d M Y" }} ·
+    {% t "total" %} {{ exam.total_marks }} · {{ total_students }} {% t "students" %}</p>
+</div></section>
+
+<section class="sec"><div class="container"><div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card-ons p-4">
+      <h5 class="mb-3">{% t "find_result" %}</h5>
+      <form method="get" class="mb-0">
+        <label class="form-label small">{% t "student_id" %}</label>
+        {{ form.student_id }}
+        <button class="btn btn-ons w-100 mt-3">{% t "search" %}</button>
+      </form>
+      {% if not_found %}<div class="alert alert-warning small mt-3 mb-0">{% t "result_not_found" %}</div>{% endif %}
+    </div>
+
+    {% if found %}
+    <div class="card-ons p-4 mt-3">
+      <div class="text-center pb-3 border-bottom mb-3">
+        <h5 class="mb-1">{{ found.student.name }}</h5>
+        <div class="small text-muted">{{ found.student.student_id }}{% if found.roll %} · Roll {{ found.roll }}{% endif %}</div>
+      </div>
+      <div class="row text-center g-2 mb-3">
+        <div class="col-4"><div class="fs-4 fw-bold" style="color:var(--ons)">{{ found.obtained_marks|floatformat:0 }}</div>
+          <div class="small text-muted">{% t "marks" %}</div></div>
+        <div class="col-4"><div class="fs-4 fw-bold" style="color:var(--ons)">{{ found.grade }}</div>
+          <div class="small text-muted">{% t "grade" %}</div></div>
+        <div class="col-4"><div class="fs-4 fw-bold" style="color:var(--ons)">{{ found.position }}</div>
+          <div class="small text-muted">{% t "position" %}</div></div>
+      </div>
+      {% if found.subject_marks.all %}
+      <table class="table table-sm mb-0">
+        <thead><tr class="small text-muted"><th>{% t "subject" %}</th><th class="text-end">{% t "marks" %}</th></tr></thead>
+        <tbody>{% for m in found.subject_marks.all %}<tr>
+          <td>{{ m.subject.name }}</td>
+          <td class="text-end">{{ m.marks|floatformat:0 }} <span class="text-muted small">/ {{ m.out_of }}</span></td>
+        </tr>{% endfor %}</tbody>
+      </table>{% endif %}
+      {% if found.remark %}<p class="small text-muted mt-3 mb-0">{{ found.remark }}</p>{% endif %}
+      <button class="btn btn-ons-out btn-sm w-100 mt-3" onclick="window.print()">
+        <i class="bi bi-printer me-1"></i>Print</button>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-8">
+    {% if exam.show_public_list %}
+    <h5 class="mb-3">{% t "merit_list" %}</h5>
+    <div class="card-ons"><div class="table-responsive"><table class="table table-merit align-middle mb-0">
+      <thead><tr><th style="width:80px">{% t "position" %}</th><th>{% t "name" %}</th>
+        <th>{% t "class" %}</th><th class="text-end">{% t "marks" %}</th><th class="text-end">{% t "grade" %}</th></tr></thead>
+      <tbody>{% for r in merit %}<tr>
+        <td><span class="fw-bold" style="color:var(--ons)">{{ r.position }}</span></td>
+        <td>{{ r.student.name }}</td>
+        <td class="small text-muted">{{ r.student.get_class_level_display }}</td>
+        <td class="text-end fw-semibold">{{ r.obtained_marks|floatformat:0 }}</td>
+        <td class="text-end">{{ r.grade }}</td>
+      </tr>{% empty %}<tr><td colspan="5" class="text-center text-muted py-4">{% t "no_items" %}</td></tr>{% endfor %}</tbody>
+    </table></div></div>
+    {% else %}
+    <div class="card-ons p-5 text-center">
+      <i class="bi bi-lock fs-1" style="color:var(--ons-light)"></i>
+      <p class="text-muted mt-3 mb-0">{% if IS_BN %}এই পরীক্ষার মেধা তালিকা প্রকাশ করা হয়নি। বাঁ পাশে নিজের আইডি দিয়ে ফলাফল দেখুন।{% else %}The merit list for this exam is not public. Use the lookup on the left to see your own result.{% endif %}</p>
+    </div>
+    {% endif %}
+  </div>
+</div></div></section>
+{% endblock %}

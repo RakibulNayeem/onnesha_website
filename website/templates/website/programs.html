@@ -1,0 +1,36 @@
+{% extends "website/base.html" %}{% load pub %}
+{% block title %}{% t "programs" %}{% endblock %}
+{% block body %}
+<section class="py-5 page-head"><div class="container">
+  <h1 class="mb-2" style="color:var(--ons)">{% t "our_programs" %}</h1>
+  <p class="text-muted mb-0">{% if IS_BN %}প্রতিটি প্রোগ্রামের বিষয় ও মাসিক ফি{% else %}Subjects and monthly fees for every programme{% endif %}</p>
+</div></section>
+<section class="sec"><div class="container">
+  {% for row in data %}
+  <div class="card-ons p-4 p-lg-5 mb-4 anchor" id="program-{{ row.program.pk }}">
+    <div class="d-flex align-items-start gap-3 mb-3">
+      <div class="icon-round"><i class="bi bi-{{ row.program.icon|default:'book' }}"></i></div>
+      <div>
+        <h4 class="mb-1">{% if IS_BN and row.program.name_bn %}{{ row.program.name_bn }}{% else %}{{ row.program.name }}{% endif %}</h4>
+        <div class="text-muted small">{% bt row.program "tagline" %}</div>
+      </div>
+    </div>
+    {% if row.program.description_en or row.program.description_bn %}
+      <p class="prose text-muted">{% bt row.program "description" %}</p>{% endif %}
+    {% for level, courses in row.levels.items %}
+      <div class="mb-3">
+        <div class="pill mb-2">{{ level }}</div>
+        <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+          <thead><tr class="text-muted small"><th>{% t "subject" %}</th><th class="text-end">{% t "monthly_fee" %}</th></tr></thead>
+          <tbody>{% for c in courses %}<tr>
+            <td>{{ c.subject.name }}{% if c.teacher %}<span class="text-muted small"> · {{ c.teacher.name }}</span>{% endif %}</td>
+            <td class="text-end fw-semibold" style="color:var(--ons)">৳{{ c.monthly_fee|floatformat:0 }}</td>
+          </tr>{% endfor %}</tbody>
+        </table></div>
+      </div>
+    {% empty %}<p class="text-muted small">{% t "no_items" %}</p>{% endfor %}
+    <a class="btn btn-ons mt-2" href="{% url 'pub_admission' %}">{% t "apply_now" %}</a>
+  </div>
+  {% empty %}<p class="text-muted">{% t "no_items" %}</p>{% endfor %}
+</div></section>
+{% endblock %}

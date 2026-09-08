@@ -1,0 +1,35 @@
+{% extends "core/base.html" %}{% load humanize %}
+{% block title %}Receipt {{ p.receipt_no }}{% endblock %}
+{% block content %}
+<div class="card mx-auto" style="max-width:640px">
+  <div class="card-body p-4">
+    <div class="d-flex justify-content-between border-bottom pb-2 mb-3">
+      <div><div class="fs-5 fw-bold" style="color:#0f6e6e">{{ CENTRE_NAME }}</div>
+        <div class="small text-muted">{{ CENTRE_TAGLINE }}</div>
+        <div class="small text-muted">{{ CENTRE_ADDRESS }}{% if CENTRE_PHONE %} · {{ CENTRE_PHONE }}{% endif %}</div></div>
+      <div class="text-end"><div class="fw-bold">MONEY RECEIPT</div>
+        <div class="small">{{ p.receipt_no }}</div>
+        <div class="small text-muted">{{ p.paid_on|date:"d M Y" }}</div></div>
+    </div>
+    <table class="table table-sm">
+      <tr><th style="width:40%">Student</th><td>{{ p.student.name|default:"—" }} {% if p.student %}<span class="text-muted">({{ p.student.student_id }})</span>{% endif %}</td></tr>
+      <tr><th>Class / batch</th><td>{{ p.student.get_class_level_display|default:"—" }} · {{ p.student.batch.name|default:"—" }}</td></tr>
+      <tr><th>Payment for</th><td>{{ p.get_category_display }}{% if p.month %} — {{ p.month|date:"F Y" }}{% endif %}</td></tr>
+      {% if enrollment %}<tr><th>Subjects</th><td class="small">{% for c in enrollment.courses.all %}{{ c.subject.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td></tr>
+      <tr><th>Month's fee</th><td class="tk">৳{{ enrollment.fee_charged|floatformat:0|intcomma }}</td></tr>{% endif %}
+      <tr><th>Method</th><td>{{ p.get_method_display }}</td></tr>
+      <tr class="table-light"><th>Amount received</th><td class="fs-5 fw-bold tk">৳{{ p.amount|floatformat:0|intcomma }}</td></tr>
+      {% if enrollment %}<tr><th>Remaining due for the month</th><td class="tk">৳{{ enrollment.due|floatformat:0|intcomma }}</td></tr>{% endif %}
+      {% if p.note %}<tr><th>Note</th><td>{{ p.note }}</td></tr>{% endif %}
+    </table>
+    <div class="d-flex justify-content-between mt-5 pt-3 small text-muted">
+      <div>Received by: {{ p.received_by|default:"____________" }}</div>
+      <div>Guardian signature: ____________</div>
+    </div>
+  </div>
+</div>
+<div class="text-center mt-3 no-print">
+  <button class="btn text-white" style="background:#0f6e6e" onclick="window.print()">Print</button>
+  <a class="btn btn-outline-secondary" href="{% url 'payment_list' %}">Back to payments</a>
+</div>
+{% endblock %}

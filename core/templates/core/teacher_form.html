@@ -1,0 +1,12 @@
+{% extends "core/base.html" %}
+{% block content %}
+<h4 class="mb-3" style="color:#0f6e6e">{% if teacher %}Edit {{ teacher.name }}{% else %}Add a teacher{% endif %}</h4>
+<div class="card"><div class="card-body"><form method="post" class="row g-3">{% csrf_token %}
+  {% for f in form %}<div class="col-md-{% if f.name == 'subjects' %}12{% else %}4{% endif %}">
+    <label class="form-label small mb-1">{{ f.label }}</label>{{ f }}
+    {% if f.help_text %}<div class="form-text small">{{ f.help_text }}</div>{% endif %}
+    {% for e in f.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>{% endfor %}
+  <div class="col-12"><button class="btn text-white" style="background:#0f6e6e">Save</button>
+    <a class="btn btn-outline-secondary" href="{% url 'teacher_list' %}">Cancel</a></div>
+</form></div></div>
+{% endblock %}

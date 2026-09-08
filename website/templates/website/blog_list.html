@@ -1,0 +1,18 @@
+{% extends "website/base.html" %}{% load pub %}
+{% block title %}{% t "blog" %}{% endblock %}
+{% block body %}
+<section class="py-5 page-head"><div class="container">
+  <h1 class="mb-0" style="color:var(--ons)">{% t "blog" %}</h1></div></section>
+<section class="sec"><div class="container"><div class="row g-4">
+  {% for p in posts %}
+  <div class="col-md-6 col-lg-4"><div class="card-ons overflow-hidden h-100">
+    {% if p.cover_src %}<img src="{{ p.cover_src }}" class="thumb" alt="">{% endif %}
+    <div class="p-4">
+      <div class="small text-muted mb-2">{{ p.published_at|date:"d M Y" }}{% if p.author %} · {{ p.author.name }}{% endif %}</div>
+      <h5 class="mb-2"><a href="{{ p.get_absolute_url }}" style="color:var(--ink)">{% bt p "title" %}</a></h5>
+      <p class="small text-muted">{% bt p "excerpt" %}</p>
+      <a class="small fw-semibold" style="color:var(--ons)" href="{{ p.get_absolute_url }}">{% t "read_more" %} →</a>
+    </div></div></div>
+  {% empty %}<p class="text-muted">{% t "no_items" %}</p>{% endfor %}
+</div></div></section>
+{% endblock %}

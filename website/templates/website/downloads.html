@@ -1,0 +1,23 @@
+{% extends "website/base.html" %}{% load pub %}
+{% block title %}{% t "downloads" %}{% endblock %}
+{% block body %}
+<section class="py-5 page-head"><div class="container">
+  <h1 class="mb-3" style="color:var(--ons)">{% t "downloads" %}</h1>
+  <form method="get"><select name="category" class="form-select form-select-sm" style="max-width:260px" onchange="this.form.submit()">
+    <option value="">{% t "all" %}</option>
+    {% for v,l in categories %}<option value="{{ v }}" {% if category == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+  </select></form>
+</div></section>
+<section class="sec"><div class="container"><div class="row g-3">
+  {% for d in downloads %}
+  <div class="col-md-6 col-lg-4"><div class="card-ons p-4 d-flex flex-column h-100">
+    <div class="d-flex gap-3 mb-3">
+      <div class="icon-round"><i class="bi bi-file-earmark-arrow-down"></i></div>
+      <div><h6 class="mb-1">{% bt d "title" %}</h6>
+        <div class="small text-muted">{{ d.get_category_display }}{% if d.class_level %} · {{ d.get_class_level_display }}{% endif %}</div></div>
+    </div>
+    {% if d.link %}<a class="btn btn-ons-out btn-sm mt-auto" href="{{ d.link }}" download>{% t "download" %}</a>{% endif %}
+  </div></div>
+  {% empty %}<p class="text-muted">{% t "no_items" %}</p>{% endfor %}
+</div></div></section>
+{% endblock %}

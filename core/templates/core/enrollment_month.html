@@ -1,0 +1,79 @@
+{% extends "core/base.html" %}{% load humanize %}
+{% block title %}Enrollment{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0" style="color:#0f6e6e">Enrollment <span class="text-muted fs-6">{{ month|date:"F Y" }}</span></h4>
+  <a class="btn btn-sm text-white" style="background:#0f6e6e" href="{% url 'enrollment_create' %}?month={{ month_value }}"><i class="bi bi-plus-lg"></i> Enroll a student</a>
+</div>
+
+<div class="card mb-3 no-print"><div class="card-body py-2">
+<form class="row g-2 align-items-end" method="get">
+  <div class="col-md-2"><label class="form-label small mb-1">Month</label>
+    <select name="month" class="form-select form-select-sm" onchange="this.form.submit()">
+      {% for v,l in month_options %}<option value="{{ v }}" {% if v == month_value %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><label class="form-label small mb-1">Batch</label>
+    <select name="batch" class="form-select form-select-sm"><option value="">All batches</option>
+      {% for b in batches %}<option value="{{ b.pk }}" {% if batch_id == b.pk|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><label class="form-label small mb-1">Payment</label>
+    <select name="pay" class="form-select form-select-sm"><option value="">Any</option>
+      <option value="paid" {% if pay == 'paid' %}selected{% endif %}>Paid</option>
+      <option value="part" {% if pay == 'part' %}selected{% endif %}>Part paid</option>
+      <option value="unpaid" {% if pay == 'unpaid' %}selected{% endif %}>Unpaid</option></select></div>
+  <div class="col-md-3"><label class="form-label small mb-1">Search</label>
+    <input name="q" value="{{ q }}" class="form-control form-control-sm" placeholder="Name or ID"></div>
+  <div class="col-md-2"><button class="btn btn-sm btn-outline-secondary w-100">Apply</button></div>
+</form></div></div>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Enrolled</div><div class="val">{{ rows|length }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Charged</div><div class="val tk">৳{{ totals.charged|floatformat:0|intcomma }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Collected</div><div class="val tk">৳{{ totals.paid|floatformat:0|intcomma }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Due</div><div class="val tk" style="color:#b02a2a">৳{{ totals.due|floatformat:0|intcomma }}</div></div></div>
+</div>
+
+{% if prev_count and not rows %}
+<div class="alert alert-warning no-print d-flex justify-content-between align-items-center">
+  <div>{{ prev_month|date:"F Y" }} had <strong>{{ prev_count }}</strong> enrolled students. Carry them all into {{ month|date:"F Y" }}?</div>
+  <form method="post" action="{% url 'enrollment_carry_forward' %}">{% csrf_token %}
+    <input type="hidden" name="source" value="{{ prev_month|date:'Y-m' }}">
+    <input type="hidden" name="target" value="{{ month_value }}">
+    <button class="btn btn-sm text-white" style="background:#0f6e6e">Carry {{ prev_count }} students forward</button>
+  </form>
+</div>
+{% elif prev_count %}
+<form method="post" action="{% url 'enrollment_carry_forward' %}" class="mb-3 no-print">{% csrf_token %}
+  <input type="hidden" name="source" value="{{ prev_month|date:'Y-m' }}">
+  <input type="hidden" name="target" value="{{ month_value }}">
+  <button class="btn btn-sm btn-outline-secondary">Carry anyone missing from {{ prev_month|date:"F Y" }} into this month</button>
+</form>
+{% endif %}
+
+<div class="card mb-3"><div class="table-responsive"><table class="table table-sm table-hover mb-0">
+<thead><tr><th>ID</th><th>Student</th><th>Batch</th><th>Subjects</th><th class="text-center">#</th>
+<th class="text-end">Fee</th><th class="text-end">Paid</th><th class="text-end">Due</th><th>Status</th><th></th></tr></thead>
+<tbody>{% for r in rows %}<tr>
+  <td class="text-muted small">{{ r.e.student.student_id }}</td>
+  <td><a href="{{ r.e.student.get_absolute_url }}" class="text-decoration-none fw-semibold">{{ r.e.student.name }}</a></td>
+  <td class="small">{{ r.e.batch.name|default:"—" }}</td>
+  <td class="small">{% for c in r.e.courses.all %}{{ c.subject.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
+  <td class="text-center">{{ r.e.course_count }}</td>
+  <td class="text-end tk">৳{{ r.e.fee_charged|floatformat:0|intcomma }}</td>
+  <td class="text-end tk">৳{{ r.paid|floatformat:0|intcomma }}</td>
+  <td class="text-end tk {% if r.due > 0 %}text-danger{% endif %}">৳{{ r.due|floatformat:0|intcomma }}</td>
+  <td><span class="badge badge-{{ r.status }}">{{ r.label }}</span></td>
+  <td class="text-end text-nowrap no-print">
+    {% if r.due > 0 %}<a class="btn btn-sm py-0 text-white" style="background:#0f6e6e" href="{% url 'payment_create' %}?student={{ r.e.student.pk }}&month={{ month_value }}">Take fee</a>{% endif %}
+    <a class="btn btn-sm btn-outline-secondary py-0" href="{% url 'enrollment_edit' r.e.pk %}">Edit</a></td>
+</tr>{% empty %}<tr><td colspan="10" class="text-center text-muted py-4">Nobody is enrolled for {{ month|date:"F Y" }} yet.</td></tr>{% endfor %}</tbody>
+</table></div></div>
+
+{% if not_enrolled %}
+<div class="card no-print"><div class="card-header">Active students not enrolled this month ({{ not_enrolled|length }})</div>
+<div class="card-body">
+  {% for s in not_enrolled %}
+    <a class="btn btn-sm btn-outline-secondary mb-1" href="{% url 'enrollment_create' %}?student={{ s.pk }}&month={{ month_value }}">
+      {{ s.name }} <span class="text-muted">{{ s.student_id }}</span> <i class="bi bi-plus-lg"></i></a>
+  {% endfor %}
+</div></div>
+{% endif %}
+{% endblock %}

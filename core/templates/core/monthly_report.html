@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}{% load humanize %}
+{% block title %}Monthly report{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0" style="color:#0f6e6e">Monthly report <span class="text-muted fs-6">{{ month|date:"F Y" }}</span></h4>
+  <div class="no-print"><form method="get" class="d-inline-block me-2" style="width:180px">
+    <select name="month" class="form-select form-select-sm" onchange="this.form.submit()">
+      {% for v,l in month_options %}<option value="{{ v }}" {% if v == month_value %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></form>
+    <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">Print</button></div>
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Income</div><div class="val tk">৳{{ income_total|floatformat:0|intcomma }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Expense</div><div class="val tk">৳{{ expense_total|floatformat:0|intcomma }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Profit / loss</div>
+    <div class="val tk" style="color:{% if profit < 0 %}#b02a2a{% else %}#186418{% endif %}">৳{{ profit|floatformat:0|intcomma }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Students</div><div class="val">{{ enrolled }}</div></div></div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-4"><div class="card"><div class="card-header">Income by type</div>
+    <table class="table table-sm mb-0"><tbody>
+    {% for r in income_rows %}<tr><td>{{ r.label }}</td><td class="text-end tk">৳{{ r.total|floatformat:0|intcomma }}</td></tr>{% endfor %}
+    <tr class="fw-bold"><td>Total</td><td class="text-end tk">৳{{ income_total|floatformat:0|intcomma }}</td></tr>
+    </tbody></table></div></div>
+  <div class="col-lg-4"><div class="card"><div class="card-header">Expense by category</div>
+    <table class="table table-sm mb-0"><tbody>
+    {% for r in expense_rows %}<tr><td>{{ r.label }}</td><td class="text-end tk">৳{{ r.total|floatformat:0|intcomma }}</td></tr>
+    {% empty %}<tr><td class="text-muted small">Nothing recorded.</td></tr>{% endfor %}
+    <tr class="fw-bold"><td>Total</td><td class="text-end tk">৳{{ expense_total|floatformat:0|intcomma }}</td></tr>
+    </tbody></table></div></div>
+  <div class="col-lg-4"><div class="card"><div class="card-header">Course popularity</div>
+    <table class="table table-sm mb-0"><thead><tr><th>Course</th><th class="text-end">Students</th><th class="text-end">Expected</th></tr></thead>
+    <tbody>{% for c in course_rows %}<tr><td class="small">{{ c.subject.name }} · {{ c.get_class_level_display }}</td>
+      <td class="text-end">{{ c.students }}</td><td class="text-end tk">৳{{ c.expected|floatformat:0|intcomma }}</td></tr>
+    {% empty %}<tr><td colspan="3" class="text-muted small">No enrollment this month.</td></tr>{% endfor %}</tbody></table></div></div>
+</div>
+{% endblock %}

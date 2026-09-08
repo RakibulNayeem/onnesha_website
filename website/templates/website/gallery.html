@@ -1,0 +1,42 @@
+{% extends "website/base.html" %}{% load pub %}
+{% block title %}{% t "gallery" %}{% endblock %}
+{% block body %}
+<section class="py-5 page-head"><div class="container">
+  <h1 class="mb-0" style="color:var(--ons)">{% t "gallery" %}</h1></div></section>
+<section class="sec"><div class="container">
+  {% for album in albums %}
+    {% if album.images.all %}
+    <div class="mb-5">
+      <div class="d-flex align-items-baseline gap-3 mb-3">
+        <h4 class="mb-0">{% bt album "title" %}</h4>
+        {% if album.held_on %}<span class="small text-muted">{{ album.held_on|date:"d M Y" }}</span>{% endif %}
+      </div>
+      <div class="row g-2">
+        {% for img in album.images.all %}{% if img.src %}
+        <div class="col-6 col-md-4 col-lg-3">
+          <img src="{{ img.src }}" class="thumb" alt="{% bt img 'caption' %}"
+               data-bs-toggle="modal" data-bs-target="#lb" data-src="{{ img.src }}" style="cursor:zoom-in">
+          {% if img.caption_en or img.caption_bn %}<div class="small text-muted mt-1">{% bt img "caption" %}</div>{% endif %}
+        </div>{% endif %}{% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  {% endfor %}
+  {% if loose %}
+  <div class="row g-2">
+    {% for img in loose %}<div class="col-6 col-md-4 col-lg-3">
+      <img src="{{ img.src }}" class="thumb" alt="" data-bs-toggle="modal" data-bs-target="#lb"
+           data-src="{{ img.src }}" style="cursor:zoom-in"></div>{% endfor %}
+  </div>{% endif %}
+  {% if not albums and not loose %}<p class="text-muted">{% t "no_items" %}</p>{% endif %}
+</div></section>
+<div class="modal fade" id="lb"><div class="modal-dialog modal-lg modal-dialog-centered">
+  <div class="modal-content border-0 bg-transparent"><img id="lbimg" class="w-100 rounded"></div></div></div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('lb')?.addEventListener('show.bs.modal', e => {
+  document.getElementById('lbimg').src = e.relatedTarget.dataset.src;
+});
+</script>
+{% endblock %}
