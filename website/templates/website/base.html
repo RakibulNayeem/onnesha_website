@@ -18,15 +18,15 @@
   body{
     font-family:{% if IS_BN %}'Hind Siliguri','Inter'{% else %}'Inter','Hind Siliguri'{% endif %},system-ui,sans-serif;
     color:var(--ink); {% if IS_BN %}font-size:1.02rem;{% endif %}
-    background:#eef4f4;
+    background:#dbeceb;
     background-image:
-      radial-gradient(900px 420px at 88% -8%, rgba(15,110,110,.09), transparent 60%),
-      radial-gradient(760px 380px at -10% 22%, rgba(26,163,154,.08), transparent 62%);
+      radial-gradient(900px 420px at 88% -8%, rgba(15,110,110,.18), transparent 60%),
+      radial-gradient(760px 380px at -10% 22%, rgba(26,163,154,.16), transparent 62%);
     background-attachment:fixed;
   }
   h1,h2,h3,h4,h5{font-weight:700;letter-spacing:-.01em;}
   a{text-decoration:none;}
-  .navbar{background:rgba(255,255,255,.92);backdrop-filter:blur(10px);
+  .navbar{background:rgba(247,252,251,.94);backdrop-filter:blur(10px);
     box-shadow:0 2px 16px rgba(18,49,47,.07);}
   .navbar .nav-link{color:var(--ink);font-weight:500;padding:.4rem .75rem!important;border-radius:.4rem;}
   .navbar .nav-link:hover{background:var(--ons-soft);color:var(--ons);}
@@ -39,7 +39,7 @@
   .btn-ons-out:hover{background:var(--ons);color:#fff;}
   .hero{background:linear-gradient(135deg,var(--ons) 0%,#12857f 55%,#1aa39a 100%);color:#fff;}
   .hero .lead{color:#d6efee;}
-  .soft{background:#fff;box-shadow:inset 0 1px 0 #e2ecec, inset 0 -1px 0 #e2ecec;}
+  .soft{background:#f3faf9;box-shadow:inset 0 1px 0 #d3e6e5, inset 0 -1px 0 #d3e6e5;}
   .sec{padding:3.5rem 0;}
   .sec-title{font-size:1.7rem;margin-bottom:.35rem;}
   .sec-sub{color:var(--muted);margin-bottom:2rem;}
@@ -64,7 +64,7 @@
     font-size:.8rem;font-weight:600;color:var(--muted);}
   .lang-btn.on{background:var(--ons);color:#fff;border-color:var(--ons);}
   .prose{line-height:1.85;white-space:pre-line;}
-  .page-head{background:linear-gradient(180deg,#ffffff 0%,#f4f9f9 100%);
+  .page-head{background:linear-gradient(180deg,#f6fcfb 0%,#e4f1f0 100%);
     box-shadow:0 4px 16px rgba(18,49,47,.05);border-bottom:1px solid #e6eeee;}
   .form-control,.form-select{background:#fff;border-color:#dbe7e6;}
   .form-control:focus,.form-select:focus{border-color:var(--ons);
