@@ -35,18 +35,22 @@ def _month_context(request, key="month"):
 # ============================================================ DASHBOARD
 @login_required
 def dashboard(request):
-    month, options = _month_context(request)
-    nxt = add_months(month, 1)
+    rng = range_context(request.GET)
+    start, nxt = rng["start_month"], rng["end_exclusive"]
+    span = months_between(start, rng["end_month"])
 
-    payments = Payment.objects.filter(paid_on__gte=month, paid_on__lt=nxt)
-    expenses = Expense.objects.filter(spent_on__gte=month, spent_on__lt=nxt)
+    payments = Payment.objects.filter(paid_on__gte=start, paid_on__lt=nxt)
+    expenses = Expense.objects.filter(spent_on__gte=start, spent_on__lt=nxt)
     cash_in = _sum(payments)
     cash_out = _sum(expenses)
 
-    enrollments = MonthlyEnrollment.objects.filter(month=month)
+    enrollments = MonthlyEnrollment.objects.filter(month__gte=start, month__lt=nxt)
     charged = _sum(enrollments, "fee_charged")
     collected = _sum(
-        Payment.objects.filter(month=month, category=PaymentCategory.MONTHLY_FEE)
+        Payment.objects.filter(
+            month__gte=start, month__lt=nxt,
+            category=PaymentCategory.MONTHLY_FEE,
+        )
     )
     due = charged - collected
 
@@ -60,14 +64,17 @@ def dashboard(request):
         b_charged = _sum(b_enr, "fee_charged")
         b_collected = _sum(
             Payment.objects.filter(
-                month=month, category=PaymentCategory.MONTHLY_FEE,
-                student__enrollments__month=month,
+                month__gte=start, month__lt=nxt,
+                category=PaymentCategory.MONTHLY_FEE,
+                student__enrollments__month__gte=start,
+                student__enrollments__month__lt=nxt,
                 student__enrollments__batch=batch,
             ).distinct()
         )
         if b_enr.exists() or b_charged or b_collected:
             batch_rows.append({
-                "batch": batch, "students": b_enr.count(),
+                "batch": batch,
+                "students": b_enr.values("student").distinct().count(),
                 "charged": b_charged, "collected": b_collected,
                 "due": b_charged - b_collected,
             })
@@ -84,9 +91,16 @@ def dashboard(request):
     for row in expense_by_cat:
         row["label"] = dict(ExpenseCategory.choices)[row["category"]]
 
+    # Ask for a span and the little table shows that span; ask for one month
+    # and it keeps showing the half-year running up to it.
+    if rng["is_range"]:
+        trend_months, trend_title = span, "Month by month"
+    else:
+        trend_months = [add_months(start, i) for i in range(-5, 1)]
+        trend_title = "Last 6 months"
+
     trend = []
-    for i in range(-5, 1):
-        m = add_months(month, i)
+    for m in trend_months:
         m_next = add_months(m, 1)
         trend.append({
             "month": m,
@@ -99,8 +113,8 @@ def dashboard(request):
 
     teacher_dues = []
     for t in Teacher.objects.filter(is_active=True):
-        expected = t.expected_for_month(month)
-        paid = t.paid_for_month(month)
+        expected = sum((t.expected_for_month(m) for m in span), ZERO)
+        paid = sum((t.paid_for_month(m) for m in span), ZERO)
         if expected or paid:
             teacher_dues.append({
                 "teacher": t, "expected": expected, "paid": paid,
@@ -108,21 +122,20 @@ def dashboard(request):
             })
 
     context = {
-        "month": month, "month_options": options,
-        "month_value": month.strftime("%Y-%m"),
         "cash_in": cash_in, "cash_out": cash_out, "profit": cash_in - cash_out,
         "charged": charged, "collected": collected, "due": due,
         "collection_rate": (collected / charged * 100) if charged else ZERO,
-        "enrolled": enrollments.count(),
+        "enrolled": enrollments.values("student").distinct().count(),
         "courses_taken": enrollments.aggregate(t=Count("courses"))["t"] or 0,
         "active_students": Student.objects.filter(status=StudentStatus.ACTIVE).count(),
         "status_counts": status_counts,
         "batch_rows": batch_rows,
         "income_by_cat": income_by_cat, "expense_by_cat": expense_by_cat,
-        "trend": trend, "teacher_dues": teacher_dues,
+        "trend": trend, "trend_title": trend_title,
+        "teacher_dues": teacher_dues,
     }
+    context.update(rng)
     return render(request, "core/dashboard.html", context)
-
 
 # ============================================================ STUDENTS
 @login_required

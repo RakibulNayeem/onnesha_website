@@ -3,8 +3,8 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h4 class="mb-0" style="color:#0f6e6e">Monthly report <span class="text-muted fs-6">{{ range_label }}</span></h4>
-  <div class="no-print d-flex align-items-center gap-2"><form method="get" style="width:340px">
-    {% include "core/_month_range.html" %}</form>
+  <div class="no-print d-flex align-items-center gap-2"><form method="get" style="width:420px">
+    {% include "core/_month_range.html" with range_apply=1 %}</form>
     <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">Print</button></div>
 </div>
 <div class="row g-3 mb-3">

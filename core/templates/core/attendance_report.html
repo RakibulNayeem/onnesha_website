@@ -2,7 +2,7 @@
 {% block content %}
 <h4 class="mb-3" style="color:#0f6e6e">Attendance report <span class="text-muted fs-6">{{ range_label }}</span></h4>
 <form class="row g-2 mb-3 no-print" method="get">
-  <div class="col-md-6">{% include "core/_month_range.html" %}</div>
+  <div class="col-md-6">{% include "core/_month_range.html" with range_apply=1 %}</div>
   <div class="col-md-3"><select name="batch" class="form-select form-select-sm" onchange="this.form.submit()">
     <option value="">All batches</option>
     {% for b in batches %}<option value="{{ b.pk }}" {% if batch_id == b.pk|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>{% endfor %}</select></div>

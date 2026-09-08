@@ -13,7 +13,7 @@
   </div></div></div>
   <div class="col-lg-8">
     <form class="row g-2 mb-3 no-print" method="get">
-      <div class="col-md-7">{% include "core/_month_range.html" %}</div>
+      <div class="col-md-7">{% include "core/_month_range.html" with range_apply=1 %}</div>
       <div class="col-md-5"><select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
         <option value="">All categories</option>
         {% for v,l in categories %}<option value="{{ v }}" {% if category == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
