@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}{{ site.hero_title_en }}{% endblock %} · Onnesha</title>
 <meta name="description" content="{% block meta_desc %}Onnesha — academic and admission care coaching centre. Class 8–12, SSC, HSC and admission test preparation.{% endblock %}">
+<script src="{% static 'js/theme.js' %}"></script>
 <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
 <link rel="apple-touch-icon" href="{% static 'img/logo.png' %}">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -105,6 +106,49 @@
   a.card-link{color:inherit;display:block;height:100%;}
   a.card-link:hover h5,a.card-link:hover h6{color:var(--ons);}
   .anchor{scroll-margin-top:90px;}
+  .theme-btn{width:32px;height:32px;padding:0;line-height:1;border-radius:50%;
+    border:1px solid #d6e3e2;background:transparent;color:var(--muted);
+    display:inline-grid;place-items:center;vertical-align:middle;
+    transition:color .15s ease,border-color .15s ease;}
+  .theme-btn:hover{color:var(--ons);border-color:var(--ons);}
+
+  /* ---------- night mode ----------
+     Bootstrap 5.3 recolours its own components from data-bs-theme; what
+     follows is only this site's own paintwork. */
+  [data-bs-theme="dark"]{
+    --ons:#35b3a9;        /* brand colour where it is read as text */
+    --ons-solid:#15867f;  /* and where white text sits on top of it */
+    --ons-dark:#092b2b; --ons-light:#14403e; --ons-soft:#11312f;
+    --ink:#e2f0ee; --muted:#93b4b1;
+  }
+  [data-bs-theme="dark"] body{
+    background:#0b1e1e;
+    background-image:
+      radial-gradient(900px 420px at 88% -8%, rgba(53,179,169,.13), transparent 60%),
+      radial-gradient(760px 380px at -10% 22%, rgba(15,110,110,.22), transparent 62%);
+  }
+  [data-bs-theme="dark"] .navbar{background:rgba(11,32,31,.94);
+    box-shadow:0 2px 16px rgba(0,0,0,.45);}
+  [data-bs-theme="dark"] .card-ons{background:#122c2b;border-color:#20433f;}
+  [data-bs-theme="dark"] .card-ons:hover{border-color:#2d5b55;
+    box-shadow:0 4px 10px rgba(0,0,0,.35), 0 18px 38px rgba(0,0,0,.45);}
+  [data-bs-theme="dark"] .soft{background:#0e2625;
+    box-shadow:inset 0 1px 0 #1b3b39, inset 0 -1px 0 #1b3b39;}
+  [data-bs-theme="dark"] .page-head{background:linear-gradient(180deg,#122c2b 0%,#0c2322 100%);
+    border-bottom-color:#20433f;box-shadow:0 4px 16px rgba(0,0,0,.3);}
+  [data-bs-theme="dark"] .stat-strip{background:#122c2b;box-shadow:0 6px 18px rgba(0,0,0,.35);}
+  [data-bs-theme="dark"] .hero{background:linear-gradient(135deg,#0c4f4c 0%,#0f6a65 55%,#13837c 100%);}
+  [data-bs-theme="dark"] .btn-ons{background:var(--ons-solid);box-shadow:0 4px 14px rgba(0,0,0,.35);}
+  [data-bs-theme="dark"] .btn-ons:hover{background:#1aa39a;box-shadow:0 6px 20px rgba(0,0,0,.4);}
+  [data-bs-theme="dark"] .btn-ons-out:hover{background:var(--ons-solid);}
+  [data-bs-theme="dark"] .lang-btn,[data-bs-theme="dark"] .theme-btn{border-color:#2a4e4a;}
+  [data-bs-theme="dark"] .lang-btn.on{background:var(--ons-solid);border-color:var(--ons-solid);}
+  [data-bs-theme="dark"] .pill{color:#8fe0d8;}
+  [data-bs-theme="dark"] .thumb{background:#173533;}
+  [data-bs-theme="dark"] .table-merit thead th{background:var(--ons-solid);}
+  [data-bs-theme="dark"] .form-control,[data-bs-theme="dark"] .form-select{
+    background:#0e2625;border-color:#2a4e4a;color:var(--ink);}
+  [data-bs-theme="dark"] .footer{box-shadow:0 -8px 30px rgba(0,0,0,.4);}
 </style>
 {% block head %}{% endblock %}
 </head>
@@ -142,6 +186,8 @@
         <li class="nav-item ms-lg-2 my-2 my-lg-0">
           <a href="{% url 'pub_set_language' 'en' %}" class="lang-btn {% if not IS_BN %}on{% endif %}">EN</a>
           <a href="{% url 'pub_set_language' 'bn' %}" class="lang-btn {% if IS_BN %}on{% endif %}">বাং</a>
+          <button type="button" class="theme-btn ms-1" data-theme-toggle>
+            <i class="bi bi-moon-stars"></i></button>
         </li>
       </ul>
     </div>
