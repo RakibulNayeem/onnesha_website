@@ -82,6 +82,12 @@
   .slide::after{content:"";position:absolute;inset:0;
     background:linear-gradient(90deg,rgba(10,79,79,.92) 0%,rgba(10,79,79,.72) 45%,rgba(10,79,79,.28) 100%);}
   .slide-body{position:relative;z-index:2;height:100%;display:flex;align-items:center;color:#fff;}
+  /* .slide-body covers the whole slide at z-index 2, so Bootstrap's own
+     controls (indicators 2, arrows 1) end up under it and every click on
+     them lands on the slide instead. Lift them clear. */
+  #heroCarousel .carousel-indicators,
+  #heroCarousel .carousel-control-prev,
+  #heroCarousel .carousel-control-next{z-index:5;}
   .carousel-indicators [data-bs-target]{width:26px;height:4px;border-radius:2px;
     background-color:#0a4f4f;opacity:.4;box-shadow:0 0 0 1px rgba(255,255,255,.75);}
   .carousel-indicators .active{opacity:1;}
@@ -137,8 +143,6 @@
           <a href="{% url 'pub_set_language' 'en' %}" class="lang-btn {% if not IS_BN %}on{% endif %}">EN</a>
           <a href="{% url 'pub_set_language' 'bn' %}" class="lang-btn {% if IS_BN %}on{% endif %}">বাং</a>
         </li>
-        <li class="nav-item ms-lg-3 my-2 my-lg-0">
-          <a class="btn btn-ons btn-sm px-3" href="{% url 'pub_admission' %}">{% t "apply_now" %}</a></li>
       </ul>
     </div>
   </div>

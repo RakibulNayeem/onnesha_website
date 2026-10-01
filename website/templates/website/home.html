@@ -25,14 +25,7 @@
               <span class="pill mb-3" style="background:rgba(255,255,255,.2);color:#fff">
                 <i class="bi bi-dot"></i>{% t "admission_open" %}</span>
               <h1 class="display-5 fw-bold mb-3">{% bt sl "title" %}</h1>
-              <p class="lead mb-4" style="color:#d6efee">{% bt sl "subtitle" %}</p>
-              {% if sl.button_url %}
-                <a class="btn btn-light btn-lg px-4 fw-semibold" style="color:var(--ons)"
-                   href="{{ sl.button_url }}">{% bt sl "button_text" %}</a>
-              {% else %}
-                <a class="btn btn-light btn-lg px-4 fw-semibold" style="color:var(--ons)"
-                   href="{% url 'pub_admission' %}">{% t "apply_online" %}</a>
-              {% endif %}
+              <p class="lead mb-0" style="color:#d6efee">{% bt sl "subtitle" %}</p>
             </div>
           </div>
         </div>
