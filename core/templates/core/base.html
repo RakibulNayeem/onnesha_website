@@ -37,18 +37,25 @@
     display:inline-grid;place-items:center;flex:none;}
   .theme-btn:hover{border-color:#fff;color:#fff;}
 
-  /* ---------- night mode: Bootstrap repaints its own parts, this is ours ---------- */
-  [data-bs-theme="dark"] body{background:#0c1c1c;}
-  [data-bs-theme="dark"] .sidebar{background:#0a3b3a;}
-  [data-bs-theme="dark"] .card{background-color:#122927;border-color:#22403e;}
-  [data-bs-theme="dark"] .card-header{background:#122927;border-bottom-color:#22403e;}
-  [data-bs-theme="dark"] .stat{background:#122927;border-color:#22403e;}
-  [data-bs-theme="dark"] .stat .lbl{color:#8fa9a7;}
-  [data-bs-theme="dark"] .stat .val{color:#cfeae7;}
+  /* ---------- night mode ----------
+     Neutral greys; the brand teal stays as the accent on top of them. */
+  [data-bs-theme="dark"] body{background:#18191a;}
+  [data-bs-theme="dark"] .sidebar{background:#202122;border-right:1px solid #303132;}
+  [data-bs-theme="dark"] .sidebar a{color:#b0b3b8;}
+  [data-bs-theme="dark"] .sidebar a:hover{background:rgba(255,255,255,.07);color:#fff;}
+  [data-bs-theme="dark"] .sidebar a.active{background:#13857e;color:#fff;}
+  [data-bs-theme="dark"] .sidebar .brand{color:#e4e6eb;}
+  [data-bs-theme="dark"] .sidebar .grp{color:#8a8d91;}
+  [data-bs-theme="dark"] .card{background-color:#242526;border-color:#3a3b3c;}
+  [data-bs-theme="dark"] .card-header{background:#242526;border-bottom-color:#3a3b3c;}
+  [data-bs-theme="dark"] .stat{background:#242526;border-color:#3a3b3c;}
+  [data-bs-theme="dark"] .stat .lbl{color:#9aa0a6;}
+  [data-bs-theme="dark"] .stat .val{color:#e4e6eb;}
+  [data-bs-theme="dark"] .table thead th{background:#13857e;}
   [data-bs-theme="dark"] .badge-paid{background:#14361b;color:#8de19a;}
   [data-bs-theme="dark"] .badge-part{background:#3a300d;color:#ffd978;}
   [data-bs-theme="dark"] .badge-unpaid{background:#3d1818;color:#ff9f9f;}
-  [data-bs-theme="dark"] .badge-free{background:#262c2c;color:#a9b6b6;}
+  [data-bs-theme="dark"] .badge-free{background:#2d2e30;color:#b0b3b8;}
   @media print{.sidebar,.no-print{display:none!important}body{background:#fff}}
 </style>
 </head>

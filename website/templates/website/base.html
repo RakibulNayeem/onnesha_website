@@ -79,10 +79,12 @@
   .footer{box-shadow:0 -8px 30px rgba(10,79,79,.18);}
   .table-merit thead th{background:var(--ons);color:#fff;font-weight:600;}
   .ticker{background:var(--ons-light);border-radius:.6rem;padding:.55rem 1rem;}
-  .slide{height:clamp(320px,52vh,520px);background-size:cover;background-position:center;position:relative;}
-  .slide::after{content:"";position:absolute;inset:0;
+  /* Named hero-slide, not slide: Bootstrap puts its own `slide` class on
+     the carousel root, so a bare .slide rule veils the whole carousel. */
+  .hero-slide{height:clamp(320px,52vh,520px);background-size:cover;background-position:center;position:relative;}
+  .hero-slide::after{content:"";position:absolute;inset:0;
     background:linear-gradient(90deg,rgba(10,79,79,.92) 0%,rgba(10,79,79,.72) 45%,rgba(10,79,79,.28) 100%);}
-  .slide-body{position:relative;z-index:2;height:100%;display:flex;align-items:center;color:#fff;}
+  .hero-slide-body{position:relative;z-index:2;height:100%;display:flex;align-items:center;color:#fff;}
   /* .slide-body covers the whole slide at z-index 2, so Bootstrap's own
      controls (indicators 2, arrows 1) end up under it and every click on
      them lands on the slide instead. Lift them clear. */
@@ -113,42 +115,42 @@
   .theme-btn:hover{color:var(--ons);border-color:var(--ons);}
 
   /* ---------- night mode ----------
-     Bootstrap 5.3 recolours its own components from data-bs-theme; what
-     follows is only this site's own paintwork. */
+     Neutral greys, the way a dark app reads at night; the brand teal
+     stays as the accent on top rather than tinting the whole page.
+     Bootstrap 5.3 recolours its own components from data-bs-theme, so
+     what follows is only this site's own paintwork. */
   [data-bs-theme="dark"]{
-    --ons:#35b3a9;        /* brand colour where it is read as text */
-    --ons-solid:#15867f;  /* and where white text sits on top of it */
-    --ons-dark:#092b2b; --ons-light:#14403e; --ons-soft:#11312f;
-    --ink:#e2f0ee; --muted:#93b4b1;
+    --ons:#3ecabd;        /* accent where it is read as text */
+    --ons-solid:#13857e;  /* and where white text sits on top of it */
+    --ons-dark:#1c1d1e; --ons-light:#2d2e30; --ons-soft:#2d2e30;
+    --ink:#e4e6eb; --muted:#b0b3b8;
   }
-  [data-bs-theme="dark"] body{
-    background:#0b1e1e;
-    background-image:
-      radial-gradient(900px 420px at 88% -8%, rgba(53,179,169,.13), transparent 60%),
-      radial-gradient(760px 380px at -10% 22%, rgba(15,110,110,.22), transparent 62%);
-  }
-  [data-bs-theme="dark"] .navbar{background:rgba(11,32,31,.94);
-    box-shadow:0 2px 16px rgba(0,0,0,.45);}
-  [data-bs-theme="dark"] .card-ons{background:#122c2b;border-color:#20433f;}
-  [data-bs-theme="dark"] .card-ons:hover{border-color:#2d5b55;
-    box-shadow:0 4px 10px rgba(0,0,0,.35), 0 18px 38px rgba(0,0,0,.45);}
-  [data-bs-theme="dark"] .soft{background:#0e2625;
-    box-shadow:inset 0 1px 0 #1b3b39, inset 0 -1px 0 #1b3b39;}
-  [data-bs-theme="dark"] .page-head{background:linear-gradient(180deg,#122c2b 0%,#0c2322 100%);
-    border-bottom-color:#20433f;box-shadow:0 4px 16px rgba(0,0,0,.3);}
-  [data-bs-theme="dark"] .stat-strip{background:#122c2b;box-shadow:0 6px 18px rgba(0,0,0,.35);}
+  [data-bs-theme="dark"] body{background:#18191a;background-image:none;}
+  [data-bs-theme="dark"] .navbar{background:rgba(32,33,35,.96);
+    box-shadow:0 1px 0 #303132;}
+  [data-bs-theme="dark"] .card-ons{background:#242526;border-color:#3a3b3c;}
+  [data-bs-theme="dark"] .card-ons:hover{border-color:#4a4b4d;
+    box-shadow:0 4px 10px rgba(0,0,0,.4), 0 18px 38px rgba(0,0,0,.5);}
+  [data-bs-theme="dark"] .soft{background:#1f2021;
+    box-shadow:inset 0 1px 0 #303132, inset 0 -1px 0 #303132;}
+  [data-bs-theme="dark"] .page-head{background:#242526;
+    border-bottom-color:#3a3b3c;box-shadow:0 4px 16px rgba(0,0,0,.35);}
+  [data-bs-theme="dark"] .stat-strip{background:#242526;box-shadow:0 6px 18px rgba(0,0,0,.4);}
+  [data-bs-theme="dark"] .footer{background:#1c1d1e;color:var(--muted);
+    box-shadow:0 -1px 0 #303132;}
+  [data-bs-theme="dark"] .footer a{color:var(--muted);}
+  [data-bs-theme="dark"] .footer a:hover{color:#fff;}
   [data-bs-theme="dark"] .hero{background:linear-gradient(135deg,#0c4f4c 0%,#0f6a65 55%,#13837c 100%);}
-  [data-bs-theme="dark"] .btn-ons{background:var(--ons-solid);box-shadow:0 4px 14px rgba(0,0,0,.35);}
-  [data-bs-theme="dark"] .btn-ons:hover{background:#1aa39a;box-shadow:0 6px 20px rgba(0,0,0,.4);}
+  [data-bs-theme="dark"] .btn-ons{background:var(--ons-solid);box-shadow:0 4px 14px rgba(0,0,0,.4);}
+  [data-bs-theme="dark"] .btn-ons:hover{background:#1aa39a;box-shadow:0 6px 20px rgba(0,0,0,.45);}
   [data-bs-theme="dark"] .btn-ons-out:hover{background:var(--ons-solid);}
-  [data-bs-theme="dark"] .lang-btn,[data-bs-theme="dark"] .theme-btn{border-color:#2a4e4a;}
+  [data-bs-theme="dark"] .lang-btn,[data-bs-theme="dark"] .theme-btn{border-color:#3a3b3c;}
   [data-bs-theme="dark"] .lang-btn.on{background:var(--ons-solid);border-color:var(--ons-solid);}
-  [data-bs-theme="dark"] .pill{color:#8fe0d8;}
-  [data-bs-theme="dark"] .thumb{background:#173533;}
+  [data-bs-theme="dark"] .pill{color:var(--ons);}
+  [data-bs-theme="dark"] .thumb,[data-bs-theme="dark"] .avatar{background:#3a3b3c;}
   [data-bs-theme="dark"] .table-merit thead th{background:var(--ons-solid);}
   [data-bs-theme="dark"] .form-control,[data-bs-theme="dark"] .form-select{
-    background:#0e2625;border-color:#2a4e4a;color:var(--ink);}
-  [data-bs-theme="dark"] .footer{box-shadow:0 -8px 30px rgba(0,0,0,.4);}
+    background:#1c1d1e;border-color:#3a3b3c;color:var(--ink);}
 </style>
 {% block head %}{% endblock %}
 </head>
