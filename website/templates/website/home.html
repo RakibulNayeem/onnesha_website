@@ -13,6 +13,11 @@
   <div class="carousel-inner">
     {% for sl in slides %}
     <div class="carousel-item {% if forloop.first %}active{% endif %}">
+      {% if sl.is_poster %}
+      <a class="poster" href="{% url 'pub_admission' %}">
+        <img src="{{ sl.src }}" alt="{{ sl.alt }}" {% if not forloop.first %}loading="lazy"{% endif %}>
+      </a>
+      {% else %}
       <div class="slide" style="background-image:url('{{ sl.src }}')">
         <div class="slide-body">
           <div class="container">
@@ -32,6 +37,7 @@
           </div>
         </div>
       </div>
+      {% endif %}
     </div>
     {% endfor %}
   </div>

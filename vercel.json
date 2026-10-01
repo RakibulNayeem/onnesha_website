@@ -6,14 +6,14 @@
       "config": {
         "maxLambdaSize": "15mb",
         "runtime": "python3.12",
-        "includeFiles": "{core,website,onnesha_finance}/**"
+        "includeFiles": "{core,website,onnesha_finance,static}/**"
       }
-    },
-    { "src": "build_files.sh", "use": "@vercel/static-build",
-      "config": { "distDir": "staticfiles" } }
+    }
   ],
   "routes": [
-    { "src": "/static/(.*)", "dest": "/staticfiles/$1" },
-    { "src": "/(.*)", "dest": "onnesha_finance/wsgi.py" }
+    {
+      "src": "/(.*)",
+      "dest": "onnesha_finance/wsgi.py"
+    }
   ]
 }

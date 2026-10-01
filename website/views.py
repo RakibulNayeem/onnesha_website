@@ -1,8 +1,11 @@
+from types import SimpleNamespace
+
 from django.contrib import messages
 from django.db.models import Count, Min, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.templatetags.static import static
 from django.utils import timezone
 
 from core.models import ClassLevel, Course, Program, Student, Subject, Teacher
@@ -25,6 +28,23 @@ def set_language(request, code):
     return redirect(request.META.get("HTTP_REFERER") or "pub_home")
 
 
+# The centre's printed banners, shipped with the site so the home page
+# never depends on an upload surviving a deploy.
+POSTERS = (
+    ("img/poster-1.jpg",
+     "Onnesha - admission going on, class 9 to 12, HSC-28 batch"),
+    ("img/poster-2.jpg",
+     "Onnesha academic and admission care - Town Colony Charmatha, Sherpur, Bogura"),
+)
+
+
+def poster_slides():
+    return [
+        SimpleNamespace(src=static(path), alt=alt, is_poster=True, button_url="")
+        for path, alt in POSTERS
+    ]
+
+
 def home(request):
     programs = Program.objects.filter(is_active=True, show_on_website=True)
     teachers = Teacher.objects.filter(show_on_website=True)[:8]
@@ -35,10 +55,6 @@ def home(request):
     ).exclude(image="", image_url="")[:8]
     posts = BlogPost.objects.live()[:3]
     exams = Exam.objects.live()[:3]
-    slides = HeroSlide.objects.filter(is_published=True).exclude(
-        image="", image_url=""
-    )
-
     fee_from = (
         Course.objects.filter(is_active=True)
         .values("program")
@@ -46,12 +62,11 @@ def home(request):
     )
     fee_map = {row["program"]: row["low"] for row in fee_from}
 
-    slides = HeroSlide.objects.filter(is_published=True).exclude(
-        image="", image_url=""
+    slides = poster_slides() + list(
+        HeroSlide.objects.filter(is_published=True).exclude(image="", image_url="")
     )
 
     return render(request, "website/home.html", {
-        "slides": slides,
         "programs": programs, "teachers": teachers, "notices": notices,
         "videos": videos, "images": images, "posts": posts, "exams": exams,
         "fee_map": fee_map, "slides": slides,

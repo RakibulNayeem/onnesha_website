@@ -102,6 +102,15 @@ class HeroSlide(BilingualMixin):
             return self.image.url
         return self.image_url or ""
 
+    @property
+    def is_poster(self):
+        """A slide with no headline of its own is printed artwork.
+
+        Such a banner already carries its own text, so the home page shows
+        it whole instead of cropping it behind the usual teal overlay.
+        """
+        return not (self.title_en or self.title_bn)
+
 
 class PublishedQuerySet(models.QuerySet):
     def live(self):

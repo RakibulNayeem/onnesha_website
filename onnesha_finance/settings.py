@@ -102,13 +102,18 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    # Plain (unhashed) names: Vercel ships the collected files as static
-    # assets and routes /static/ at them, but the lambda itself does not
-    # carry staticfiles.json - a manifest lookup there would 500 the page.
+    # Plain (unhashed) names - see WHITENOISE_USE_FINDERS below.
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"
     },
 }
+
+# Vercel has no place to put a collectstatic build the app can read back,
+# so WhiteNoise serves the files where they already live - this repo's
+# static/ plus each app's own. Deploys that do run collectstatic (Render)
+# are unaffected: STATIC_ROOT still wins when it is populated.
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_MAX_AGE = 60 * 60 * 24 * 7
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
