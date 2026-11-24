@@ -1,3 +1,4 @@
+from pathlib import Path
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -181,3 +182,29 @@ class UniversityList(TestCase):
         self.assertEqual([g for g, _ in groups], sorted({n[:1] for n in ("খুলনা", "ঢাকা", "কুমিল্লা", "ক্যাম্পাস")}))
         self.assertEqual([s.name for s in dict(groups)["ক"]], sorted(["কুমিল্লা বিশ্ববিদ্যালয়", "ক্যাম্পাস টেস্ট"]))
         self.assertEqual([lab for lab, _ in r.context["other_groups"]], ["বোর্ড"])
+
+
+class ImportBank(TestCase):
+    """The transcribed-book loader: files questions by board+year, skips bad ones, and never duplicates."""
+    def make(self, tmp):
+        p = Path(tmp) / "c.txt"
+        p.write_text("@track ssc এসএসসি academic\n@subject পদার্থবিজ্ঞান\n@chapter 1 ভৌত রাশি\n"
+                     "1 || ঢা. বো.'২৩; ব. বো.'২২ || b || প্রশ্ন এক? || ক || খ || গ || ঘ\n"
+                     "2 || সম্ভাব্য প্রশ্ন || c || প্রশ্ন দুই? ¶ (i) এ ¶ (ii) বি || এ || বি || সি || ডি\n"
+                     "3 || ঢা. বো.'২৪ || x || ভুল প্রশ্ন? || ক || খ || গ || ঘ\n"
+                     "4 || সি. বো.'২৩ || a || প্রশ্ন এক? || অন্য || খ || গ || ঘ\n", encoding="utf-8")
+        return str(p)
+
+    def test_import_files_by_board_year_and_is_idempotent(self):
+        import tempfile
+        from django.core.management import call_command
+        with tempfile.TemporaryDirectory() as tmp:
+            f = self.make(tmp)
+            call_command("import_bank", f, verbosity=0); call_command("import_bank", f, verbosity=0)
+        self.assertEqual(Question.objects.count(), 3)            # re-run did not duplicate; Q3 skipped; Q4 shares Q1's stem but is its own question
+        q1 = Question.objects.get(text="প্রশ্ন এক?", option_a="ক")
+        self.assertEqual((q1.source.name, q1.source.year, q1.source.kind), ("ঢাকা বোর্ড ২০২৩", 2023, "board"))
+        self.assertEqual((q1.correct, q1.status, q1.refs), ("b", "approved", "ঢা. বো.'২৩; ব. বো.'২২"))
+        q2 = Question.objects.get(text__startswith="প্রশ্ন দুই?")
+        self.assertIn("\n(i) এ\n", q2.text)                      # ¶ became real line breaks
+        self.assertEqual(q2.source.kind, "other")

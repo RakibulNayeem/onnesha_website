@@ -51,6 +51,7 @@ class Source(models.Model):
     KINDS = [("university", "বিশ্ববিদ্যালয়"), ("board", "বোর্ড"), ("job", "চাকরি"), ("other", "অন্যান্য")]
     name = models.CharField(max_length=150, unique=True)
     kind = models.CharField(max_length=12, choices=KINDS, default="university", db_index=True)
+    year = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Exam year, for boards and past papers.")
     logo = models.CharField(
         max_length=120, blank=True,
         help_text="File name inside static/img/logos/ (e.g. buet.png). Leave blank for a letter badge.")
@@ -82,6 +83,8 @@ class Question(models.Model):
     correct = models.CharField(max_length=1, blank=True,
                                choices=[(k, k.upper()) for k in OPTION_KEYS])
     explanation = models.TextField(blank=True)
+    refs = models.CharField("exam references", max_length=200, blank=True,
+                            help_text="Where it appeared, as printed in the book, e.g. ঢা. বো.'২৩; ব. বো.'২২")
     # CQ only: [{"q": "...", "marks": 1, "answer": "..."}, ...]
     parts = models.JSONField(default=list, blank=True)
     status = models.CharField(max_length=10, choices=STATUSES, default=DRAFT, db_index=True)

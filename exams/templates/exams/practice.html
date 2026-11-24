@@ -11,7 +11,7 @@
     <span class="pbar"><i id="t-bar"></i></span><span class="chip2"><b id="t-pct">০%</b></span><span class="chip2">🔥 <b id="t-streak">০</b></span><span class="chip2">⭐ <b id="t-pts">০</b></span></div>
   {% for q in page %}
   <div class="paper qcard pq" data-correct="{{ q.correct }}">
-    <div class="qmeta"><span class="tag hl">{{ q.subject.name }}</span>{% if q.chapter %}<span class="tag">{{ q.chapter.name }}</span>{% endif %}{% if q.source %}<span class="tag">{{ q.source.name }}</span>{% endif %}</div>
+    <div class="qmeta"><span class="tag hl">{{ q.subject.name }}</span>{% if q.chapter %}<span class="tag">{{ q.chapter.name }}</span>{% endif %}{% if q.refs %}<span class="tag">{{ q.refs }}</span>{% elif q.source %}<span class="tag">{{ q.source.name }}</span>{% endif %}</div>
     <div class="qtext"><span class="qno">{{ page.start_index|add:forloop.counter0|bn }}.</span> {{ q.text|linebreaksbr }}</div>
     {% for k, v in q.options %}<button type="button" class="opt" data-k="{{ k }}"><span class="bub">{{ k|bnletter }}</span><span>{{ v }}</span></button>{% endfor %}
     <div class="note" hidden><b>সঠিক উত্তর: {{ q.correct|bnletter }}</b>{% if q.explanation %} — {{ q.explanation|linebreaksbr }}{% endif %}</div>

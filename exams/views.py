@@ -85,7 +85,10 @@ def bank(request):
     sources = list(Source.objects.annotate(n=Count("questions", filter=approved)))
 
     def by_kind(kind):
-        return sorted((x for x in sources if x.kind == kind), key=lambda x: x.name)
+        items = (x for x in sources if x.kind == kind)
+        if kind == "board":                       # newest exam year first, then board name
+            return sorted(items, key=lambda x: (-(x.year or 0), x.name))
+        return sorted(items, key=lambda x: x.name)
 
     letters = {}
     for x in by_kind("university"):          # Bangla alphabetical order, grouped by first letter

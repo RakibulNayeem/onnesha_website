@@ -17,6 +17,7 @@
   <div class="filter-tabs"><button class="on" data-f="all">সব</button><button data-f="wrong">ভুল</button><button data-f="skip">বাদ</button></div>
   {% for it in items %}
   <div class="paper qcard rv" data-s="{% if not it.chosen %}skip{% elif it.is_correct %}ok{% else %}wrong{% endif %}">
+    {% if it.question.refs %}<div class="qmeta"><span class="tag">{{ it.question.refs }}</span></div>{% endif %}
     <div class="qtext"><span class="qno">{{ forloop.counter|bn }}.</span> {{ it.question.text|linebreaksbr }}</div>
     {% for k, v in it.question.options %}<div class="opt {% if k == it.question.correct %}right{% elif k == it.chosen %}wrong{% endif %}" style="cursor:default"><span class="bub">{{ k|bnletter }}</span><span>{{ v }}</span>
       {% if k == it.chosen %}<span class="tag" style="margin-left:auto">তোমার উত্তর</span>{% endif %}</div>{% endfor %}
