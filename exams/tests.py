@@ -266,3 +266,18 @@ class StaticCacheBusting(TestCase):
         html = self.client.get(reverse("exam_home")).content.decode()
         self.assertRegex(html, r'/static/css/site\.css\?v=[0-9a-f]{10}')
         self.assertRegex(html, r'/static/js/theme\.js\?v=[0-9a-f]{10}')
+
+
+class SignInWithUsername(TestCase):
+    def test_staff_without_an_email_can_sign_in_with_their_username_and_students_with_their_email(self):
+        User.objects.create_user("onnesha_admin_rakib", "", "Str0ng-pass-91", is_staff=True)
+        r = self.client.post(reverse("account_login"), {"login": "onnesha_admin_rakib", "password": "Str0ng-pass-91"})
+        self.assertEqual(r.status_code, 302)
+        self.assertEqual(self.client.get(reverse("exam_profile")).status_code, 200)
+        self.client.logout()
+        User.objects.create_user("stu77", "stu77@x.com", "Str0ng-pass-91")
+        r = self.client.post(reverse("account_login"), {"login": "stu77@x.com", "password": "Str0ng-pass-91"})
+        self.assertEqual(r.status_code, 302)
+        self.client.logout()
+        r = self.client.post(reverse("account_login"), {"login": "onnesha_admin_rakib", "password": "wrong-password"})
+        self.assertEqual(r.status_code, 200)                                # wrong password is still refused

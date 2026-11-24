@@ -265,4 +265,5 @@ EN = {
     'এখনো কোনো প্রশ্নব্যাংক নেই।': 'No question banks yet.',
     'ভাষা': 'Language',
     'প্যানেল': 'Panel',
+    'ইমেইল বা ইউজারনেম': 'Email or username',
 }

@@ -9,7 +9,7 @@
     <p class="muted">{% t "তোমার অগ্রগতি ও মেধাতালিকার অবস্থান দেখতে লগইন করো" %}</p>
     <form method="post" action="{% url 'account_login' %}" class="authform">{% csrf_token %}{{ redirect_field }}
       {% if form.non_field_errors %}<div class="autherr">{{ form.non_field_errors }}</div>{% endif %}
-      <label for="{{ form.login.id_for_label }}">{% t "ইমেইল" %}</label>{{ form.login }}{{ form.login.errors }}
+      <label for="{{ form.login.id_for_label }}">{% t "ইমেইল বা ইউজারনেম" %}</label>{{ form.login }}{{ form.login.errors }}
       <label for="{{ form.password.id_for_label }}">{% t "পাসওয়ার্ড" %}</label>
       <div class="pw">{{ form.password }}<button type="button" class="pwt" aria-label="show / hide password"><i class="bi bi-eye"></i></button></div>{{ form.password.errors }}
       <div class="authrow"><label class="rem">{{ form.remember }} <span>{% t "আমাকে মনে রাখো" %}</span></label><a href="{% url 'account_reset_password' %}">{% t "পাসওয়ার্ড ভুলে গেছ?" %}</a></div>
