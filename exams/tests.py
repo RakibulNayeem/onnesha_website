@@ -258,3 +258,11 @@ class SeedUniversities(TestCase):
         self.assertTrue(set(LOGOS) <= set(UNIVERSITIES))
         for f in LOGOS.values():
             self.assertTrue((Path(settings.BASE_DIR) / "static" / "img" / "logos" / f).exists(), f)
+
+
+class StaticCacheBusting(TestCase):
+    def test_css_and_js_urls_carry_a_content_hash(self):
+        import re
+        html = self.client.get(reverse("exam_home")).content.decode()
+        self.assertRegex(html, r'/static/css/site\.css\?v=[0-9a-f]{10}')
+        self.assertRegex(html, r'/static/js/theme\.js\?v=[0-9a-f]{10}')

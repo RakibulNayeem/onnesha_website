@@ -1,3 +1,6 @@
+import hashlib
+from functools import lru_cache
+
 from django import template
 
 from exams.i18n import is_en, tr
@@ -42,3 +45,24 @@ def t(msg, **kw):
 def tr_filter(value):
     """Translate a Bangla label that comes from the database/choices, e.g. {{ t.get_kind_display|tr }}."""
     return tr(str(value))
+
+
+@lru_cache(maxsize=None)
+def _digest(path):
+    from django.contrib.staticfiles import finders
+    found = finders.find(path)
+    if not found:
+        return ""
+    with open(found, "rb") as fh:
+        return hashlib.md5(fh.read()).hexdigest()[:10]
+
+
+@register.simple_tag
+def asset(path):
+    """Static URL with a content hash, e.g. /static/css/site.css?v=ab12cd34ef.
+
+    Static files are cached by browsers for a week under a fixed name, so without this a visitor
+    can get new HTML with the previous stylesheet after a deploy. The hash changes with the file."""
+    from django.templatetags.static import static
+    v = _digest(path)
+    return f"{static(path)}?v={v}" if v else static(path)
