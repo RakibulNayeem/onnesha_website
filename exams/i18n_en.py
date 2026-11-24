@@ -263,4 +263,5 @@ EN = {
     'অধ্যায় যোগ করা হয়নি।': 'No chapters added yet.',
     'শীঘ্রই আসছে।': 'Coming soon.',
     'এখনো কোনো প্রশ্নব্যাংক নেই।': 'No question banks yet.',
+    'ভাষা': 'Language',
 }

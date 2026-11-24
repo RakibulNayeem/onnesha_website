@@ -645,11 +645,13 @@ html.tb-hidden .nav,html.tb-hidden .topbar{transform:translateY(-100%)}
 .letter{width:38px;height:38px;border-radius:10px;background:var(--ink);color:var(--card);display:grid;place-items:center;font-size:1.25rem}
 .grp[id]{scroll-margin-top:calc(var(--tbh) + 70px)}
 
-/* language switch */
-.langsw{display:inline-flex;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:3px;gap:2px}
-.langsw a{padding:.1rem .7rem;border-radius:99px;font-weight:700;font-size:.82rem;color:var(--muted);line-height:1.6;transition:background .2s var(--ease),color .2s}
-.langsw a.on{background:var(--ink);color:var(--card)}.langsw a:hover:not(.on){color:var(--ink)}
-.langsw.sm a{padding:0 .5rem;font-size:.76rem}
+/* language menu: globe button in the sidebar footer / phone header */
+.langbtn{justify-content:flex-start}.langbtn .chev{margin-left:auto;font-size:.75rem;color:var(--muted)}
+.langmenu{position:fixed;z-index:70;min-width:170px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 40px rgba(15,23,42,.18);padding:.3rem;animation:rise .16s var(--ease) both}
+.langmenu[hidden]{display:none}
+.langmenu a{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.55rem .8rem;border-radius:8px;color:var(--ink);font-weight:600}
+.langmenu a:hover{background:var(--brand-l)}.langmenu a i{visibility:hidden;color:var(--brand)}.langmenu a.on i{visibility:visible}.langmenu a.on{font-weight:800}
+html.side-collapsed .langbtn .chev{display:none}
 html[lang=en] .rules li::before{content:counter(r)}
 
 /* ---- sign in / sign up ---- */

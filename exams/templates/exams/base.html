@@ -20,6 +20,10 @@
   <div class="bm-h">{% t "নোটিফিকেশন" %}</div>
   {% for n in hud.notes %}<a href="{{ n.url }}"><i class="bi bi-{{ n.icon }}"></i><span>{{ n.text }}</span></a>{% empty %}<p class="muted" style="padding:.8rem 1rem;margin:0">{% t "কোনো নতুন নোটিফিকেশন নেই।" %}</p>{% endfor %}
 </div>{% endif %}
+<div class="langmenu" id="langmenu" hidden role="menu" aria-label="Language">
+  <a href="{% url 'exam_lang' 'bn' %}" role="menuitem" class="{% if LANG != 'en' %}on{% endif %}"><span>বাংলা</span><i class="bi bi-check2"></i></a>
+  <a href="{% url 'exam_lang' 'en' %}" role="menuitem" class="{% if LANG == 'en' %}on{% endif %}"><span>English</span><i class="bi bi-check2"></i></a>
+</div>
 <aside class="side">
   <div class="side-head">
   <a class="brand" href="{{ u_home }}"><img src="{% static 'img/logo.png' %}" alt=""><span>{% t "অন্বেষা" %}<small>{% t "পরীক্ষা ও প্রশ্নব্যাংক" %}</small></span></a>
@@ -35,6 +39,8 @@
     {% if user.is_staff %}<a href="/django-admin/exams/question/?status__exact=draft" data-tip="{% t "রিভিউ" %}" aria-label="{% t "রিভিউ" %}"><i class="bi bi-clipboard-check"></i><span>{% t "রিভিউ" %}</span></a>{% endif %}
   </nav>
   <div class="side-foot">
+    <button type="button" class="btn sm foot-btn langbtn" data-lang-btn data-tip="{% t "ভাষা" %}" aria-label="Language" aria-haspopup="true"><i class="bi bi-translate"></i><span>{% if LANG == 'en' %}English{% else %}বাংলা{% endif %}</span><i class="bi bi-chevron-up chev"></i></button>
+    
     {% if user.is_authenticated %}<a class="who" href="{% url 'exam_profile' %}" data-tip="{% t 'প্রোফাইল" aria-label="প্রোফাইল' %}"><i class="bi bi-person-circle"></i><span>{{ user.username }}</span></a>
     {% else %}<a class="btn pri sm foot-btn" data-tip="{% t 'লগইন / সাইন আপ" aria-label="লগইন / সাইন আপ' %}" href="{% url 'account_login' %}"><i class="bi bi-box-arrow-in-right"></i><span>{% t "লগইন / সাইন আপ" %}</span></a>{% endif %}
   </div>
@@ -46,7 +52,6 @@
   <span class="hchip" title="{% t "প্রতিটি সঠিক উত্তরে ১০ পয়েন্ট" %}"><i class="bi bi-star-fill" style="color:#d97706"></i><b>{{ hud.points|bn }}</b> {% t "পয়েন্ট" %}</span>
   <button type="button" class="hchip bellbtn {% if hud.notes %}has{% endif %}" data-bell aria-haspopup="true" aria-label="{% t "নোটিফিকেশন" %}"><i class="bi bi-bell"></i><b>{{ hud.notes|length|bn }}</b></button>
   {% else %}<a class="btn pri sm" href="{% url 'account_login' %}">{% t "লগইন / সাইন আপ" %}</a>{% endif %}
-  <div class="langsw" role="group" aria-label="Language"><a href="{% url 'exam_lang' 'bn' %}" class="{% if LANG != 'en' %}on{% endif %}">বাংলা</a><a href="{% url 'exam_lang' 'en' %}" class="{% if LANG == 'en' %}on{% endif %}">EN</a></div>
   <button type="button" class="themepill" data-theme-toggle aria-label="{% t "দিন / রাত" %}"><span class="ic sun"><b class="bi bi-sun"></b></span><span class="ic moon"><b class="bi bi-moon-stars"></b></span></button>
 </div>
 <header class="nav"><div class="wrap">
@@ -62,7 +67,7 @@
   <div class="nav-r">
     {% if user.is_authenticated %}<span class="hchip sm"><i class="bi bi-fire" style="color:#ea580c"></i><b>{{ hud.streak|bn }}</b></span><span class="hchip sm"><i class="bi bi-star-fill" style="color:#d97706"></i><b>{{ hud.points|bn }}</b></span>{% endif %}
     {% if user.is_authenticated %}<button type="button" class="round bell-m" data-bell aria-label="{% t "নোটিফিকেশন" %}"><i class="bi bi-bell"></i>{% if hud.notes %}<em class="ndot"></em>{% endif %}</button>{% endif %}
-    <div class="langsw sm"><a href="{% url 'exam_lang' 'bn' %}" class="{% if LANG != 'en' %}on{% endif %}">বা</a><a href="{% url 'exam_lang' 'en' %}" class="{% if LANG == 'en' %}on{% endif %}">EN</a></div>
+    <button type="button" class="round" data-lang-btn aria-label="Language" aria-haspopup="true"><i class="bi bi-translate"></i></button>
     <button type="button" class="round" data-theme-toggle title="Day / night"><i class="bi bi-moon-stars"></i></button>
     {% if user.is_staff %}<a class="btn sm flat" href="/django-admin/exams/question/?status__exact=draft">{% t "রিভিউ" %}</a>{% endif %}
     {% if user.is_authenticated %}
@@ -92,6 +97,13 @@
 </nav>
 <script>
 (function(){var h=document.documentElement;
+ var lm=document.getElementById('langmenu');
+ document.querySelectorAll('[data-lang-btn]').forEach(function(btn){btn.addEventListener('click',function(e){e.stopPropagation();
+  lm.hidden=!lm.hidden; if(lm.hidden)return; var r=btn.getBoundingClientRect(),wide=innerWidth>=900;
+  if(wide){lm.style.left=(r.right+10)+'px';lm.style.right='auto';lm.style.top=Math.max(8,r.bottom-lm.offsetHeight)+'px';}
+  else{lm.style.left='auto';lm.style.right=Math.max(8,innerWidth-r.right)+'px';lm.style.top=(r.bottom+8)+'px';}});});
+ if(lm){document.addEventListener('click',function(e){if(!lm.contains(e.target))lm.hidden=true});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')lm.hidden=true});}
  var menu=document.getElementById('bellmenu');
  function placeMenu(btn){var r=btn.getBoundingClientRect();menu.style.top=(r.bottom+8)+'px';menu.style.left='auto';menu.style.right=Math.max(8,innerWidth-r.right)+'px';}
  document.querySelectorAll('[data-bell]').forEach(function(btn){btn.addEventListener('click',function(e){e.stopPropagation();
