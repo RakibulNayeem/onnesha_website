@@ -20,9 +20,15 @@
   <div class="bm-h">{% t "নোটিফিকেশন" %}</div>
   {% for n in hud.notes %}<a href="{{ n.url }}"><i class="bi bi-{{ n.icon }}"></i><span>{{ n.text }}</span></a>{% empty %}<p class="muted" style="padding:.8rem 1rem;margin:0">{% t "কোনো নতুন নোটিফিকেশন নেই।" %}</p>{% endfor %}
 </div>{% endif %}
-<div class="langmenu" id="langmenu" hidden role="menu" aria-label="Language">
-  <a href="{% url 'exam_lang' 'bn' %}" role="menuitem" class="{% if LANG != 'en' %}on{% endif %}"><span>বাংলা</span><i class="bi bi-check2"></i></a>
-  <a href="{% url 'exam_lang' 'en' %}" role="menuitem" class="{% if LANG == 'en' %}on{% endif %}"><span>English</span><i class="bi bi-check2"></i></a>
+<div class="acctmenu" id="acctmenu" hidden role="menu">
+  {% if user.is_authenticated %}
+  <div class="am-user"><span class="avatar sm">{{ user.get_username|slice:":1"|upper }}</span><div><b>{% firstof user.get_full_name user.username %}</b><small>{{ user.email }}</small></div></div>
+  <a href="{% url 'exam_profile' %}" role="menuitem" class="am-item"><i class="bi bi-person"></i><span>{% t "প্রোফাইল" %}</span></a>
+  <div class="am-sep"></div>
+  {% endif %}
+  <div class="am-label"><i class="bi bi-translate"></i> {% t "ভাষা" %}</div>
+  <a href="{% url 'exam_lang' 'bn' %}" role="menuitem" class="am-item {% if LANG != 'en' %}on{% endif %}"><span>বাংলা</span><i class="bi bi-check2"></i></a>
+  <a href="{% url 'exam_lang' 'en' %}" role="menuitem" class="am-item {% if LANG == 'en' %}on{% endif %}"><span>English</span><i class="bi bi-check2"></i></a>
 </div>
 <aside class="side">
   <div class="side-head">
@@ -39,10 +45,12 @@
     {% if user.is_staff %}<a href="/django-admin/exams/question/?status__exact=draft" data-tip="{% t "রিভিউ" %}" aria-label="{% t "রিভিউ" %}"><i class="bi bi-clipboard-check"></i><span>{% t "রিভিউ" %}</span></a>{% endif %}
   </nav>
   <div class="side-foot">
-    <button type="button" class="btn sm foot-btn langbtn" data-lang-btn data-tip="{% t "ভাষা" %}" aria-label="Language" aria-haspopup="true"><i class="bi bi-translate"></i><span>{% if LANG == 'en' %}English{% else %}বাংলা{% endif %}</span><i class="bi bi-chevron-up chev"></i></button>
-    
-    {% if user.is_authenticated %}<a class="who" href="{% url 'exam_profile' %}" data-tip="{% t 'প্রোফাইল" aria-label="প্রোফাইল' %}"><i class="bi bi-person-circle"></i><span>{{ user.username }}</span></a>
-    {% else %}<a class="btn pri sm foot-btn" data-tip="{% t 'লগইন / সাইন আপ" aria-label="লগইন / সাইন আপ' %}" href="{% url 'account_login' %}"><i class="bi bi-box-arrow-in-right"></i><span>{% t "লগইন / সাইন আপ" %}</span></a>{% endif %}
+    {% if user.is_authenticated %}
+    <button type="button" class="who" data-acct data-tip="{% t "প্রোফাইল" %}" aria-label="{% t "প্রোফাইল" %}" aria-haspopup="true"><i class="bi bi-person-circle"></i><span>{{ user.username }}</span><i class="bi bi-chevron-up chev"></i></button>
+    {% else %}
+    <button type="button" class="btn sm foot-btn langbtn" data-acct data-tip="{% t "ভাষা" %}" aria-label="Language" aria-haspopup="true"><i class="bi bi-translate"></i><span>{% if LANG == 'en' %}English{% else %}বাংলা{% endif %}</span><i class="bi bi-chevron-up chev"></i></button>
+    <a class="btn pri sm foot-btn" style="margin-top:.5rem" data-tip="{% t "লগইন / সাইন আপ" %}" aria-label="{% t "লগইন / সাইন আপ" %}" href="{% url 'account_login' %}"><i class="bi bi-box-arrow-in-right"></i><span>{% t "লগইন / সাইন আপ" %}</span></a>
+    {% endif %}
   </div>
 </aside>
 <div class="main">
@@ -67,12 +75,10 @@
   <div class="nav-r">
     {% if user.is_authenticated %}<span class="hchip sm"><i class="bi bi-fire" style="color:#ea580c"></i><b>{{ hud.streak|bn }}</b></span><span class="hchip sm"><i class="bi bi-star-fill" style="color:#d97706"></i><b>{{ hud.points|bn }}</b></span>{% endif %}
     {% if user.is_authenticated %}<button type="button" class="round bell-m" data-bell aria-label="{% t "নোটিফিকেশন" %}"><i class="bi bi-bell"></i>{% if hud.notes %}<em class="ndot"></em>{% endif %}</button>{% endif %}
-    <button type="button" class="round" data-lang-btn aria-label="Language" aria-haspopup="true"><i class="bi bi-translate"></i></button>
+    {% if user.is_authenticated %}<button type="button" class="round" data-acct aria-label="{% t "প্রোফাইল" %}" aria-haspopup="true"><i class="bi bi-person"></i></button>{% else %}<button type="button" class="round" data-acct aria-label="Language" aria-haspopup="true"><i class="bi bi-translate"></i></button>{% endif %}
     <button type="button" class="round" data-theme-toggle title="Day / night"><i class="bi bi-moon-stars"></i></button>
     {% if user.is_staff %}<a class="btn sm flat" href="/django-admin/exams/question/?status__exact=draft">{% t "রিভিউ" %}</a>{% endif %}
-    {% if user.is_authenticated %}
-      <a class="btn sm" href="{% url 'exam_profile' %}"><i class="bi bi-person"></i> {% t "প্রোফাইল" %}</a>
-    {% else %}<a class="btn sm pri" href="{% url 'account_login' %}">{% t "লগইন" %}</a>{% endif %}
+    {% if not user.is_authenticated %}<a class="btn sm pri" href="{% url 'account_login' %}">{% t "লগইন" %}</a>{% endif %}
   </div>
 </div></header>
 {% if messages %}<div class="wrap alerts">{% for m in messages %}<div class="a {{ m.tags }}"><span>{{ m }}</span><button onclick="this.parentNode.remove()">×</button></div>{% endfor %}</div>{% endif %}
@@ -97,13 +103,13 @@
 </nav>
 <script>
 (function(){var h=document.documentElement;
- var lm=document.getElementById('langmenu');
- document.querySelectorAll('[data-lang-btn]').forEach(function(btn){btn.addEventListener('click',function(e){e.stopPropagation();
-  lm.hidden=!lm.hidden; if(lm.hidden)return; var r=btn.getBoundingClientRect(),wide=innerWidth>=900;
-  if(wide){lm.style.left=(r.right+10)+'px';lm.style.right='auto';lm.style.top=Math.max(8,r.bottom-lm.offsetHeight)+'px';}
-  else{lm.style.left='auto';lm.style.right=Math.max(8,innerWidth-r.right)+'px';lm.style.top=(r.bottom+8)+'px';}});});
- if(lm){document.addEventListener('click',function(e){if(!lm.contains(e.target))lm.hidden=true});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape')lm.hidden=true});}
+ var am=document.getElementById('acctmenu');
+ document.querySelectorAll('[data-acct]').forEach(function(btn){btn.addEventListener('click',function(e){e.stopPropagation();
+  am.hidden=!am.hidden; if(am.hidden)return; var r=btn.getBoundingClientRect(),wide=innerWidth>=900;
+  if(wide){am.style.left=(r.right+10)+'px';am.style.right='auto';am.style.top=Math.max(8,r.bottom-am.offsetHeight)+'px';}
+  else{am.style.left='auto';am.style.right=Math.max(8,innerWidth-r.right)+'px';am.style.top=(r.bottom+8)+'px';}});});
+ if(am){document.addEventListener('click',function(e){if(!am.contains(e.target))am.hidden=true});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')am.hidden=true});}
  var menu=document.getElementById('bellmenu');
  function placeMenu(btn){var r=btn.getBoundingClientRect();menu.style.top=(r.bottom+8)+'px';menu.style.left='auto';menu.style.right=Math.max(8,innerWidth-r.right)+'px';}
  document.querySelectorAll('[data-bell]').forEach(function(btn){btn.addEventListener('click',function(e){e.stopPropagation();

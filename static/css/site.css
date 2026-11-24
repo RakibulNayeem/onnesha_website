@@ -645,13 +645,22 @@ html.tb-hidden .nav,html.tb-hidden .topbar{transform:translateY(-100%)}
 .letter{width:38px;height:38px;border-radius:10px;background:var(--ink);color:var(--card);display:grid;place-items:center;font-size:1.25rem}
 .grp[id]{scroll-margin-top:calc(var(--tbh) + 70px)}
 
-/* language menu: globe button in the sidebar footer / phone header */
-.langbtn{justify-content:flex-start}.langbtn .chev{margin-left:auto;font-size:.75rem;color:var(--muted)}
-.langmenu{position:fixed;z-index:70;min-width:170px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 40px rgba(15,23,42,.18);padding:.3rem;animation:rise .16s var(--ease) both}
-.langmenu[hidden]{display:none}
-.langmenu a{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.55rem .8rem;border-radius:8px;color:var(--ink);font-weight:600}
-.langmenu a:hover{background:var(--brand-l)}.langmenu a i{visibility:hidden;color:var(--brand)}.langmenu a.on i{visibility:visible}.langmenu a.on{font-weight:800}
-html.side-collapsed .langbtn .chev{display:none}
+/* account menu: click the profile icon (sidebar footer / phone header) */
+.who{font:inherit;width:100%;display:flex;align-items:center;gap:.5rem;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:.45rem .6rem;cursor:pointer;color:var(--ink)}
+.who:hover{border-color:var(--ink)}.who span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;flex:1;text-align:left}
+.who .chev,.langbtn .chev{margin-left:auto;font-size:.75rem;color:var(--muted)}
+.langbtn{justify-content:flex-start}
+html.side-collapsed .who{justify-content:center;padding:.45rem 0}html.side-collapsed .who .chev,html.side-collapsed .langbtn .chev{display:none}
+.acctmenu{position:fixed;z-index:70;width:240px;max-width:calc(100vw - 16px);background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 44px rgba(15,23,42,.2);padding:.4rem;animation:rise .16s var(--ease) both}
+.acctmenu[hidden]{display:none}
+.am-user{display:flex;gap:.7rem;align-items:center;padding:.6rem .6rem .7rem}.am-user b{display:block;line-height:1.25}.am-user small{display:block;color:var(--muted);overflow:hidden;text-overflow:ellipsis;max-width:150px}
+.avatar.sm{width:38px;height:38px;font-size:1.05rem}
+.am-sep{height:1px;background:var(--line);margin:.3rem .4rem}
+.am-label{display:flex;gap:.5rem;align-items:center;padding:.4rem .7rem .2rem;font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.am-item{display:flex;align-items:center;gap:.7rem;padding:.55rem .7rem;border-radius:9px;color:var(--ink);font-weight:600}
+.am-item span{flex:1}.am-item:hover{background:var(--brand-l);color:var(--ink)}
+.am-item>i:last-child{visibility:hidden;color:var(--brand)}.am-item.on>i:last-child{visibility:visible}.am-item.on{font-weight:800}
+.am-item>i:first-child{color:var(--muted)}
 html[lang=en] .rules li::before{content:counter(r)}
 
 /* ---- sign in / sign up ---- */
