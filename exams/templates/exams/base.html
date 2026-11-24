@@ -35,13 +35,13 @@
   <a class="brand" href="{{ u_home }}"><img src="{% static 'img/logo.png' %}" alt=""><span>{% t "অন্বেষা" %}<small>{% t "পরীক্ষা ও প্রশ্নব্যাংক" %}</small></span></a>
   <button type="button" class="side-toggle" id="sideClose" aria-label="{% t "মেনু ছোট/বড় করো" %}" data-tip="{% t "মেনু ছোট/বড় করো" %}" aria-label="{% t "মেনু ছোট/বড় করো" %}"><i class="bi bi-chevron-left"></i></button></div>
   <nav class="side-links">
-    <a href="{{ u_home }}" class="{% if request.path == u_home %}on{% endif %}" data-tip="{% t 'হোম" aria-label="হোম' %}"><i class="bi bi-house-door"></i><span>{% t "হোম" %}</span></a>
-    <a href="{{ u_bank }}" class="{% if request.path == u_bank %}on{% endif %}" data-tip="{% t 'প্রশ্নব্যাংক" aria-label="প্রশ্নব্যাংক' %}"><i class="bi bi-archive"></i><span>{% t "প্রশ্নব্যাংক" %}</span></a>
-    <a href="{{ u_build }}?mode=quick" class="{% if request.path == u_prac or request.path == u_build and request.GET.mode == 'quick' %}on{% endif %}" data-tip="{% t 'প্র্যাকটিস" aria-label="প্র্যাকটিস' %}"><i class="bi bi-pencil-square"></i><span>{% t "প্র্যাকটিস" %}</span></a>
-    <a href="{{ u_build }}" class="{% if request.path == u_build and request.GET.mode != 'quick' %}on{% endif %}" data-tip="{% t 'মডেল টেস্ট" aria-label="মডেল টেস্ট' %}"><i class="bi bi-stopwatch"></i><span>{% t "মডেল টেস্ট" %}</span></a>
-    <a href="{{ u_cq }}" class="{% if request.path == u_cq %}on{% endif %}" data-tip="{% t 'সৃজনশীল" aria-label="সৃজনশীল' %}"><i class="bi bi-journal-text"></i><span>{% t "সৃজনশীল" %}</span></a>
-    <a href="{{ u_lb }}" class="{% if request.path == u_lb %}on{% endif %}" data-tip="{% t 'মেধাতালিকা" aria-label="মেধাতালিকা' %}"><i class="bi bi-trophy"></i><span>{% t "মেধাতালিকা" %}</span></a>
-    <a href="{{ u_me }}" class="{% if request.path == u_me %}on{% endif %}" data-tip="{% t 'আমার অগ্রগতি" aria-label="আমার অগ্রগতি' %}"><i class="bi bi-graph-up-arrow"></i><span>{% t "আমার অগ্রগতি" %}</span></a>
+    <a href="{{ u_home }}" class="{% if request.path == u_home %}on{% endif %}" data-tip="{% t "হোম" %}" aria-label="{% t "হোম" %}"><i class="bi bi-house-door"></i><span>{% t "হোম" %}</span></a>
+    <a href="{{ u_bank }}" class="{% if request.path == u_bank %}on{% endif %}" data-tip="{% t "প্রশ্নব্যাংক" %}" aria-label="{% t "প্রশ্নব্যাংক" %}"><i class="bi bi-archive"></i><span>{% t "প্রশ্নব্যাংক" %}</span></a>
+    <a href="{{ u_build }}?mode=quick" class="{% if request.path == u_prac or request.path == u_build and request.GET.mode == 'quick' %}on{% endif %}" data-tip="{% t "প্র্যাকটিস" %}" aria-label="{% t "প্র্যাকটিস" %}"><i class="bi bi-pencil-square"></i><span>{% t "প্র্যাকটিস" %}</span></a>
+    <a href="{{ u_build }}" class="{% if request.path == u_build and request.GET.mode != 'quick' %}on{% endif %}" data-tip="{% t "মডেল টেস্ট" %}" aria-label="{% t "মডেল টেস্ট" %}"><i class="bi bi-stopwatch"></i><span>{% t "মডেল টেস্ট" %}</span></a>
+    <a href="{{ u_cq }}" class="{% if request.path == u_cq %}on{% endif %}" data-tip="{% t "সৃজনশীল" %}" aria-label="{% t "সৃজনশীল" %}"><i class="bi bi-journal-text"></i><span>{% t "সৃজনশীল" %}</span></a>
+    <a href="{{ u_lb }}" class="{% if request.path == u_lb %}on{% endif %}" data-tip="{% t "মেধাতালিকা" %}" aria-label="{% t "মেধাতালিকা" %}"><i class="bi bi-trophy"></i><span>{% t "মেধাতালিকা" %}</span></a>
+    <a href="{{ u_me }}" class="{% if request.path == u_me %}on{% endif %}" data-tip="{% t "আমার অগ্রগতি" %}" aria-label="{% t "আমার অগ্রগতি" %}"><i class="bi bi-graph-up-arrow"></i><span>{% t "আমার অগ্রগতি" %}</span></a>
     {% if user.is_staff %}<a href="{% url 'panel_home' %}" data-tip="{% t "প্যানেল" %}" aria-label="{% t "রিভিউ" %}"><i class="bi bi-speedometer2"></i><span>{% t "প্যানেল" %}</span></a>{% endif %}
   </nav>
   <div class="side-foot">
