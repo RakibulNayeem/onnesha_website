@@ -1,0 +1,5 @@
+{% extends "panel/base.html" %}{% block title %}No access{% endblock %}
+{% block body %}<div class="pcard" style="max-width:520px;margin:3rem auto;text-align:center">
+  <div class="bigico red"><i class="bi bi-shield-lock"></i></div>
+  <h1>You don't have access to this</h1><p class="muted">Your role doesn't include this page or action. If you think it should, ask an Admin.</p>
+  <a class="btn pri" href="{% url 'panel_home' %}">Back to the dashboard</a></div>{% endblock %}

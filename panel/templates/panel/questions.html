@@ -1,0 +1,39 @@
+{% extends "panel/base.html" %}{% block title %}Questions{% endblock %}
+{% block body %}
+<header class="phead"><div><h1>{% if f.status == 'draft' %}{% if nav.can_approve %}Review queue{% else %}My drafts{% endif %}{% else %}Questions{% endif %}</h1>
+  <p class="muted">{{ page.paginator.count }} {% if f.q or f.status or f.subject or f.type or f.source or f.author %}matching{% endif %} questions{% if not nav.can_approve %} · you only see your own{% endif %}</p></div>
+  <a class="btn pri" href="{% url 'panel_question_new' %}"><i class="bi bi-plus-lg"></i> New question</a></header>
+<form method="get" class="pfilters">
+  <input type="search" name="q" value="{{ f.q }}" placeholder="Search text or reference…">
+  <select name="status"><option value="">Any status</option><option value="draft" {% if f.status == 'draft' %}selected{% endif %}>Draft</option><option value="approved" {% if f.status == 'approved' %}selected{% endif %}>Published</option></select>
+  <select name="type"><option value="">MCQ + CQ</option><option value="mcq" {% if f.type == 'mcq' %}selected{% endif %}>MCQ</option><option value="cq" {% if f.type == 'cq' %}selected{% endif %}>Creative</option></select>
+  <select name="subject" onchange="this.form.chapter&&(this.form.chapter.value='');this.form.submit()"><option value="">All subjects</option>{% for s in subjects %}<option value="{{ s.pk }}" {% if f.subject == s.pk|stringformat:"s" %}selected{% endif %}>{{ s.name }} · {{ s.track.name }}</option>{% endfor %}</select>
+  {% if chapters %}<select name="chapter"><option value="">All chapters</option>{% for c in chapters %}<option value="{{ c.pk }}" {% if f.chapter == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>{% endif %}
+  <select name="source"><option value="">All banks</option>{% for s in sources %}<option value="{{ s.pk }}" {% if f.source == s.pk|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>{% endfor %}</select>
+  {% if authors %}<select name="author"><option value="">All authors</option>{% for a in authors %}<option value="{{ a.pk }}" {% if f.author == a.pk|stringformat:"s" %}selected{% endif %}>{{ a.username }}</option>{% endfor %}</select>{% endif %}
+  <button class="btn">Filter</button>{% if f.q or f.status or f.subject or f.type or f.source or f.author %}<a class="btn flat" href="{% url 'panel_questions' %}">Clear</a>{% endif %}
+</form>
+<form method="post" id="bulk">{% csrf_token %}
+{% if nav.can_approve %}<div class="pbulk" id="bulkbar" hidden><b><span id="cnt">0</span> selected</b>
+  <button name="bulk" value="approve" class="btn sm pri">Publish</button><button name="bulk" value="draft" class="btn sm">Send back to draft</button>
+  <button name="bulk" value="delete" class="btn sm danger" onclick="return confirm('Delete the selected questions?')">Delete</button></div>{% endif %}
+<div class="pcard flush"><table class="ptable">
+  <thead><tr>{% if nav.can_approve %}<th class="chk"><input type="checkbox" id="all" aria-label="Select all"></th>{% endif %}<th>Question</th><th>Subject · chapter</th><th>Bank</th><th>Status</th><th>By</th><th></th></tr></thead>
+  <tbody>{% for q in page %}
+  <tr>{% if nav.can_approve %}<td class="chk"><input type="checkbox" name="ids" value="{{ q.pk }}"></td>{% endif %}
+    <td><a href="{% url 'panel_question_edit' q.pk %}">{{ q.text|truncatechars:90 }}</a><small><span class="ptype">{{ q.get_qtype_display }}</span>{% if q.refs %} {{ q.refs|truncatechars:40 }}{% endif %}</small></td>
+    <td>{{ q.subject.name }}<small>{{ q.chapter.name|default:"—" }}</small></td>
+    <td>{{ q.source.name|default:"—"|truncatechars:26 }}</td>
+    <td><span class="pst {{ q.status }}">{% if q.status == 'approved' %}Published{% else %}Draft{% endif %}</span>{% if q.problems %}<small class="ferr" title="{{ q.problems|join:', ' }}">incomplete</small>{% endif %}</td>
+    <td>{{ q.author.username|default:"—" }}</td>
+    <td class="r"><a class="btn sm" href="{% url 'panel_question_edit' q.pk %}">Edit</a></td></tr>
+  {% empty %}<tr><td colspan="7" class="pempty muted">No questions match.</td></tr>{% endfor %}</tbody></table></div>
+</form>
+{% if page.paginator.num_pages > 1 %}<nav class="ppager">{% if page.has_previous %}<a class="btn sm" href="?{{ qs }}&page={{ page.previous_page_number }}">← Previous</a>{% endif %}
+  <span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a class="btn sm" href="?{{ qs }}&page={{ page.next_page_number }}">Next →</a>{% endif %}</nav>{% endif %}
+{% endblock %}
+{% block scripts %}<script>
+var boxes=[...document.querySelectorAll('input[name=ids]')],bar=document.getElementById('bulkbar'),all=document.getElementById('all');
+function sync(){var n=boxes.filter(b=>b.checked).length;if(bar){bar.hidden=!n;document.getElementById('cnt').textContent=n}}
+boxes.forEach(b=>b.addEventListener('change',sync));if(all)all.addEventListener('change',function(){boxes.forEach(b=>b.checked=all.checked);sync()});
+</script>{% endblock %}

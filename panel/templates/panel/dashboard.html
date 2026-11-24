@@ -1,0 +1,22 @@
+{% extends "panel/base.html" %}{% block title %}Dashboard{% endblock %}
+{% block body %}
+<header class="phead"><div><h1>Dashboard</h1><p class="muted">{% if nav.can_approve %}Everything in the question bank.{% else %}Your questions.{% endif %}</p></div>
+  <a class="btn pri" href="{% url 'panel_question_new' %}"><i class="bi bi-plus-lg"></i> New question</a></header>
+<div class="pstats">
+  <div class="pstat"><span>{% if nav.can_approve %}Total questions{% else %}My questions{% endif %}</span><b>{{ stats.total }}</b><small>{{ new_week }} added this week</small></div>
+  <div class="pstat ok"><span>Published</span><b>{{ stats.published }}</b><small>visible to students</small></div>
+  <div class="pstat warn"><span>{% if nav.can_approve %}Waiting for review{% else %}Drafts{% endif %}</span><b>{{ stats.drafts }}</b><small><a href="{% url 'panel_questions' %}?status=draft">open the queue →</a></small></div>
+  <div class="pstat"><span>MCQ / Creative</span><b>{{ stats.mcq }} <em>/ {{ stats.cq }}</em></b><small>by type</small></div>
+  {% if people %}<div class="pstat"><span>Students</span><b>{{ people.students }}</b><small>{{ people.staff }} staff · {{ tests_week }} tests this week</small></div>{% endif %}
+</div>
+<div class="pgrid">
+  <section class="pcard"><h2>{% if nav.can_approve %}Review queue{% else %}Your latest drafts{% endif %}</h2>
+    {% if queue %}<table class="ptable"><tbody>{% for q in queue %}
+      <tr><td><a href="{% url 'panel_question_edit' q.pk %}">{{ q.text|truncatechars:70 }}</a><small>{{ q.subject.name }}{% if q.chapter %} · {{ q.chapter.name }}{% endif %}{% if q.author %} · {{ q.author.username }}{% endif %}</small></td>
+      <td class="r"><a class="btn sm" href="{% url 'panel_question_edit' q.pk %}">{% if nav.can_approve %}Review{% else %}Edit{% endif %}</a></td></tr>{% endfor %}</tbody></table>
+    {% else %}<p class="muted pempty"><i class="bi bi-check2-circle"></i> Nothing waiting. All caught up.</p>{% endif %}</section>
+  <section class="pcard"><h2>Questions by subject</h2>
+    {% for s, pct in subjects %}<div class="pbar"><div class="l"><span>{{ s.name }} <small>{{ s.track.name }}</small></span><b>{{ s.n }}</b></div><div class="t"><i style="width:{{ pct }}%"></i></div></div>
+    {% empty %}<p class="muted pempty">No questions yet.</p>{% endfor %}</section>
+</div>
+{% endblock %}

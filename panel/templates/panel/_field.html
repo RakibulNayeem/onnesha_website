@@ -1,0 +1,6 @@
+<div class="pfield {{ cls }}">
+  <label for="{{ f.id_for_label }}">{{ f.label }}{% if f.field.required %}<i class="req">*</i>{% endif %}</label>
+  {{ f }}
+  {% if f.help_text %}<small class="hint">{{ f.help_text }}</small>{% endif %}
+  {% for e in f.errors %}<small class="ferr">{{ e }}</small>{% endfor %}
+</div>

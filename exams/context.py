@@ -42,5 +42,5 @@ def hud(request):
         n = Question.objects.filter(status=Question.DRAFT).count()
         if n:
             notes.append({"text": f"{num(n)}{tr('টি প্রশ্ন রিভিউয়ের অপেক্ষায়')}", "icon": "clipboard-check",
-                          "url": "/django-admin/exams/question/?status__exact=draft"})
+                          "url": reverse("panel_questions") + "?status=draft"})
     return {"hud": {"points": points, "streak": _streak(user), "notes": notes}}

@@ -9,7 +9,7 @@
       "config": {
         "maxLambdaSize": "30mb",
         "runtime": "python3.12",
-        "includeFiles": "{exams,onnesha_finance,static}/**"
+        "includeFiles": "{exams,panel,onnesha_finance,static}/**"
       }
     }
   ],

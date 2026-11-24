@@ -1,0 +1,14 @@
+{% extends "panel/base.html" %}{% block title %}{% if obj %}Manage user{% else %}New user{% endif %}{% endblock %}
+{% block body %}
+<header class="phead"><div><div class="crumbs"><a href="{% url 'panel_users' %}">Users &amp; roles</a> / {% if obj %}{{ obj.username }}{% else %}New{% endif %}</div><h1>{% if obj %}Manage {{ obj.username }}{% else %}New user{% endif %}</h1></div></header>
+<form method="post" class="pcard narrow" autocomplete="off">{% csrf_token %}{% if form.non_field_errors %}<div class="perr">{{ form.non_field_errors }}</div>{% endif %}
+  {% include "panel/_field.html" with f=form.username %}
+  <div class="prow2">{% include "panel/_field.html" with f=form.first_name %}{% include "panel/_field.html" with f=form.last_name %}</div>
+  {% include "panel/_field.html" with f=form.email %}
+  {% include "panel/_field.html" with f=form.role %}
+  {% include "panel/_field.html" with f=form.password %}
+  <label class="pcheck"><input type="checkbox" name="is_active" {% if form.is_active.value %}checked{% endif %}> {{ form.is_active.label }}</label>
+  <p class="muted" style="font-size:.88rem">Staff roles (Teacher, Moderator, Admin) can open this panel. People sign in at the normal sign-in page.</p>
+  <div class="pbtns"><button class="btn pri">Save</button><a class="btn flat" href="{% url 'panel_users' %}">Cancel</a></div>
+</form>
+{% endblock %}

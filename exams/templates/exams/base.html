@@ -42,7 +42,7 @@
     <a href="{{ u_cq }}" class="{% if request.path == u_cq %}on{% endif %}" data-tip="{% t 'সৃজনশীল" aria-label="সৃজনশীল' %}"><i class="bi bi-journal-text"></i><span>{% t "সৃজনশীল" %}</span></a>
     <a href="{{ u_lb }}" class="{% if request.path == u_lb %}on{% endif %}" data-tip="{% t 'মেধাতালিকা" aria-label="মেধাতালিকা' %}"><i class="bi bi-trophy"></i><span>{% t "মেধাতালিকা" %}</span></a>
     <a href="{{ u_me }}" class="{% if request.path == u_me %}on{% endif %}" data-tip="{% t 'আমার অগ্রগতি" aria-label="আমার অগ্রগতি' %}"><i class="bi bi-graph-up-arrow"></i><span>{% t "আমার অগ্রগতি" %}</span></a>
-    {% if user.is_staff %}<a href="/django-admin/exams/question/?status__exact=draft" data-tip="{% t "রিভিউ" %}" aria-label="{% t "রিভিউ" %}"><i class="bi bi-clipboard-check"></i><span>{% t "রিভিউ" %}</span></a>{% endif %}
+    {% if user.is_staff %}<a href="{% url 'panel_home' %}" data-tip="{% t "প্যানেল" %}" aria-label="{% t "রিভিউ" %}"><i class="bi bi-speedometer2"></i><span>{% t "প্যানেল" %}</span></a>{% endif %}
   </nav>
   <div class="side-foot">
     {% if user.is_authenticated %}
@@ -77,7 +77,7 @@
     {% if user.is_authenticated %}<button type="button" class="round bell-m" data-bell aria-label="{% t "নোটিফিকেশন" %}"><i class="bi bi-bell"></i>{% if hud.notes %}<em class="ndot"></em>{% endif %}</button>{% endif %}
     {% if user.is_authenticated %}<button type="button" class="round" data-acct aria-label="{% t "প্রোফাইল" %}" aria-haspopup="true"><i class="bi bi-person"></i></button>{% else %}<button type="button" class="round" data-acct aria-label="Language" aria-haspopup="true"><i class="bi bi-translate"></i></button>{% endif %}
     <button type="button" class="round" data-theme-toggle title="Day / night"><i class="bi bi-moon-stars"></i></button>
-    {% if user.is_staff %}<a class="btn sm flat" href="/django-admin/exams/question/?status__exact=draft">{% t "রিভিউ" %}</a>{% endif %}
+    {% if user.is_staff %}<a class="btn sm flat" href="{% url 'panel_home' %}">{% t "প্যানেল" %}</a>{% endif %}
     {% if not user.is_authenticated %}<a class="btn sm pri" href="{% url 'account_login' %}">{% t "লগইন" %}</a>{% endif %}
   </div>
 </div></header>

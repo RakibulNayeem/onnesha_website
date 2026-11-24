@@ -1,0 +1,10 @@
+{% extends "panel/base.html" %}{% block title %}{{ title }}{% endblock %}
+{% block body %}
+<header class="phead"><div><h1>{{ title }}</h1><p class="muted">{{ hint }}</p></div><a class="btn pri" href="{% url 'panel_content_new' kind %}"><i class="bi bi-plus-lg"></i> Add</a></header>
+<form method="get" class="pfilters"><input type="search" name="q" value="{{ q }}" placeholder="Search {{ title|lower }}…"><button class="btn">Search</button>{% if q %}<a class="btn flat" href="{% url 'panel_content' kind %}">Clear</a>{% endif %}</form>
+<div class="pcard flush"><table class="ptable"><thead><tr>{% for h in heads %}<th>{{ h }}</th>{% endfor %}<th></th></tr></thead><tbody>
+{% for obj, cells in page %}<tr>{% for c in cells %}<td>{% if forloop.first %}<a href="{% url 'panel_content_edit' kind obj.pk %}">{{ c }}</a>{% else %}{{ c }}{% endif %}</td>{% endfor %}
+  <td class="r"><a class="btn sm" href="{% url 'panel_content_edit' kind obj.pk %}">Edit</a></td></tr>
+{% empty %}<tr><td colspan="9" class="pempty muted">Nothing here yet.</td></tr>{% endfor %}</tbody></table></div>
+{% if page.paginator.num_pages > 1 %}<nav class="ppager">{% if page.has_previous %}<a class="btn sm" href="?q={{ q }}&page={{ page.previous_page_number }}">← Previous</a>{% endif %}<span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a class="btn sm" href="?q={{ q }}&page={{ page.next_page_number }}">Next →</a>{% endif %}</nav>{% endif %}
+{% endblock %}

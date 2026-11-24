@@ -1,0 +1,9 @@
+{% extends "panel/base.html" %}{% block title %}{% if obj %}Edit{% else %}Add{% endif %} · {{ title }}{% endblock %}
+{% block body %}
+<header class="phead"><div><div class="crumbs"><a href="{% url 'panel_content' kind %}">{{ title }}</a> / {% if obj %}{{ obj }}{% else %}New{% endif %}</div><h1>{% if obj %}Edit{% else %}Add{% endif %} — {{ title }}</h1></div></header>
+<form method="post" class="pcard narrow">{% csrf_token %}{% if form.non_field_errors %}<div class="perr">{{ form.non_field_errors }}</div>{% endif %}
+  {% for f in form %}{% include "panel/_field.html" with f=f %}{% endfor %}
+  <div class="pbtns"><button class="btn pri">Save</button><a class="btn flat" href="{% url 'panel_content' kind %}">Cancel</a></div>
+</form>
+{% if obj %}<form method="post" action="{% url 'panel_content_delete' kind obj.pk %}" class="pdel" onsubmit="return confirm('Delete this for good?')">{% csrf_token %}<button class="btn danger sm"><i class="bi bi-trash"></i> Delete</button></form>{% endif %}
+{% endblock %}

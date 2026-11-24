@@ -32,6 +32,60 @@ def can_approve(user):
     return user.is_superuser or user.has_perm("exams.approve_question")
 
 
+# ---- the admin panel (/panel/) ---------------------------------------------------------------
+RANK = {None: 0, TEACHER: 1, MODERATOR: 2, ADMIN: 3, "superuser": 4}
+ROLE_CHOICES = [(None, "Student"), (TEACHER, "Teacher"), (MODERATOR, "Moderator"), (ADMIN, "Admin"), ("superuser", "Superuser")]
+
+
+def rank(user):
+    return RANK[role(user)]
+
+
+def can_use_panel(user):
+    """Anyone with a staff role (Teacher and above)."""
+    return user.is_authenticated and user.is_active and user.is_staff and rank(user) >= 1
+
+
+def can_write_questions(user):
+    return can_use_panel(user)
+
+
+def can_manage_content(user):
+    """Tracks, subjects, chapters and question banks."""
+    return can_use_panel(user) and rank(user) >= RANK[ADMIN]
+
+
+def can_manage_users(user):
+    return can_use_panel(user) and rank(user) >= RANK[ADMIN]
+
+
+def assignable_roles(actor):
+    """Roles the actor may give: Admins up to Moderator, superusers anything."""
+    top = 4 if actor.is_superuser else RANK[ADMIN] - 1
+    return [(k, v) for k, v in ROLE_CHOICES if RANK[k] <= top]
+
+
+def can_manage_user(actor, target):
+    """Superusers manage everyone; Admins only people below Admin; nobody edits their own role here."""
+    if actor.pk == target.pk:
+        return False
+    return actor.is_superuser or rank(target) < RANK[ADMIN]
+
+
+def apply_role(user, new_role):
+    """Make `user` hold exactly one role: groups + staff flag + superuser flag."""
+    for g in Group.objects.filter(name__in=(TEACHER, MODERATOR, ADMIN)):
+        user.groups.remove(g)
+    if new_role == "superuser":
+        user.is_superuser = user.is_staff = True
+    else:
+        user.is_superuser = False
+        user.is_staff = new_role is not None
+        if new_role:
+            user.groups.add(Group.objects.get(name=new_role))
+    user.save(update_fields=["is_superuser", "is_staff"])
+
+
 def sync_roles():
     """Create or refresh the role groups. Safe to run repeatedly."""
     def perms(*codes, app="exams"):

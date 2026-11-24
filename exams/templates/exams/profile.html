@@ -23,12 +23,12 @@
     <div class="paper"><h3 style="margin-bottom:.4rem">{% t "অ্যাডমিন প্যানেল" %}</h3>
       <p class="muted" style="margin-bottom:.8rem">{% t "আপনার ভূমিকা" %}: <b>{{ role }}</b></p>
       <div class="plinks">
-        <a href="/django-admin/exams/question/add/"><i class="bi bi-plus-circle"></i> {% t "নতুন প্রশ্ন লেখো" %}</a>
-        <a href="/django-admin/exams/question/"><i class="bi bi-list-check"></i> {% if role_key == 'Teacher' %}{% t "আমার প্রশ্ন" %} ({{ mine|bn }}){% else %}{% t "সব প্রশ্ন" %}{% endif %}</a>
-        {% if drafts or role_key == 'Moderator' or role_key == 'Admin' or role_key == 'superuser' %}<a href="/django-admin/exams/question/?status__exact=draft"><i class="bi bi-clipboard-check"></i> {% t "রিভিউ কিউ" %} ({{ drafts|bn }})</a>{% endif %}
-        {% if role_key == 'Admin' or role_key == 'superuser' %}<a href="/django-admin/auth/user/"><i class="bi bi-people"></i> {% t "ব্যবহারকারী ও ভূমিকা" %}</a>
-        <a href="/django-admin/exams/source/"><i class="bi bi-archive"></i> {% t "প্রশ্নব্যাংক ও লোগো" %}</a>{% endif %}
-        <a href="/django-admin/"><i class="bi bi-box-arrow-up-right"></i> {% t "সম্পূর্ণ প্যানেল" %}</a>
+        <a href="{% url 'panel_question_new' %}"><i class="bi bi-plus-circle"></i> {% t "নতুন প্রশ্ন লেখো" %}</a>
+        <a href="{% url 'panel_questions' %}"><i class="bi bi-list-check"></i> {% if role_key == 'Teacher' %}{% t "আমার প্রশ্ন" %} ({{ mine|bn }}){% else %}{% t "সব প্রশ্ন" %}{% endif %}</a>
+        {% if drafts or role_key == 'Moderator' or role_key == 'Admin' or role_key == 'superuser' %}<a href="{% url 'panel_questions' %}?status=draft"><i class="bi bi-clipboard-check"></i> {% t "রিভিউ কিউ" %} ({{ drafts|bn }})</a>{% endif %}
+        {% if role_key == 'Admin' or role_key == 'superuser' %}<a href="{% url 'panel_users' %}"><i class="bi bi-people"></i> {% t "ব্যবহারকারী ও ভূমিকা" %}</a>
+        <a href="{% url 'panel_content' 'banks' %}"><i class="bi bi-archive"></i> {% t "প্রশ্নব্যাংক ও লোগো" %}</a>{% endif %}
+        <a href="{% url 'panel_home' %}"><i class="bi bi-speedometer2"></i> {% t "সম্পূর্ণ প্যানেল" %}</a>
       </div></div>
     {% else %}
     <div class="paper"><h3 style="margin-bottom:.3rem">{% t "প্রশ্ন লিখতে চাও" %}?</h3><p class="muted">{% t "শিক্ষক বা প্রশ্নকর্তা হিসেবে যুক্ত হতে অ্যাডমিনের সঙ্গে যোগাযোগ করো।" %}</p></div>

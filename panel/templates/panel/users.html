@@ -1,0 +1,22 @@
+{% extends "panel/base.html" %}{% block title %}Users &amp; roles{% endblock %}
+{% block body %}
+<header class="phead"><div><h1>Users &amp; roles</h1><p class="muted">Give people a role. Students are everyone who signed up; staff roles open this panel.</p></div><a class="btn pri" href="{% url 'panel_user_new' %}"><i class="bi bi-person-plus"></i> New user</a></header>
+<form method="get" class="pfilters"><input type="search" name="q" value="{{ q }}" placeholder="Search name, username or email…">
+  <select name="role"><option value="">Any role</option>{% for r in role_names %}<option value="{{ r|lower }}" {% if role_f == r|lower %}selected{% endif %}>{{ r }}</option>{% endfor %}</select>
+  <button class="btn">Filter</button>{% if q or role_f %}<a class="btn flat" href="{% url 'panel_users' %}">Clear</a>{% endif %}</form>
+<div class="pcard flush"><table class="ptable"><thead><tr><th>User</th><th>Role</th><th>Status</th><th>Tests</th><th>Joined</th><th></th></tr></thead><tbody>
+{% for u, role, can in page %}<tr>
+  <td><b>{{ u.username }}</b>{% if u.get_full_name %} <span class="muted">· {{ u.get_full_name }}</span>{% endif %}<small>{{ u.email|default:"no email" }}</small></td>
+  <td><span class="prole {{ role|lower }}">{{ role }}</span></td>
+  <td>{% if u.is_active %}<span class="pst approved">Active</span>{% else %}<span class="pst off">Disabled</span>{% endif %}</td>
+  <td>{{ u.tests }}</td><td>{{ u.date_joined|date:"j M Y" }}</td>
+  <td class="r">{% if can %}<a class="btn sm" href="{% url 'panel_user_edit' u.pk %}">Manage</a>{% else %}<small class="muted">{% if u.pk == request.user.pk %}you{% else %}protected{% endif %}</small>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="6" class="pempty muted">No users match.</td></tr>{% endfor %}</tbody></table></div>
+{% if page.paginator.num_pages > 1 %}<nav class="ppager">{% if page.has_previous %}<a class="btn sm" href="?q={{ q }}&role={{ role_f }}&page={{ page.previous_page_number }}">← Previous</a>{% endif %}<span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a class="btn sm" href="?q={{ q }}&role={{ role_f }}&page={{ page.next_page_number }}">Next →</a>{% endif %}</nav>{% endif %}
+<section class="pcard" style="margin-top:1.2rem"><h2>What each role can do</h2><div class="proles">
+  <div><span class="prole student">Student</span><p>Practice, take tests, see their own progress. No panel access.</p></div>
+  <div><span class="prole teacher">Teacher</span><p>Writes questions. Sees only their own; everything saves as a draft.</p></div>
+  <div><span class="prole moderator">Moderator</span><p>Reviews and publishes everyone's questions; edits and deletes them.</p></div>
+  <div><span class="prole admin">Admin</span><p>Everything above plus content and users (up to Moderator).</p></div>
+  <div><span class="prole superuser">Superuser</span><p>Everything, including creating Admins.</p></div></div></section>
+{% endblock %}

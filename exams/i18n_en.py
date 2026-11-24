@@ -264,4 +264,5 @@ EN = {
     'শীঘ্রই আসছে।': 'Coming soon.',
     'এখনো কোনো প্রশ্নব্যাংক নেই।': 'No question banks yet.',
     'ভাষা': 'Language',
+    'প্যানেল': 'Panel',
 }

@@ -1,0 +1,66 @@
+{% extends "panel/base.html" %}{% block title %}{% if obj %}Edit question{% else %}New question{% endif %}{% endblock %}
+{% block body %}
+<header class="phead"><div><div class="crumbs"><a href="{% url 'panel_questions' %}">Questions</a> / {% if obj %}#{{ obj.pk }}{% else %}New{% endif %}</div>
+  <h1>{% if obj %}Edit question{% else %}New question{% endif %}</h1></div>
+  {% if obj %}<span class="pst {{ obj.status }} lg">{% if obj.status == 'approved' %}Published{% else %}Draft{% endif %}</span>{% endif %}</header>
+<form method="post" class="qform">{% csrf_token %}
+  {% if form.non_field_errors %}<div class="perr">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="qgrid">
+    <div class="pcard qmain">
+      <div class="seg2" role="radiogroup" aria-label="Question type">
+        <label><input type="radio" name="qtype" value="mcq" {% if form.qtype.value != 'cq' %}checked{% endif %}><span><i class="bi bi-ui-radios"></i> Multiple choice</span></label>
+        <label><input type="radio" name="qtype" value="cq" {% if form.qtype.value == 'cq' %}checked{% endif %}><span><i class="bi bi-journal-text"></i> Creative (CQ)</span></label>
+      </div>
+      {% include "panel/_field.html" with f=form.text %}
+      <div id="mcq">
+        <div class="plabel">Options <small class="muted">— select the circle next to the correct one</small></div>
+        <div class="popt"><input type="radio" name="correct" value="a" {% if form.correct.value == 'a' %}checked{% endif %} aria-label="a is correct"><b>ক</b>{{ form.option_a }}</div>
+        <div class="popt"><input type="radio" name="correct" value="b" {% if form.correct.value == 'b' %}checked{% endif %} aria-label="b is correct"><b>খ</b>{{ form.option_b }}</div>
+        <div class="popt"><input type="radio" name="correct" value="c" {% if form.correct.value == 'c' %}checked{% endif %} aria-label="c is correct"><b>গ</b>{{ form.option_c }}</div>
+        <div class="popt"><input type="radio" name="correct" value="d" {% if form.correct.value == 'd' %}checked{% endif %} aria-label="d is correct"><b>ঘ</b>{{ form.option_d }}</div>
+        {% for e in form.correct.errors %}<small class="ferr">{{ e }}</small>{% endfor %}
+      </div>
+      <div id="cq" hidden>
+        <div class="plabel">Parts <small class="muted">— leave unused parts empty</small></div>
+        {% for i, q, marks, ans in form.part_rows %}
+        <div class="ppart"><div class="ph"><b>Part {{ i }}</b><label>Marks {{ marks }}</label></div>{{ q }}<label class="sub">Model answer</label>{{ ans }}</div>
+        {% endfor %}
+      </div>
+      {% include "panel/_field.html" with f=form.explanation %}
+    </div>
+    <aside class="qside">
+      <div class="pcard">
+        <div class="pfield"><label for="id_subject">Subject<i class="req">*</i></label>{{ form.subject }}{% for e in form.subject.errors %}<small class="ferr">{{ e }}</small>{% endfor %}</div>
+        <div class="pfield"><label for="id_chapter">Chapter</label>
+          <select name="chapter" id="id_chapter"><option value="">— none —</option>
+            {% for c in chapters %}<option value="{{ c.id }}" data-s="{{ c.subject }}" {% if form.chapter.value|stringformat:"s" == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>
+          {% for e in form.chapter.errors %}<small class="ferr">{{ e }}</small>{% endfor %}</div>
+        {% include "panel/_field.html" with f=form.source %}
+        {% include "panel/_field.html" with f=form.refs %}
+      </div>
+      <div class="pcard pact">
+        {% if problems %}<div class="pwarn"><b>Not ready to publish:</b> {{ problems|join:", " }}.</div>{% endif %}
+        {% if nav.can_approve %}
+          <button name="action" value="approve" class="btn pri"><i class="bi bi-check2-circle"></i> Publish</button>
+          <button name="action" value="approve_next" class="btn pri alt">Publish &amp; next in queue →</button>
+          <button name="action" value="save" class="btn">Save</button>
+          {% if obj.status == 'approved' %}<button name="action" value="draft" class="btn">Send back to draft</button>{% endif %}
+        {% else %}
+          <button name="action" value="save" class="btn pri"><i class="bi bi-save"></i> Save as draft</button>
+          <small class="muted">A moderator reviews it before students see it.</small>
+        {% endif %}
+        {% if obj %}{% if obj.author %}<small class="muted">Written by {{ obj.author.username }} · {{ obj.created|date:"j M Y" }}</small>{% endif %}{% endif %}
+      </div>
+    </aside>
+  </div>
+</form>
+{% if obj and nav.can_approve %}<form method="post" action="{% url 'panel_question_delete' obj.pk %}" class="pdel" onsubmit="return confirm('Delete this question for good?')">{% csrf_token %}<button class="btn danger sm"><i class="bi bi-trash"></i> Delete question</button></form>{% endif %}
+{% endblock %}
+{% block scripts %}<script>
+var types=document.querySelectorAll('input[name=qtype]'),mcq=document.getElementById('mcq'),cq=document.getElementById('cq');
+function showType(){var isCq=document.querySelector('input[name=qtype]:checked').value==='cq';mcq.hidden=isCq;cq.hidden=!isCq}
+types.forEach(t=>t.addEventListener('change',showType));showType();
+var subj=document.getElementById('id_subject'),chap=document.getElementById('id_chapter');
+function filterChapters(){[...chap.options].forEach(function(o){if(!o.value)return;var ok=o.dataset.s===subj.value;o.hidden=!ok;o.disabled=!ok;if(!ok&&o.selected)chap.value=''})}
+subj.addEventListener('change',filterChapters);filterChapters();
+</script>{% endblock %}

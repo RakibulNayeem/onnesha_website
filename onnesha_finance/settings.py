@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     # exams must precede allauth so its template overrides win
     "exams",
+    "panel",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",

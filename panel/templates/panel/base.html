@@ -1,0 +1,42 @@
+{% load static bn %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Panel{% endblock %} · Onnesha Panel</title>
+<meta name="robots" content="noindex">
+<script src="{% asset 'js/theme.js' %}"></script>
+<link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="{% asset 'css/site.css' %}">
+<link rel="stylesheet" href="{% asset 'css/panel.css' %}">
+</head>
+<body class="pbody">
+<aside class="psb">
+  <a class="pbrand" href="{% url 'panel_home' %}"><img src="{% static 'img/logo.png' %}" alt=""><span>Onnesha<small>Staff panel</small></span></a>
+  <nav>
+    <a href="{% url 'panel_home' %}" class="{% if section == 'home' %}on{% endif %}"><i class="bi bi-grid-1x2"></i>Dashboard</a>
+    <a href="{% url 'panel_questions' %}" class="{% if section == 'questions' and not request.GET.status %}on{% endif %}"><i class="bi bi-list-check"></i>Questions</a>
+    <a href="{% url 'panel_questions' %}?status=draft" class="{% if section == 'questions' and request.GET.status == 'draft' %}on{% endif %}"><i class="bi bi-clipboard-check"></i>{% if nav.can_approve %}Review queue{% else %}My drafts{% endif %}{% if nav.drafts %}<em class="pbadge">{{ nav.drafts }}</em>{% endif %}</a>
+    <a href="{% url 'panel_question_new' %}"><i class="bi bi-plus-circle"></i>New question</a>
+    {% if nav.can_content %}<div class="pgroup">Content</div>
+    <a href="{% url 'panel_content' 'tracks' %}" class="{% if section == 'tracks' %}on{% endif %}"><i class="bi bi-signpost-split"></i>Tracks</a>
+    <a href="{% url 'panel_content' 'subjects' %}" class="{% if section == 'subjects' %}on{% endif %}"><i class="bi bi-book"></i>Subjects</a>
+    <a href="{% url 'panel_content' 'chapters' %}" class="{% if section == 'chapters' %}on{% endif %}"><i class="bi bi-journal-bookmark"></i>Chapters</a>
+    <a href="{% url 'panel_content' 'banks' %}" class="{% if section == 'banks' %}on{% endif %}"><i class="bi bi-archive"></i>Question banks</a>{% endif %}
+    {% if nav.can_users %}<div class="pgroup">People</div>
+    <a href="{% url 'panel_users' %}" class="{% if section == 'users' %}on{% endif %}"><i class="bi bi-people"></i>Users &amp; roles</a>{% endif %}
+  </nav>
+  <div class="pfoot">
+    <a href="{% url 'exam_home' %}"><i class="bi bi-box-arrow-up-right"></i>View student site</a>
+    <div class="pme"><span class="avatar sm">{{ user.get_username|slice:":1"|upper }}</span><div><b>{{ user.username }}</b><small>{{ nav.role }}</small></div></div>
+    <button type="button" class="ptheme" data-theme-toggle title="Day / night"><i class="bi bi-moon-stars"></i> Theme</button>
+  </div>
+</aside>
+<main class="pmain">
+  {% if messages %}<div class="pmsgs">{% for m in messages %}<div class="pmsg {{ m.tags }}"><span>{{ m }}</span><button onclick="this.parentNode.remove()" aria-label="Dismiss">×</button></div>{% endfor %}</div>{% endif %}
+  {% block body %}{% endblock %}
+</main>
+{% block scripts %}{% endblock %}
+</body></html>
