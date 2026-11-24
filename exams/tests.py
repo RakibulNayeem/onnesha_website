@@ -245,3 +245,16 @@ class LanguageAndAuth(TestCase):
         r = self.client.post(reverse("account_login"), {"login": "new@x.com", "password": "Str0ng-pass-91"})
         self.assertEqual(r.status_code, 302)
         self.assertEqual(self.client.get(reverse("exam_profile")).status_code, 200)
+
+
+class SeedUniversities(TestCase):
+    def test_seed_is_idempotent_and_every_logo_file_exists(self):
+        from pathlib import Path
+        from django.conf import settings
+        from django.core.management import call_command
+        from exams.management.commands.seed_universities import LOGOS, UNIVERSITIES
+        call_command("seed_universities", verbosity=0); call_command("seed_universities", verbosity=0)
+        self.assertEqual(Source.objects.filter(kind="university").count(), len(set(UNIVERSITIES)))
+        self.assertTrue(set(LOGOS) <= set(UNIVERSITIES))
+        for f in LOGOS.values():
+            self.assertTrue((Path(settings.BASE_DIR) / "static" / "img" / "logos" / f).exists(), f)
