@@ -10,23 +10,23 @@
     <div>
       {% for it in items %}
       <div class="paper slide" data-i="{{ forloop.counter0 }}">
-        <div class="qmeta"><span class="qno">প্রশ্ন {{ forloop.counter|bn }} / {{ items|length|bn }}</span>
+        <div class="qmeta"><span class="qno">{% t "প্রশ্ন" %} {{ forloop.counter|bn }} / {{ items|length|bn }}</span>
           {% if it.question.chapter %}<span class="tag">{{ it.question.chapter.name }}</span>{% endif %}</div>
         <div class="qtext">{{ it.question.text|linebreaksbr }}</div>
         {% for k, v in it.question.options %}
           <label class="opt"><input type="radio" name="q{{ it.question_id }}" value="{{ k }}" hidden><span class="bub">{{ k|bnletter }}</span><span>{{ v }}</span></label>{% endfor %}
-        <div style="margin-top:.8rem"><button type="button" class="btn link sm clear">উত্তর মুছো</button> <button type="button" class="btn link sm flag"><i class="bi bi-flag"></i> পরে দেখব</button></div>
+        <div style="margin-top:.8rem"><button type="button" class="btn link sm clear">{% t "উত্তর মুছো" %}</button> <button type="button" class="btn link sm flag"><i class="bi bi-flag"></i> {% t "পরে দেখব" %}</button></div>
       </div>{% endfor %}
       <div class="pager">
-        <button type="button" class="btn" id="prev">← আগের</button>
-        <button type="button" class="btn pri" id="next">পরের →</button>
-        <button type="submit" class="btn red" id="submit" hidden onclick="return confirm('জমা দেবে? উত্তর আর বদলানো যাবে না।')">জমা দাও</button>
+        <button type="button" class="btn" id="prev">← {% t "আগের" %}</button>
+        <button type="button" class="btn pri" id="next">{% t "পরের" %} →</button>
+        <button type="submit" class="btn red" id="submit" hidden onclick="{% t "return confirm('জমা দেবে? উত্তর আর বদলানো যাবে না।')" %}">{% t "জমা দাও" %}</button>
       </div>
     </div>
-    <aside class="paper omr"><h4 style="margin-bottom:.5rem">OMR শিট</h4>
+    <aside class="paper omr"><h4 style="margin-bottom:.5rem">OMR {% t "শিট" %}</h4>
       {% for it in items %}<div class="omr-row" data-i="{{ forloop.counter0 }}"><span class="n">{{ forloop.counter|bn }}</span>
         {% for k, v in it.question.options %}<span class="b" data-k="{{ k }}">{{ k|bnletter }}</span>{% endfor %}</div>{% endfor %}
-      <button type="submit" class="btn red" style="width:100%;margin-top:.8rem" onclick="return confirm('জমা দেবে? উত্তর আর বদলানো যাবে না।')">জমা দাও</button>
+      <button type="submit" class="btn red" style="width:100%;margin-top:.8rem" onclick="{% t "return confirm('জমা দেবে? উত্তর আর বদলানো যাবে না।')" %}">{% t "জমা দাও" %}</button>
     </aside>
   </div>
 </form>
@@ -51,7 +51,7 @@ slides.forEach(function(s,j){
 rows.forEach((r,j)=>r.onclick=()=>show(j));
 document.getElementById('prev').onclick=()=>show(cur-1); document.getElementById('next').onclick=()=>show(cur+1);
 document.addEventListener('keydown',function(e){ if(e.key==='ArrowRight')show(cur+1); if(e.key==='ArrowLeft')show(cur-1); });
-var left={{ remaining }}, el=document.getElementById('clock'), D='০১২৩৪৫৬৭৮৯';
+var left={{ remaining }}, el=document.getElementById('clock'), D='{% t "০১২৩৪৫৬৭৮৯" %}';
 function bn(s){return s.replace(/\d/g,d=>D[d]);}
 (function tick(){ var m=Math.floor(left/60), s=left%60; el.textContent=bn(String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'));
   el.classList.toggle('low', left<=60); if(left<=0){ document.getElementById('exam').submit(); return; } left--; setTimeout(tick,1000); })();

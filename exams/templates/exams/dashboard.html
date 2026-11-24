@@ -1,26 +1,26 @@
 {% extends "exams/base.html" %}{% load bn %}
-{% block title %}আমার অগ্রগতি{% endblock %}
+{% block title %}{% t "আমার অগ্রগতি" %}{% endblock %}
 {% block body %}
-<div class="pagehead"><div class="wrap"><h1>আমার অগ্রগতি</h1><p class="muted">{{ user.username }}</p></div></div>
+<div class="pagehead"><div class="wrap"><h1>{% t "আমার অগ্রগতি" %}</h1><p class="muted">{{ user.username }}</p></div></div>
 <section class="sec"><div class="wrap">
-  {% for e in open_exams %}<div class="note" style="margin-bottom:1rem"><b>অসমাপ্ত পরীক্ষা:</b> <a href="{% url 'exam_take' e.pk %}">{{ e.title }}</a> — চালিয়ে যাও</div>{% endfor %}
+  {% for e in open_exams %}<div class="note" style="margin-bottom:1rem"><b>{% t "অসমাপ্ত পরীক্ষা" %}:</b> <a href="{% url 'exam_take' e.pk %}">{{ e.title }}</a> — {% t "চালিয়ে যাও" %}</div>{% endfor %}
   <div class="paper" style="display:flex;gap:1.4rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem">
-    <div class="ringc"><svg width="132" height="132" viewBox="0 0 132 132"><circle class="bg" cx="66" cy="66" r="54"/><circle class="fg" id="ring" cx="66" cy="66" r="54" style="--len:0" data-p="{{ overall }}"/></svg><div class="v"><div><b>{{ overall|bn }}%</b><br><span>গড় সঠিকতা</span></div></div></div>
+    <div class="ringc"><svg width="132" height="132" viewBox="0 0 132 132"><circle class="bg" cx="66" cy="66" r="54"/><circle class="fg" id="ring" cx="66" cy="66" r="54" style="--len:0" data-p="{{ overall }}"/></svg><div class="v"><div><b>{{ overall|bn }}%</b><br><span>{% t "গড় সঠিকতা" %}</span></div></div></div>
     <div class="tiles" style="flex:1;min-width:260px">
-      <div class="tile"><b>{{ n_exams|bn }}</b><span>পরীক্ষা দিয়েছ</span></div>
-      <div class="tile"><b>{{ subjects|length|bn }}</b><span>বিষয়ে অনুশীলন</span></div>
-      <div class="tile red"><b>{{ weak|length|bn }}</b><span>দুর্বল অধ্যায়</span></div>
-      <div class="tile ok"><b>{{ overall|bn }}%</b><span>সঠিকতা</span></div>
+      <div class="tile"><b>{{ n_exams|bn }}</b><span>{% t "পরীক্ষা দিয়েছ" %}</span></div>
+      <div class="tile"><b>{{ subjects|length|bn }}</b><span>{% t "বিষয়ে অনুশীলন" %}</span></div>
+      <div class="tile red"><b>{{ weak|length|bn }}</b><span>{% t "দুর্বল অধ্যায়" %}</span></div>
+      <div class="tile ok"><b>{{ overall|bn }}%</b><span>{% t "সঠিকতা" %}</span></div>
     </div></div>
   <div class="grid c2" style="align-items:start">
-    <div class="paper"><h3 style="margin-bottom:1rem">বিষয় অনুযায়ী সঠিকতা</h3>
+    <div class="paper"><h3 style="margin-bottom:1rem">{% t "বিষয় অনুযায়ী সঠিকতা" %}</h3>
       {% for s in subjects %}<div class="brow"><div class="l"><span>{{ s.name }}</span><span>{{ s.right|bn }}/{{ s.total|bn }} · {{ s.pct|bn }}%</span></div><div class="bar"><i style="width:{{ s.pct }}%"></i></div></div>
-      {% empty %}<p class="muted">একটি টেস্ট দিলেই এখানে দেখা যাবে।</p>{% endfor %}
-      {% if weak %}<h3 style="margin:1.4rem 0 .6rem">যেখানে আরও সময় দাও</h3>
+      {% empty %}<p class="muted">{% t "একটি টেস্ট দিলেই এখানে দেখা যাবে।" %}</p>{% endfor %}
+      {% if weak %}<h3 style="margin:1.4rem 0 .6rem">{% t "যেখানে আরও সময় দাও" %}</h3>
       {% for c in weak %}<div class="leader"><span>{{ c.subject }} — {{ c.name }}</span><span class="dots"></span><b style="color:var(--red)">{{ c.pct|bn }}%</b></div>{% endfor %}{% endif %}</div>
-    <div class="paper"><h3 style="margin-bottom:.8rem">সাম্প্রতিক পরীক্ষা</h3>
+    <div class="paper"><h3 style="margin-bottom:.8rem">{% t "সাম্প্রতিক পরীক্ষা" %}</h3>
       {% for e in exams %}<a class="leader" href="{% url 'exam_result' e.pk %}"><span>{{ e.title }}<br><small class="muted">{{ e.submitted_at|date:"j M, H:i" }}</small></span><span class="dots"></span><b>{{ e.correct|bn }}/{{ e.total|bn }}</b></a>
-      {% empty %}<p class="muted">এখনো কোনো পরীক্ষা দাওনি। <a href="{% url 'exam_build' %}">প্রথম টেস্ট দাও →</a></p>{% endfor %}</div>
+      {% empty %}<p class="muted">{% t "এখনো কোনো পরীক্ষা দাওনি।" %} <a href="{% url 'exam_build' %}">{% t "প্রথম টেস্ট দাও" %} →</a></p>{% endfor %}</div>
   </div>
 </div></section>
 {% endblock %}

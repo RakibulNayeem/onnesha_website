@@ -12,6 +12,7 @@ urlpatterns = [
     path("test/new/", views.build, name="exam_build"),
     path("test/<int:pk>/", views.take, name="exam_take"),
     path("test/<int:pk>/result/", views.result, name="exam_result"),
+    path("lang/<str:code>/", views.set_language, name="exam_lang"),
     path("profile/", views.profile, name="exam_profile"),
     path("me/", views.dashboard, name="exam_dashboard"),
     path("leaderboard/", views.leaderboard, name="exam_leaderboard"),

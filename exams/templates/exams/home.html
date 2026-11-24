@@ -2,82 +2,83 @@
 {% block body %}
 <section class="hero2"><div class="wrap hero-grid">
   <div>
-    <span class="eyebrow"><i></i>SSC · HSC · ভর্তি · চাকরি</span>
-    <h1>পরীক্ষার হলের মতো করেই প্রস্তুতি নাও</h1>
-    <p class="lead">চ্যাপ্টার ধরে MCQ ও সৃজনশীল প্র্যাকটিস, ঘড়ি ধরে মডেল টেস্ট এবং আগের বছরের প্রশ্নব্যাংক — সবই এক জায়গায়।</p>
+    <span class="eyebrow"><i></i>SSC · HSC · {% t "ভর্তি · চাকরি" %}</span>
+    <h1>{% t "পরীক্ষার হলের মতো করেই প্রস্তুতি নাও" %}</h1>
+    <p class="lead">{% t "চ্যাপ্টার ধরে MCQ ও সৃজনশীল প্র্যাকটিস, ঘড়ি ধরে মডেল টেস্ট এবং আগের বছরের প্রশ্নব্যাংক — সবই এক জায়গায়।" %}</p>
     <div style="display:flex;flex-wrap:wrap;gap:.7rem">
-      <a class="btn pri lg" href="{% url 'exam_build' %}"><i class="bi bi-stopwatch"></i> মডেল টেস্ট দাও</a>
-      <a class="btn lg" href="{% url 'exam_bank' %}">প্রশ্নব্যাংক দেখো <i class="bi bi-arrow-right"></i></a>
+      <a class="btn pri lg" href="{% url 'exam_build' %}"><i class="bi bi-stopwatch"></i> {% t "মডেল টেস্ট দাও" %}</a>
+      <a class="btn lg" href="{% url 'exam_bank' %}">{% t "প্রশ্নব্যাংক দেখো" %} <i class="bi bi-arrow-right"></i></a>
     </div>
   </div>
   {% if hero_q %}
   <div class="livecard pq" data-correct="{{ hero_q.correct }}" data-qid="{{ hero_q.pk }}" data-next="{% url 'exam_quick' %}">
-    <div class="hud"><span>🔥 <b id="h-streak">০</b> স্ট্রিক</span><span>⭐ <b id="h-pts">০</b> পয়েন্ট</span><span class="tag hl subj" style="margin-left:auto;align-self:center">{{ hero_q.subject.name }}</span></div>
+    <div class="hud"><span>🔥 <b id="h-streak">{% t "০" %}</b> {% t "স্ট্রিক" %}</span><span>⭐ <b id="h-pts">{% t "০" %}</b> {% t "পয়েন্ট" %}</span><span class="tag hl subj" style="margin-left:auto;align-self:center">{{ hero_q.subject.name }}</span></div>
     <div class="qtext">{{ hero_q.text }}</div>
     {% for k, v in hero_q.options %}<button type="button" class="opt" data-k="{{ k }}"><span class="bub">{{ k|bnletter }}</span><span>{{ v }}</span></button>{% endfor %}
-    <div class="note" hidden><b>সঠিক উত্তর: {{ hero_q.correct|bnletter }}</b><span class="ex">{% if hero_q.explanation %} — {{ hero_q.explanation }}{% endif %}</span>
-      <div class="next-row"><button type="button" class="btn pri sm nextq">পরের প্রশ্ন <i class="bi bi-arrow-right"></i></button> <a href="{% url 'exam_practice' %}" style="font-weight:700;margin-left:.6rem">সব প্রশ্ন →</a></div></div>
+    <div class="note" hidden><b>{% t "সঠিক উত্তর" %}: {{ hero_q.correct|bnletter }}</b><span class="ex">{% if hero_q.explanation %} — {{ hero_q.explanation }}{% endif %}</span>
+      <div class="next-row"><button type="button" class="btn pri sm nextq">{% t "পরের প্রশ্ন" %} <i class="bi bi-arrow-right"></i></button> <a href="{% url 'exam_practice' %}" style="font-weight:700;margin-left:.6rem">{% t "সব প্রশ্ন" %} →</a></div></div>
   </div>{% endif %}
 </div>
 <div class="wrap"><div class="kpis">
-  <div class="kpi"><b data-count="{{ n_questions }}">{{ n_questions|bn }}</b><span>যাচাই করা প্রশ্ন</span></div>
-  <div class="kpi"><b data-count="{{ n_subjects }}">{{ n_subjects|bn }}</b><span>বিষয়</span></div>
-  <div class="kpi"><b data-count="{{ n_banks }}">{{ n_banks|bn }}</b><span>প্রশ্নব্যাংক</span></div>
-  <div class="kpi"><b data-count="{{ n_tests }}">{{ n_tests|bn }}</b><span>পরীক্ষা দেওয়া হয়েছে</span></div>
+  <div class="kpi"><b data-count="{{ n_questions }}">{{ n_questions|bn }}</b><span>{% t "যাচাই করা প্রশ্ন" %}</span></div>
+  <div class="kpi"><b data-count="{{ n_subjects }}">{{ n_subjects|bn }}</b><span>{% t "বিষয়" %}</span></div>
+  <div class="kpi"><b data-count="{{ n_banks }}">{{ n_banks|bn }}</b><span>{% t "প্রশ্নব্যাংক" %}</span></div>
+  <div class="kpi"><b data-count="{{ n_tests }}">{{ n_tests|bn }}</b><span>{% t "পরীক্ষা দেওয়া হয়েছে" %}</span></div>
 </div></div></section>
 
 <section class="sec"><div class="wrap">
-  <div class="sec-h"><h2>বিষয় অনুযায়ী শুরু করো</h2><a class="more" href="{% url 'exam_bank' %}">সব দেখো →</a></div>
+  <div class="sec-h"><h2>{% t "বিষয় অনুযায়ী শুরু করো" %}</h2><a class="more" href="{% url 'exam_bank' %}">{% t "সব দেখো" %} →</a></div>
   <div class="scroller">
     {% for t, subjects in tracks %}{% for s in subjects %}
     <a href="{% url 'exam_subject' s.id %}"><div class="sc {{ s.pk|tile }}"><small>{{ t.name }}</small><b>{{ s.name }}</b>
-      <div class="row"><span>{% if s.mcq %}MCQ{% else %}শীঘ্রই{% endif %}</span>{% if s.mcq %}<strong>{{ s.mcq|bn }}</strong>{% endif %}</div></div></a>
+      <div class="row"><span>{% if s.mcq %}MCQ{% else %}{% t "শীঘ্রই" %}{% endif %}</span>{% if s.mcq %}<strong>{{ s.mcq|bn }}</strong>{% endif %}</div></div></a>
     {% endfor %}{% endfor %}
   </div>
 </div></section>
 
+<section class="wrap" style="margin-top:1.6rem;margin-bottom:.4rem"><div class="cta"><div><h2>{% t "আজই প্রথম টেস্টটি দাও" %}</h2><p>{% t "১০টি প্রশ্ন, ১০ মিনিট — তোমার অবস্থান জেনে নাও।" %}</p></div>
+  <a class="btn hl" href="{% url 'exam_build' %}">{% t "শুরু করি" %} <i class="bi bi-arrow-right"></i></a></div></section>
+
 <section class="sec" style="padding-top:.4rem"><div class="wrap">
-  <div class="sec-h"><h2>এক প্ল্যাটফর্মে পুরো প্রস্তুতি</h2></div>
+  <div class="sec-h"><h2>{% t "এক প্ল্যাটফর্মে পুরো প্রস্তুতি" %}</h2></div>
   <div class="ftabs" id="ft">
     <div class="ft-list">
-      <button class="ft-btn on" data-p="0"><i class="bi bi-pencil-square"></i><span><b>প্র্যাকটিস</b><small>সঙ্গে সঙ্গে উত্তর ও ব্যাখ্যা</small></span></button>
-      <button class="ft-btn" data-p="1"><i class="bi bi-stopwatch"></i><span><b>মডেল টেস্ট ও OMR</b><small>ঘড়ি ধরে, আসল পরীক্ষার মতো</small></span></button>
-      <button class="ft-btn" data-p="2"><i class="bi bi-bar-chart-line"></i><span><b>বিশ্লেষণ</b><small>কোন অধ্যায়ে দুর্বল, এক নজরে</small></span></button>
-      <button class="ft-btn" data-p="3"><i class="bi bi-trophy"></i><span><b>মেধাতালিকা</b><small>অন্যদের সঙ্গে নিজের অবস্থান</small></span></button>
+      <button class="ft-btn on" data-p="0"><i class="bi bi-pencil-square"></i><span><b>{% t "প্র্যাকটিস" %}</b><small>{% t "সঙ্গে সঙ্গে উত্তর ও ব্যাখ্যা" %}</small></span></button>
+      <button class="ft-btn" data-p="1"><i class="bi bi-stopwatch"></i><span><b>{% t "মডেল টেস্ট ও" %} OMR</b><small>{% t "ঘড়ি ধরে, আসল পরীক্ষার মতো" %}</small></span></button>
+      <button class="ft-btn" data-p="2"><i class="bi bi-bar-chart-line"></i><span><b>{% t "বিশ্লেষণ" %}</b><small>{% t "কোন অধ্যায়ে দুর্বল, এক নজরে" %}</small></span></button>
+      <button class="ft-btn" data-p="3"><i class="bi bi-trophy"></i><span><b>{% t "মেধাতালিকা" %}</b><small>{% t "অন্যদের সঙ্গে নিজের অবস্থান" %}</small></span></button>
     </div>
     <div>
-      <div class="ft-panel on"><div class="mock"><div class="mock-h"><span>প্র্যাকটিস · নমুনা</span><span>১/১০</span></div>
-        <div class="qtext">পানির আণবিক সংকেত কোনটি?</div>
-        <button class="opt"><span class="bub">ক</span>CO₂</button><button class="opt right" style="cursor:default"><span class="bub">খ</span>H₂O</button><button class="opt"><span class="bub">গ</span>NaCl</button>
-        <div class="note"><b>ব্যাখ্যা:</b> দুটি হাইড্রোজেন ও একটি অক্সিজেন পরমাণু মিলে পানির অণু গঠিত হয়।</div></div></div>
-      <div class="ft-panel"><div class="mock"><div class="mock-h"><span>মডেল টেস্ট · নমুনা</span><span class="clock" style="margin:0">১৯:৪২</span></div>
-        <div class="bar" style="margin-bottom:.6rem"><i style="width:40%"></i></div><b>OMR শিট</b>
+      <div class="ft-panel on"><div class="mock"><div class="mock-h"><span>{% t "প্র্যাকটিস · নমুনা" %}</span><span>{% t "১/১০" %}</span></div>
+        <div class="qtext">{% t "পানির আণবিক সংকেত কোনটি" %}?</div>
+        <button class="opt"><span class="bub">{% t "ক" %}</span>CO₂</button><button class="opt right" style="cursor:default"><span class="bub">{% t "খ" %}</span>H₂O</button><button class="opt"><span class="bub">{% t "গ" %}</span>NaCl</button>
+        <div class="note"><b>{% t "ব্যাখ্যা" %}:</b> {% t "দুটি হাইড্রোজেন ও একটি অক্সিজেন পরমাণু মিলে পানির অণু গঠিত হয়।" %}</div></div></div>
+      <div class="ft-panel"><div class="mock"><div class="mock-h"><span>{% t "মডেল টেস্ট · নমুনা" %}</span><span class="clock" style="margin:0">{% t "১৯:৪২" %}</span></div>
+        <div class="bar" style="margin-bottom:.6rem"><i style="width:40%"></i></div><b>OMR {% t "শিট" %}</b>
         <div class="mini-omr">{% for n,f in omr %}<div>{{ n|bn }} <i class="{% if f %}f{% endif %}"></i><i></i><i></i><i></i></div>{% endfor %}</div></div></div>
-      <div class="ft-panel"><div class="mock"><div class="mock-h"><span>অধ্যায় অনুযায়ী সঠিকতা · নমুনা</span></div>
-        <div class="hbar"><div class="l"><span>নিউটনীয় বলবিদ্যা</span><span>৮৫%</span></div><div class="t"><i style="--w:85%"></i></div></div>
-        <div class="hbar"><div class="l"><span>পদার্থের গঠন</span><span>৬৮%</span></div><div class="t"><i style="--w:68%"></i></div></div>
-        <div class="hbar bad"><div class="l"><span>পর্যায় সারণি</span><span>৩৫%</span></div><div class="t"><i style="--w:35%"></i></div></div>
-        <div class="note"><b>পরামর্শ:</b> পর্যায় সারণি অধ্যায়ে আরও অনুশীলন করো।</div></div></div>
-      <div class="ft-panel"><div class="mock"><div class="mock-h"><span>মেধাতালিকা · নমুনা</span></div>
+      <div class="ft-panel"><div class="mock"><div class="mock-h"><span>{% t "অধ্যায় অনুযায়ী সঠিকতা · নমুনা" %}</span></div>
+        <div class="hbar"><div class="l"><span>{% t "নিউটনীয় বলবিদ্যা" %}</span><span>{% t "৮৫" %}%</span></div><div class="t"><i style="--w:85%"></i></div></div>
+        <div class="hbar"><div class="l"><span>{% t "পদার্থের গঠন" %}</span><span>{% t "৬৮" %}%</span></div><div class="t"><i style="--w:68%"></i></div></div>
+        <div class="hbar bad"><div class="l"><span>{% t "পর্যায় সারণি" %}</span><span>{% t "৩৫" %}%</span></div><div class="t"><i style="--w:35%"></i></div></div>
+        <div class="note"><b>{% t "পরামর্শ" %}:</b> {% t "পর্যায় সারণি অধ্যায়ে আরও অনুশীলন করো।" %}</div></div></div>
+      <div class="ft-panel"><div class="mock"><div class="mock-h"><span>{% t "মেধাতালিকা · নমুনা" %}</span></div>
         {% for n,p in demo_lb %}<div class="lb-row"><span class="medal {% if forloop.counter <= 3 %}m{{ forloop.counter }}{% endif %}">{{ forloop.counter|bn }}</span><b style="flex:1">{{ n }}</b><span>{{ p|bn }}</span></div>{% endfor %}</div></div>
     </div>
   </div>
 </div></section>
 
 <section class="sec" style="padding-top:0"><div class="wrap grid c2" style="align-items:start">
-  <div><div class="sec-h"><h2>মেধাতালিকা</h2><a class="more" href="{% url 'exam_leaderboard' %}">সব দেখো →</a></div>
-    <div class="paper"><table class="merit"><thead><tr><th>#</th><th>নাম</th><th>পরীক্ষা</th><th>পয়েন্ট</th></tr></thead>
+  <div><div class="sec-h"><h2>{% t "মেধাতালিকা" %}</h2><a class="more" href="{% url 'exam_leaderboard' %}">{% t "সব দেখো" %} →</a></div>
+    <div class="paper"><table class="merit"><thead><tr><th>#</th><th>{% t "নাম" %}</th><th>{% t "পরীক্ষা" %}</th><th>{% t "পয়েন্ট" %}</th></tr></thead>
       {% for r in top %}<tr><td><span class="medal {% if forloop.counter <= 3 %}m{{ forloop.counter }}{% endif %}">{{ forloop.counter|bn }}</span></td><td>{{ r.user__username }}</td><td>{{ r.exams|bn }}</td><td><b>{{ r.points|floatformat:"-2"|bn }}</b></td></tr>
-      {% empty %}<tr><td colspan="4" class="muted" style="padding:1.4rem 0;text-align:center">এখনো কেউ পরীক্ষা দেয়নি — তুমিই প্রথম হও!</td></tr>{% endfor %}</table></div></div>
-  <div><div class="sec-h"><h2>প্রশ্ন ও উত্তর</h2></div>
-    <details class="faq"><summary>প্র্যাকটিস করতে কি লগইন লাগবে?</summary><p>না। প্র্যাকটিস সবার জন্য খোলা। মডেল টেস্ট ও অগ্রগতি দেখতে একটি ফ্রি অ্যাকাউন্ট লাগবে।</p></details>
-    <details class="faq"><summary>নেগেটিভ মার্কিং কীভাবে কাজ করে?</summary><p>ভর্তি প্রস্তুতির টেস্টে প্রতিটি ভুল উত্তরের জন্য ০.২৫ নম্বর কাটা যায়। না জানলে ফাঁকা রাখলে কিছু কাটা যাবে না।</p></details>
-    <details class="faq"><summary>প্রশ্নগুলো কোথা থেকে আসে?</summary><p>বিভিন্ন বোর্ড ও বিশ্ববিদ্যালয়ের আগের বছরের প্রশ্ন থেকে। প্রতিটি প্রশ্ন যাচাই করে তবেই প্রকাশ করা হয়।</p></details>
-    <details class="faq"><summary>Google বা Facebook দিয়ে লগইন করা যাবে?</summary><p>হ্যাঁ, ইমেইল-পাসওয়ার্ড ছাড়াও Google ও Facebook দিয়ে লগইন করা যায়।</p></details></div>
+      {% empty %}<tr><td colspan="4" class="muted" style="padding:1.4rem 0;text-align:center">{% t "এখনো কেউ পরীক্ষা দেয়নি — তুমিই প্রথম হও" %}!</td></tr>{% endfor %}</table></div></div>
+  <div><div class="sec-h"><h2>{% t "প্রশ্ন ও উত্তর" %}</h2></div>
+    <details class="faq"><summary>{% t "প্র্যাকটিস করতে কি লগইন লাগবে" %}?</summary><p>{% t "না। প্র্যাকটিস সবার জন্য খোলা। মডেল টেস্ট ও অগ্রগতি দেখতে একটি ফ্রি অ্যাকাউন্ট লাগবে।" %}</p></details>
+    <details class="faq"><summary>{% t "নেগেটিভ মার্কিং কীভাবে কাজ করে" %}?</summary><p>{% t "ভর্তি প্রস্তুতির টেস্টে প্রতিটি ভুল উত্তরের জন্য ০.২৫ নম্বর কাটা যায়। না জানলে ফাঁকা রাখলে কিছু কাটা যাবে না।" %}</p></details>
+    <details class="faq"><summary>{% t "প্রশ্নগুলো কোথা থেকে আসে" %}?</summary><p>{% t "বিভিন্ন বোর্ড ও বিশ্ববিদ্যালয়ের আগের বছরের প্রশ্ন থেকে। প্রতিটি প্রশ্ন যাচাই করে তবেই প্রকাশ করা হয়।" %}</p></details>
+    <details class="faq"><summary>Google {% t "বা Facebook দিয়ে লগইন করা যাবে" %}?</summary><p>{% t "হ্যাঁ, ইমেইল-পাসওয়ার্ড ছাড়াও Google ও Facebook দিয়ে লগইন করা যায়।" %}</p></details></div>
 </div></section>
 
-<section class="wrap"><div class="cta"><div><h2>আজই প্রথম টেস্টটি দাও</h2><p>১০টি প্রশ্ন, ১০ মিনিট — তোমার অবস্থান জেনে নাও।</p></div>
-  <a class="btn hl" href="{% url 'exam_build' %}">শুরু করি <i class="bi bi-arrow-right"></i></a></div></section>
 {% endblock %}
 {% block scripts %}<script>
 {% include "exams/_quiz.js" %}

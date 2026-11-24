@@ -1,0 +1,26 @@
+{% extends "exams/base.html" %}{% load bn %}
+{% block title %}{% t "নতুন অ্যাকাউন্ট" %}{% endblock %}
+{% block body %}
+<section class="authwrap"><div class="authcard">
+  {% include "account/_authshell.html" %}
+  <div class="authmain">
+    <div class="authtabs"><a href="{% url 'account_login' %}">{% t "লগইন" %}</a><a class="on" href="{% url 'account_signup' %}">{% t "নতুন অ্যাকাউন্ট" %}</a></div>
+    <h1>{% t "বিনামূল্যে শুরু করো" %}</h1>
+    <p class="muted">{% t "একটি ফ্রি অ্যাকাউন্টেই মডেল টেস্ট, অগ্রগতি ও মেধাতালিকা" %}</p>
+    <form method="post" action="{% url 'account_signup' %}" class="authform">{% csrf_token %}{{ redirect_field }}
+      {% if form.non_field_errors %}<div class="autherr">{{ form.non_field_errors }}</div>{% endif %}
+      <label for="{{ form.email.id_for_label }}">{% t "ইমেইল" %}</label>{{ form.email }}{{ form.email.errors }}
+      <label for="{{ form.password1.id_for_label }}">{% t "পাসওয়ার্ড" %}</label>
+      <div class="pw">{{ form.password1 }}<button type="button" class="pwt" aria-label="show / hide password"><i class="bi bi-eye"></i></button></div>{{ form.password1.errors }}
+      <label for="{{ form.password2.id_for_label }}">{% t "পাসওয়ার্ড আবার লেখো" %}</label>
+      <div class="pw">{{ form.password2 }}<button type="button" class="pwt" aria-label="show / hide password"><i class="bi bi-eye"></i></button></div>{{ form.password2.errors }}
+      <button class="btn pri lg" style="width:100%;margin-top:.6rem">{% t "অ্যাকাউন্ট খোলো" %}</button>
+    </form>
+    {% include "account/_socials.html" with process="login" %}
+    <p class="authswitch">{% t "আগেই অ্যাকাউন্ট আছে?" %} <a href="{% url 'account_login' %}">{% t "লগইন করো" %}</a></p>
+  </div>
+</div></section>
+{% endblock %}
+{% block scripts %}<script>
+document.querySelectorAll('.pwt').forEach(function(b){b.onclick=function(){var i=b.parentNode.querySelector('input');var s=i.type==='password';i.type=s?'text':'password';b.querySelector('i').className='bi bi-eye'+(s?'-slash':'')}});
+</script>{% endblock %}

@@ -1,20 +1,20 @@
 {% extends "exams/base.html" %}{% load bn %}
-{% block title %}সৃজনশীল প্রশ্ন{% endblock %}
+{% block title %}{% t "সৃজনশীল প্রশ্ন" %}{% endblock %}
 {% block body %}
-<div class="pagehead"><div class="wrap"><h1>সৃজনশীল প্রশ্ন</h1><p class="muted">উদ্দীপক পড়ো, প্রতিটি প্রশ্নের উত্তর ভাবো, তারপর মডেল উত্তর খুলে মিলিয়ে নাও।</p>
+<div class="pagehead"><div class="wrap"><h1>{% t "সৃজনশীল প্রশ্ন" %}</h1><p class="muted">{% t "উদ্দীপক পড়ো, প্রতিটি প্রশ্নের উত্তর ভাবো, তারপর মডেল উত্তর খুলে মিলিয়ে নাও।" %}</p>
   <form method="get" class="filters" style="margin-top:1rem">
-    <select name="subject" onchange="this.form.chapter.value='';this.form.submit()"><option value="">সব বিষয়</option>{% for s in subjects %}<option value="{{ s.id }}" {% if sel.subject == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>{% endfor %}</select>
-    <select name="chapter" onchange="this.form.submit()"><option value="">সব অধ্যায়</option>{% for c in chapters %}<option value="{{ c.id }}" {% if sel.chapter == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>
-    <select name="source" onchange="this.form.submit()"><option value="">সব প্রশ্নব্যাংক</option>{% for s in sources %}<option value="{{ s.id }}" {% if sel.source == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>{% endfor %}</select>
+    <select name="subject" onchange="this.form.chapter.value='';this.form.submit()"><option value="">{% t "সব বিষয়" %}</option>{% for s in subjects %}<option value="{{ s.id }}" {% if sel.subject == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>{% endfor %}</select>
+    <select name="chapter" onchange="this.form.submit()"><option value="">{% t "সব অধ্যায়" %}</option>{% for c in chapters %}<option value="{{ c.id }}" {% if sel.chapter == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>
+    <select name="source" onchange="this.form.submit()"><option value="">{% t "সব প্রশ্নব্যাংক" %}</option>{% for s in sources %}<option value="{{ s.id }}" {% if sel.source == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>{% endfor %}</select>
   </form></div></div>
 <section class="sec"><div class="wrap" style="max-width:780px">
   {% for q in page %}<div class="paper qcard">
     <div class="qmeta"><span class="tag hl">{{ q.subject.name }}</span>{% if q.chapter %}<span class="tag">{{ q.chapter.name }}</span>{% endif %}{% if q.source %}<span class="tag">{{ q.source.name }}</span>{% endif %}</div>
     <div class="qtext">{{ q.text|linebreaksbr }}</div>
     {% for p in q.parts %}<details class="faq" style="margin-bottom:.5rem"><summary><span>{{ forloop.counter0|add:97|stringformat:"c" }}. {{ p.q }}</span><span class="tag">{{ p.marks|bn }}</span></summary><p>{{ p.answer|default:"মডেল উত্তর শীঘ্রই যোগ হবে।"|linebreaksbr }}</p></details>{% endfor %}
-  </div>{% empty %}<div class="paper" style="text-align:center"><p class="muted">এখনো কোনো সৃজনশীল প্রশ্ন নেই।</p></div>{% endfor %}
+  </div>{% empty %}<div class="paper" style="text-align:center"><p class="muted">{% t "এখনো কোনো সৃজনশীল প্রশ্ন নেই।" %}</p></div>{% endfor %}
   <div class="pager">
-    {% if page.has_previous %}<a class="btn" href="?page={{ page.previous_page_number }}&subject={{ sel.subject }}&chapter={{ sel.chapter }}&source={{ sel.source }}">← আগের</a>{% else %}<span></span>{% endif %}
-    {% if page.has_next %}<a class="btn pri" href="?page={{ page.next_page_number }}&subject={{ sel.subject }}&chapter={{ sel.chapter }}&source={{ sel.source }}">পরের →</a>{% endif %}
+    {% if page.has_previous %}<a class="btn" href="?page={{ page.previous_page_number }}&subject={{ sel.subject }}&chapter={{ sel.chapter }}&source={{ sel.source }}">← {% t "আগের" %}</a>{% else %}<span></span>{% endif %}
+    {% if page.has_next %}<a class="btn pri" href="?page={{ page.next_page_number }}&subject={{ sel.subject }}&chapter={{ sel.chapter }}&source={{ sel.source }}">{% t "পরের" %} →</a>{% endif %}
   </div></div></section>
 {% endblock %}

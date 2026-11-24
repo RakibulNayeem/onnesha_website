@@ -1,10 +1,10 @@
 {% extends "exams/base.html" %}{% load bn %}
-{% block title %}মেধাতালিকা{% endblock %}
+{% block title %}{% t "মেধাতালিকা" %}{% endblock %}
 {% block body %}
-<div class="pagehead"><div class="wrap"><h1>মেধাতালিকা</h1><p class="muted">গত ৩০ দিনের সেরা পরীক্ষার্থী</p></div></div>
+<div class="pagehead"><div class="wrap"><h1>{% t "মেধাতালিকা" %}</h1><p class="muted">{% t "গত ৩০ দিনের সেরা পরীক্ষার্থী" %}</p></div></div>
 <section class="sec"><div class="wrap" style="max-width:720px"><div class="paper">
-  <table class="merit"><thead><tr><th>র‍্যাংক</th><th>নাম</th><th>পরীক্ষা</th><th>পয়েন্ট</th></tr></thead>
+  <table class="merit"><thead><tr><th>{% t "র‍্যাংক" %}</th><th>{% t "নাম" %}</th><th>{% t "পরীক্ষা" %}</th><th>{% t "পয়েন্ট" %}</th></tr></thead>
   {% for r in rows %}<tr><td><span class="medal {% if forloop.counter <= 3 %}m{{ forloop.counter }}{% endif %}">{{ forloop.counter|bn }}</span></td><td>{{ r.user__username }}</td><td>{{ r.exams|bn }}</td><td><b>{{ r.points|floatformat:"-2"|bn }}</b></td></tr>
-  {% empty %}<tr><td colspan="4" class="muted" style="text-align:center;padding:2rem 0">এখনো কেউ পরীক্ষা দেয়নি — তুমিই প্রথম হও!</td></tr>{% endfor %}</table></div>
-  <p style="text-align:center;margin-top:1.2rem"><a class="btn pri" href="{% url 'exam_build' %}">পরীক্ষা দিয়ে তালিকায় ওঠো</a></p></div></section>
+  {% empty %}<tr><td colspan="4" class="muted" style="text-align:center;padding:2rem 0">{% t "এখনো কেউ পরীক্ষা দেয়নি — তুমিই প্রথম হও" %}!</td></tr>{% endfor %}</table></div>
+  <p style="text-align:center;margin-top:1.2rem"><a class="btn pri" href="{% url 'exam_build' %}">{% t "পরীক্ষা দিয়ে তালিকায় ওঠো" %}</a></p></div></section>
 {% endblock %}

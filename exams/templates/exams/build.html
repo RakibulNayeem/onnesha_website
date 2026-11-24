@@ -1,38 +1,38 @@
 {% extends "exams/base.html" %}{% load bn %}
-{% block title %}পরীক্ষা{% endblock %}
+{% block title %}{% t "পরীক্ষা" %}{% endblock %}
 {% block body %}
-<div class="pagehead"><div class="wrap"><div class="crumb">পরীক্ষা</div><h1 id="ttl">পরীক্ষা শুরু করো</h1></div></div>
+<div class="pagehead"><div class="wrap"><div class="crumb">{% t "পরীক্ষা" %}</div><h1 id="ttl">{% t "পরীক্ষা শুরু করো" %}</h1></div></div>
 <form method="post" id="hub" class="wrap" style="padding-top:1.2rem">{% csrf_token %}
   {{ form.non_field_errors }}{{ form.subjects.errors }}
   <div class="top-row">
-    <div class="modesw" id="modesw"><button type="button" data-m="mock" class="{% if mode == 'mock' %}on{% endif %}"><i class="bi bi-stopwatch"></i> মডেল টেস্ট</button><button type="button" data-m="quick" class="{% if mode == 'quick' %}on{% endif %}"><i class="bi bi-lightning-charge"></i> দ্রুত প্র্যাকটিস</button></div>
-    <ol class="stepper" id="stepper"><li data-s="1"><b>১</b>বিষয়</li><li data-s="2"><b>২</b>অধ্যায়</li><li data-s="3" id="st3"><b>৩</b>সেটিংস</li></ol>
+    <div class="modesw" id="modesw"><button type="button" data-m="mock" class="{% if mode == 'mock' %}on{% endif %}"><i class="bi bi-stopwatch"></i> {% t "মডেল টেস্ট" %}</button><button type="button" data-m="quick" class="{% if mode == 'quick' %}on{% endif %}"><i class="bi bi-lightning-charge"></i> {% t "দ্রুত প্র্যাকটিস" %}</button></div>
+    <ol class="stepper" id="stepper"><li data-s="1"><b>{% t "১" %}</b>{% t "বিষয়" %}</li><li data-s="2"><b>{% t "২" %}</b>{% t "অধ্যায়" %}</li><li data-s="3" id="st3"><b>{% t "৩" %}</b>{% t "সেটিংস" %}</li></ol>
   </div>
 
   <!-- step 1: subjects -->
   <section data-step="1">
-    <h3 class="h-step">বিষয় সিলেক্ট করো</h3>
+    <h3 class="h-step">{% t "বিষয় সিলেক্ট করো" %}</h3>
     <div class="picks">
       {% for s in subjects %}
       <button type="button" class="srow" data-id="{{ s.id }}" data-name="{{ s.name }}" data-kind="{{ s.kind }}" data-n="{{ s.n }}">
         <span class="mono">{{ s.name|slice:":1" }}</span>
         <span class="pt"><b>{{ s.name }}</b><small>{{ s.track }}</small></span>
-        <span class="got" hidden></span><span class="pn">{{ s.n|bn }}টি প্রশ্ন</span><i class="bi bi-chevron-right"></i>
+        <span class="got" hidden></span><span class="pn">{{ s.n|bn }}{% t "টি প্রশ্ন" %}</span><i class="bi bi-chevron-right"></i>
       </button>
-      {% empty %}<p class="muted">এখনো কোনো বিষয়ে প্রকাশিত প্রশ্ন নেই।</p>{% endfor %}
+      {% empty %}<p class="muted">{% t "এখনো কোনো বিষয়ে প্রকাশিত প্রশ্ন নেই।" %}</p>{% endfor %}
     </div>
   </section>
 
   <!-- step 2: chapters of the opened subject -->
   <section data-step="2" hidden>
     <button type="button" class="backl" id="back"><i class="bi bi-arrow-left"></i> <span id="subj-name"></span></button>
-    <h3 class="h-step">অধ্যায় সিলেক্ট করো</h3>
+    <h3 class="h-step">{% t "অধ্যায় সিলেক্ট করো" %}</h3>
     {% for s in subjects %}
     <div class="chpanel" data-s="{{ s.id }}" hidden>
-      <label class="crow all"><input type="checkbox" class="all"><span class="box"><i class="bi bi-check-lg"></i></span><b>সব অধ্যায়</b><em>{{ s.n|bn }}টি প্রশ্ন</em></label>
+      <label class="crow all"><input type="checkbox" class="all"><span class="box"><i class="bi bi-check-lg"></i></span><b>{% t "সব অধ্যায়" %}</b><em>{{ s.n|bn }}{% t "টি প্রশ্ন" %}</em></label>
       <div class="crows">
         {% for c in chapters %}{% if c.subject == s.id %}
-        <label class="crow"><input type="checkbox" class="ch" value="{{ c.id }}" data-n="{{ c.n }}" data-name="{{ c.name }}"><span class="box"><i class="bi bi-check-lg"></i></span><b>{{ c.name }}</b><em>{{ c.n|bn }}টি প্রশ্ন</em></label>
+        <label class="crow"><input type="checkbox" class="ch" value="{{ c.id }}" data-n="{{ c.n }}" data-name="{{ c.name }}"><span class="box"><i class="bi bi-check-lg"></i></span><b>{{ c.name }}</b><em>{{ c.n|bn }}{% t "টি প্রশ্ন" %}</em></label>
         {% endif %}{% endfor %}
       </div>
     </div>
@@ -41,34 +41,34 @@
 
   <!-- step 3: settings (model test only) -->
   <section data-step="3" hidden>
-    <button type="button" class="backl" id="back3"><i class="bi bi-arrow-left"></i> অধ্যায়</button>
+    <button type="button" class="backl" id="back3"><i class="bi bi-arrow-left"></i> {% t "অধ্যায়" %}</button>
     <div class="hub">
       <div>
-        <h3 class="h-step">প্রশ্ন ও সময়</h3>
+        <h3 class="h-step">{% t "প্রশ্ন ও সময়" %}</h3>
         <div class="counts">{% for v,l in form.fields.count.choices %}<label><input type="radio" name="count" value="{{ v }}" {% if v|stringformat:"s" == picked_count %}checked{% endif %}><span>{{ v|bn }}</span></label>{% endfor %}</div>
         <div class="grid c2" style="margin-top:.9rem">
-          <div class="form"><label class="t">সময় (মিনিট) — ফাঁকা রাখলে প্রশ্ন প্রতি ১ মিনিট</label><input type="number" name="minutes" min="1" max="240" id="minutes" placeholder="স্বয়ংক্রিয়"></div>
-          <div class="form"><label class="t">প্রশ্নব্যাংক</label>{{ form.source }}</div>
+          <div class="form"><label class="t">{% t "সময় (মিনিট) — ফাঁকা রাখলে প্রশ্ন প্রতি ১ মিনিট" %}</label><input type="number" name="minutes" min="1" max="240" id="minutes" placeholder="{% t "স্বয়ংক্রিয়" %}"></div>
+          <div class="form"><label class="t">{% t "প্রশ্নব্যাংক" %}</label>{{ form.source }}</div>
         </div>
       </div>
       <aside class="ticket">
-        <div class="tk-h"><span>প্রবেশপত্র</span><b>মডেল টেস্ট</b></div>
-        <dl><dt>বিষয়</dt><dd id="tk-sub">—</dd><dt>অধ্যায়</dt><dd id="tk-ch">সব অধ্যায়</dd><dt>উপলব্ধ প্রশ্ন</dt><dd id="tk-n">০</dd>
-          <dt>প্রশ্ন সংখ্যা</dt><dd id="tk-cnt">২৫</dd><dt>সময়</dt><dd id="tk-time">২৫ মিনিট</dd><dt>নেগেটিভ মার্কিং</dt><dd id="tk-neg">নেই</dd></dl>
-        <p class="muted" style="font-size:.82rem;margin:.8rem 0 0">মডেল টেস্ট শুরু করতে লগইন লাগবে।</p>
+        <div class="tk-h"><span>{% t "প্রবেশপত্র" %}</span><b>{% t "মডেল টেস্ট" %}</b></div>
+        <dl><dt>{% t "বিষয়" %}</dt><dd id="tk-sub">—</dd><dt>{% t "অধ্যায়" %}</dt><dd id="tk-ch">{% t "সব অধ্যায়" %}</dd><dt>{% t "উপলব্ধ প্রশ্ন" %}</dt><dd id="tk-n">{% t "০" %}</dd>
+          <dt>{% t "প্রশ্ন সংখ্যা" %}</dt><dd id="tk-cnt">{% t "২৫" %}</dd><dt>{% t "সময়" %}</dt><dd id="tk-time">{% t "২৫ মিনিট" %}</dd><dt>{% t "নেগেটিভ মার্কিং" %}</dt><dd id="tk-neg">{% t "নেই" %}</dd></dl>
+        <p class="muted" style="font-size:.82rem;margin:.8rem 0 0">{% t "মডেল টেস্ট শুরু করতে লগইন লাগবে।" %}</p>
       </aside>
     </div>
   </section>
 
   <div class="actionbar">
-    <div class="ab-info" id="ab-info">কিছু বাছাই করা হয়নি</div>
-    <button type="button" class="btn" id="more" hidden><i class="bi bi-plus-lg"></i> আরেকটি বিষয়</button>
-    <button type="button" class="btn pri" id="next" disabled>এগিয়ে যাও <i class="bi bi-arrow-right"></i></button>
+    <div class="ab-info" id="ab-info">{% t "কিছু বাছাই করা হয়নি" %}</div>
+    <button type="button" class="btn" id="more" hidden><i class="bi bi-plus-lg"></i> {% t "আরেকটি বিষয়" %}</button>
+    <button type="button" class="btn pri" id="next" disabled>{% t "এগিয়ে যাও" %} <i class="bi bi-arrow-right"></i></button>
   </div>
 </form>
 {% endblock %}
 {% block scripts %}<script>
-var BN='০১২৩৪৫৬৭৮৯', bn=function(n){return String(n).replace(/\d/g,function(d){return BN[d]})}, $=function(id){return document.getElementById(id)};
+var BN='{% t "০১২৩৪৫৬৭৮৯" %}', bn=function(n){return String(n).replace(/\d/g,function(d){return BN[d]})}, $=function(id){return document.getElementById(id)};
 var form=$('hub'), mode='{{ mode }}', step=1, cur=null;
 var rows=[...document.querySelectorAll('.srow')], panels=[...document.querySelectorAll('.chpanel')];
 var pre=[{% for i in picked %}{{ i }},{% endfor %}];
@@ -77,7 +77,7 @@ function sel(id){ var p=panel(id), all=p.querySelector('.all'), chs=[...p.queryS
   return {all:all.checked||(chs.length&&on.length===chs.length), chs:on, total:chs.length}; }
 function summary(){ var subs=[], n=0, chCount=0, kinds=[];
   rows.forEach(function(r){ var s=sel(r.dataset.id), p=panel(r.dataset.id), on=s.all||s.chs.length>0, g=r.querySelector('.got');
-    g.hidden=!on; if(on){ g.textContent=s.all?'সব অধ্যায়':bn(s.chs.length)+'টি অধ্যায়'; subs.push(r); kinds.push(r.dataset.kind);
+    g.hidden=!on; if(on){ g.textContent=s.all?'{% t "সব অধ্যায়" %}':bn(s.chs.length)+'{% t "টি অধ্যায়" %}'; subs.push(r); kinds.push(r.dataset.kind);
       n+= s.all? +r.dataset.n : s.chs.reduce((a,c)=>a+ +c.dataset.n,0); chCount+= s.all?0:s.chs.length; }
     r.classList.toggle('on',on); });
   return {subs:subs,n:n,chCount:chCount,kinds:kinds}; }
@@ -85,14 +85,14 @@ function show(st){ step=st; document.querySelectorAll('[data-step]').forEach(s=>
   document.querySelectorAll('#stepper li').forEach(function(li){ var k=+li.dataset.s; li.classList.toggle('on',k===st); li.classList.toggle('done',k<st); });
   $('st3').hidden=mode==='quick'; window.scrollTo({top:0}); refresh(); }
 function refresh(){ var m=summary();
-  $('ab-info').innerHTML=m.subs.length?'<b>'+bn(m.subs.length)+'টি বিষয়</b>'+(m.chCount?' · '+bn(m.chCount)+'টি অধ্যায়':'')+' · '+bn(m.n)+'টি প্রশ্ন':'কিছু বাছাই করা হয়নি';
+  $('ab-info').innerHTML=m.subs.length?'<b>'+bn(m.subs.length)+'{% t "টি বিষয়</b>" %}'+(m.chCount?' · '+bn(m.chCount)+'{% t "টি অধ্যায়" %}':'')+' · '+bn(m.n)+'{% t "টি প্রশ্ন" %}':'{% t "কিছু বাছাই করা হয়নি" %}';
   $('more').hidden=step!==2; var nx=$('next');
-  if(step===1){ nx.disabled=!m.subs.length; nx.innerHTML='এগিয়ে যাও <i class="bi bi-arrow-right"></i>'; }
-  if(step===2){ var s=sel(cur); nx.disabled=!(m.subs.length); nx.innerHTML=(mode==='quick'?'প্র্যাকটিস শুরু করো':'এগিয়ে যাও')+' <i class="bi bi-arrow-right"></i>'; }
-  if(step===3){ nx.disabled=!m.subs.length; nx.innerHTML='পরীক্ষা শুরু করো <i class="bi bi-arrow-right"></i>'; }
-  $('tk-sub').textContent=m.subs.map(r=>r.dataset.name).join('، ')||'—'; $('tk-ch').textContent=m.chCount?bn(m.chCount)+'টি অধ্যায়':'সব অধ্যায়'; $('tk-n').textContent=bn(m.n);
+  if(step===1){ nx.disabled=!m.subs.length; nx.innerHTML='{% t "এগিয়ে যাও <i class=" %}"bi bi-arrow-right"></i>'; }
+  if(step===2){ var s=sel(cur); nx.disabled=!(m.subs.length); nx.innerHTML=(mode==='quick'?'{% t "প্র্যাকটিস শুরু করো" %}':'{% t "এগিয়ে যাও" %}')+' <i class="bi bi-arrow-right"></i>'; }
+  if(step===3){ nx.disabled=!m.subs.length; nx.innerHTML='{% t "পরীক্ষা শুরু করো <i class=" %}"bi bi-arrow-right"></i>'; }
+  $('tk-sub').textContent=m.subs.map(r=>r.dataset.name).join('، ')||'—'; $('tk-ch').textContent=m.chCount?bn(m.chCount)+'{% t "টি অধ্যায়" %}':'{% t "সব অধ্যায়" %}'; $('tk-n').textContent=bn(m.n);
   var cnt=+(form.querySelector('input[name=count]:checked')||{value:25}).value, shown=Math.min(cnt,m.n||cnt), mins=+$('minutes').value||shown;
-  $('tk-cnt').textContent=bn(shown); $('tk-time').textContent=bn(mins)+' মিনিট'; $('tk-neg').textContent=m.kinds.includes('admission')?'প্রতি ভুলে ০.২৫':'নেই'; }
+  $('tk-cnt').textContent=bn(shown); $('tk-time').textContent=bn(mins)+'{% t " মিনিট" %}'; $('tk-neg').textContent=m.kinds.includes('admission')?'{% t "প্রতি ভুলে ০.২৫" %}':'{% t "নেই" %}'; }
 function open(id){ cur=id; var r=rows.find(r=>r.dataset.id==id); $('subj-name').textContent=r.dataset.name; panels.forEach(p=>p.hidden=p.dataset.s!=id); show(2); }
 rows.forEach(r=>r.onclick=()=>open(r.dataset.id));
 form.addEventListener('change',function(e){ var t=e.target, p=t.closest('.chpanel');
@@ -114,8 +114,8 @@ function go(){ var m=summary(), src=form.querySelector('[name=source]').value;
 $('next').onclick=function(){ if(step===1){ show(summary().subs.length?(mode==='quick'?2:2):1); }
   else if(step===2){ if(mode==='quick') go(); else show(3); } else go(); };
 document.querySelectorAll('#modesw button').forEach(function(b){ b.onclick=function(){ mode=b.dataset.m;
-  document.querySelectorAll('#modesw button').forEach(x=>x.classList.toggle('on',x===b)); $('ttl').textContent=mode==='quick'?'দ্রুত প্র্যাকটিস':'মডেল টেস্ট'; show(step===3&&mode==='quick'?2:step); }; });
-$('ttl').textContent=mode==='quick'?'দ্রুত প্র্যাকটিস':'মডেল টেস্ট';
+  document.querySelectorAll('#modesw button').forEach(x=>x.classList.toggle('on',x===b)); $('ttl').textContent=mode==='quick'?'{% t "দ্রুত প্র্যাকটিস" %}':'{% t "মডেল টেস্ট" %}'; show(step===3&&mode==='quick'?2:step); }; });
+$('ttl').textContent=mode==='quick'?'{% t "দ্রুত প্র্যাকটিস" %}':'{% t "মডেল টেস্ট" %}';
 // arriving with ?subject= pre-selects it and opens its chapters
 pre.forEach(function(id){ var p=panel(id); if(p) p.querySelector('.all').checked=true, p.querySelectorAll('.ch').forEach(c=>c.checked=true); });
 if(pre.length) open(pre[0]); else show(1);

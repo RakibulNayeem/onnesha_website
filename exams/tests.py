@@ -208,3 +208,40 @@ class ImportBank(TestCase):
         q2 = Question.objects.get(text__startswith="প্রশ্ন দুই?")
         self.assertIn("\n(i) এ\n", q2.text)                      # ¶ became real line breaks
         self.assertEqual(q2.source.kind, "other")
+
+
+class LanguageAndAuth(TestCase):
+    def test_default_is_bangla_and_switch_sets_a_cookie(self):
+        r = self.client.get(reverse("exam_home"))
+        self.assertContains(r, 'lang="bn"'); self.assertContains(r, "পরীক্ষার হলের মতো")
+        r = self.client.get(reverse("exam_lang", args=["en"]), HTTP_REFERER="http://testserver/bank/")
+        self.assertRedirects(r, "http://testserver/bank/", fetch_redirect_response=False)
+        self.assertEqual(r.cookies["lang"].value, "en")
+
+    def test_english_interface_translates_text_and_numerals_but_not_content(self):
+        t = Track.objects.create(name="এসএসসি", slug="ssc2"); s = Subject.objects.create(track=t, name="পদার্থবিজ্ঞান")
+        mcq(s, 1)
+        self.client.cookies["lang"] = "en"
+        r = self.client.get(reverse("exam_home"))
+        self.assertContains(r, 'lang="en"'); self.assertContains(r, "Prepare the way the exam hall feels")
+        self.assertContains(r, "পদার্থবিজ্ঞান")                      # subject names are content, left as written
+        r = self.client.get(reverse("exam_bank"))
+        self.assertContains(r, "Question bank"); self.assertNotContains(r, "প্রশ্নব্যাংক</h1>")
+        self.client.cookies["lang"] = "bn"
+        self.assertContains(self.client.get(reverse("exam_home")), "পরীক্ষার হলের মতো")
+
+    def test_bogus_language_cookie_falls_back_to_bangla(self):
+        self.client.cookies["lang"] = "xx"
+        self.assertContains(self.client.get(reverse("exam_home")), 'lang="bn"')
+
+    def test_sign_in_and_sign_up_pages_use_the_branded_layout_and_work(self):
+        for name in ("account_login", "account_signup"):
+            self.assertContains(self.client.get(reverse(name)), "authcard")
+        r = self.client.post(reverse("account_signup"), {"email": "new@x.com", "password1": "Str0ng-pass-91", "password2": "Str0ng-pass-91"})
+        self.assertEqual(r.status_code, 302)
+        u = User.objects.get(email="new@x.com")
+        self.assertTrue(hasattr(u, "profile"))                      # profile created on sign-up
+        self.client.logout()
+        r = self.client.post(reverse("account_login"), {"login": "new@x.com", "password": "Str0ng-pass-91"})
+        self.assertEqual(r.status_code, 302)
+        self.assertEqual(self.client.get(reverse("exam_profile")).status_code, 200)

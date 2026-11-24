@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from . import roles
+from .i18n import tr
 from .forms import ExamForm, ProfileForm
 from .models import Chapter, Exam, ExamQuestion, Profile, Question, Source, Subject, Track
 
@@ -53,7 +54,7 @@ def home(request):
         "top": _top_students(5),
         # illustrative content for the "how it works" preview tabs
         "omr": [(i, i % 3 != 0) for i in range(1, 11)],
-        "demo_lb": [("তানভীর", 128), ("নুসরাত", 121), ("রাফি", 117), ("মেহেরুন", 109)]})
+        "demo_lb": [(tr("তানভীর"), 128), (tr("নুসরাত"), 121), (tr("রাফি"), 117), (tr("মেহেরুন"), 109)]})
 
 
 def quick_question(request):
@@ -93,7 +94,7 @@ def bank(request):
     letters = {}
     for x in by_kind("university"):          # Bangla alphabetical order, grouped by first letter
         letters.setdefault(x.name[:1], []).append(x)
-    others = [(label, by_kind(k)) for k, label in Source.KINDS[1:] if by_kind(k)]
+    others = [(tr(label), by_kind(k)) for k, label in Source.KINDS[1:] if by_kind(k)]
     return render(request, "exams/bank.html", {
         "tab": "institution" if request.GET.get("tab") == "institution" else "subject",
         "tracks": Track.objects.all(),
@@ -273,7 +274,7 @@ def profile(request):
     form = ProfileForm(request.POST or None, instance=prof, user=request.user)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, "প্রোফাইল সংরক্ষণ করা হয়েছে।")
+        messages.success(request, tr("প্রোফাইল সংরক্ষণ করা হয়েছে।"))
         return redirect("exam_profile")
     done = request.user.exams.filter(submitted_at__isnull=False)
     totals = ExamQuestion.objects.filter(exam__in=done).aggregate(
@@ -285,3 +286,15 @@ def profile(request):
         "mine": Question.objects.filter(author=request.user).count() if request.user.is_staff else 0,
         "drafts": Question.objects.filter(status=Question.DRAFT).count() if roles.can_approve(request.user) else 0})
 
+
+
+def set_language(request, code):
+    """Remember the interface language, then go back to where the visitor was."""
+    from django.utils.http import url_has_allowed_host_and_scheme
+    back = request.META.get("HTTP_REFERER", "")
+    if not url_has_allowed_host_and_scheme(back, allowed_hosts={request.get_host()}):
+        back = reverse("exam_home")
+    response = redirect(back)
+    if code in ("bn", "en"):
+        response.set_cookie("lang", code, max_age=60 * 60 * 24 * 365, samesite="Lax")
+    return response

@@ -1,0 +1,25 @@
+{% extends "exams/base.html" %}{% load bn %}
+{% block title %}{% t "লগইন" %}{% endblock %}
+{% block body %}
+<section class="authwrap"><div class="authcard">
+  {% include "account/_authshell.html" %}
+  <div class="authmain">
+    <div class="authtabs"><a class="on" href="{% url 'account_login' %}">{% t "লগইন" %}</a><a href="{% url 'account_signup' %}">{% t "নতুন অ্যাকাউন্ট" %}</a></div>
+    <h1>{% t "আবার স্বাগতম" %}</h1>
+    <p class="muted">{% t "তোমার অগ্রগতি ও মেধাতালিকার অবস্থান দেখতে লগইন করো" %}</p>
+    <form method="post" action="{% url 'account_login' %}" class="authform">{% csrf_token %}{{ redirect_field }}
+      {% if form.non_field_errors %}<div class="autherr">{{ form.non_field_errors }}</div>{% endif %}
+      <label for="{{ form.login.id_for_label }}">{% t "ইমেইল" %}</label>{{ form.login }}{{ form.login.errors }}
+      <label for="{{ form.password.id_for_label }}">{% t "পাসওয়ার্ড" %}</label>
+      <div class="pw">{{ form.password }}<button type="button" class="pwt" aria-label="show / hide password"><i class="bi bi-eye"></i></button></div>{{ form.password.errors }}
+      <div class="authrow"><label class="rem">{{ form.remember }} <span>{% t "আমাকে মনে রাখো" %}</span></label><a href="{% url 'account_reset_password' %}">{% t "পাসওয়ার্ড ভুলে গেছ?" %}</a></div>
+      <button class="btn pri lg" style="width:100%">{% t "লগইন করো" %}</button>
+    </form>
+    {% include "account/_socials.html" with process="login" %}
+    <p class="authswitch">{% t "অ্যাকাউন্ট নেই?" %} <a href="{% url 'account_signup' %}">{% t "নতুন অ্যাকাউন্ট খোলো" %}</a></p>
+  </div>
+</div></section>
+{% endblock %}
+{% block scripts %}<script>
+document.querySelectorAll('.pwt').forEach(function(b){b.onclick=function(){var i=b.parentNode.querySelector('input');var s=i.type==='password';i.type=s?'text':'password';b.querySelector('i').className='bi bi-eye'+(s?'-slash':'')}});
+</script>{% endblock %}

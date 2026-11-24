@@ -1,14 +1,14 @@
 {% extends "exams/base.html" %}{% load bn %}
 {% block title %}{{ track.name }}{% endblock %}
 {% block body %}
-<div class="pagehead"><div class="wrap"><div class="crumb"><a href="{% url 'exam_home' %}">হোম</a> / {{ track.get_kind_display }}</div>
+<div class="pagehead"><div class="wrap"><div class="crumb"><a href="{% url 'exam_home' %}">{% t "হোম" %}</a> / {{ track.get_kind_display|tr }}</div>
   <h1>{{ track.name }}</h1></div></div>
 <section class="sec"><div class="wrap grid c2" style="align-items:start">
-  <div class="paper notebook"><h3 style="margin-bottom:.6rem">বিষয়সমূহ</h3>
-    {% for s in subjects %}<a class="leader" href="{% url 'exam_subject' s.id %}"><span>{{ s.name }}</span><span class="dots"></span><b>{{ s.mcq|bn }}টি MCQ</b></a>
-    {% empty %}<p class="muted">শীঘ্রই আসছে।</p>{% endfor %}</div>
-  <div><h3 style="margin-bottom:.8rem">প্রশ্নব্যাংক</h3>
-    {% for s in sources %}<a class="paper folder" style="margin-bottom:.8rem" href="{% url 'exam_practice' %}?source={{ s.id }}"><i class="bi bi-folder2-open"></i><span><b>{{ s.name }}</b><small>{{ s.n|bn }}টি প্রশ্ন</small></span></a>
-    {% empty %}<p class="muted">এখনো কোনো প্রশ্নব্যাংক নেই।</p>{% endfor %}</div>
+  <div class="paper notebook"><h3 style="margin-bottom:.6rem">{% t "বিষয়সমূহ" %}</h3>
+    {% for s in subjects %}<a class="leader" href="{% url 'exam_subject' s.id %}"><span>{{ s.name }}</span><span class="dots"></span><b>{{ s.mcq|bn }}{% t "টি" %} MCQ</b></a>
+    {% empty %}<p class="muted">{% t "শীঘ্রই আসছে।" %}</p>{% endfor %}</div>
+  <div><h3 style="margin-bottom:.8rem">{% t "প্রশ্নব্যাংক" %}</h3>
+    {% for s in sources %}<a class="paper folder" style="margin-bottom:.8rem" href="{% url 'exam_practice' %}?source={{ s.id }}"><i class="bi bi-folder2-open"></i><span><b>{{ s.name }}</b><small>{{ s.n|bn }}{% t "টি প্রশ্ন" %}</small></span></a>
+    {% empty %}<p class="muted">{% t "এখনো কোনো প্রশ্নব্যাংক নেই।" %}</p>{% endfor %}</div>
 </div></section>
 {% endblock %}

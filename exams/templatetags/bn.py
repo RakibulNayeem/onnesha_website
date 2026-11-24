@@ -1,5 +1,7 @@
 from django import template
 
+from exams.i18n import is_en, tr
+
 register = template.Library()
 _DIGITS = str.maketrans("0123456789", "০১২৩৪৫৬৭৮৯")
 _LETTERS = {"a": "ক", "b": "খ", "c": "গ", "d": "ঘ"}
@@ -7,14 +9,14 @@ _LETTERS = {"a": "ক", "b": "খ", "c": "গ", "d": "ঘ"}
 
 @register.filter
 def bn(value):
-    """12 -> ১২ (Bangla digits)."""
-    return str(value).translate(_DIGITS)
+    """12 -> ১২ in Bangla; unchanged in English."""
+    return str(value) if is_en() else str(value).translate(_DIGITS)
 
 
 @register.filter
 def bnletter(key):
-    """'a' -> ক, the option labels Bangladeshi papers use."""
-    return _LETTERS.get(key, key)
+    """'a' -> ক in Bangla, 'A' in English: the option labels."""
+    return key.upper() if is_en() else _LETTERS.get(key, key)
 
 
 @register.filter
@@ -27,3 +29,16 @@ def tile(pk):
 def initial(name):
     """First letter of a name, for the watermark / badge."""
     return str(name).strip()[:1]
+
+
+@register.simple_tag
+def t(msg, **kw):
+    """{% t "বাংলা লেখা" %} -> English when the interface is English. Extra keywords fill {placeholders}."""
+    out = tr(msg)
+    return out.format(**kw) if kw else out
+
+
+@register.filter(name="tr")
+def tr_filter(value):
+    """Translate a Bangla label that comes from the database/choices, e.g. {{ t.get_kind_display|tr }}."""
+    return tr(str(value))

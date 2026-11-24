@@ -1,0 +1,9 @@
+{% load bn socialaccount %}{% get_providers as providers %}
+{% if providers %}
+<div class="author"><span>{% t "অথবা" %}</span></div>
+<div class="socials">
+  {% for provider in providers %}
+  <a class="sbtn" href="{% provider_login_url provider process=process|default:'login' %}"><i class="bi bi-{% if provider.id == 'google' %}google{% elif provider.id == 'facebook' %}facebook{% else %}box-arrow-in-right{% endif %}"></i> {% t "{name} দিয়ে চালিয়ে যাও" name=provider.name %}</a>
+  {% endfor %}
+</div>
+{% endif %}

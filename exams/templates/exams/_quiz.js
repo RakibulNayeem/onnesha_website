@@ -1,4 +1,5 @@
-var BN='০১২৩৪৫৬৭৮৯', LET={a:'ক',b:'খ',c:'গ',d:'ঘ'}, toBn=function(n){return String(n).replace(/\d/g,function(d){return BN[d]})};
+{% load bn %}
+var BN='{% t "০১২৩৪৫৬৭৮৯" %}', LET={a:'{% t "ক" %}',b:'{% t "খ" %}',c:'{% t "গ" %}',d:'{% t "ঘ" %}'}, toBn=function(n){return String(n).replace(/\d/g,function(d){return BN[d]})};
 var streak=0, pts=0;
 function bump(id,val){ var e=document.getElementById(id); if(e){ e.textContent=toBn(val); e.classList.remove('bump'); void e.offsetWidth; e.classList.add('bump'); } }
 function answer(card,b){
@@ -28,7 +29,7 @@ document.querySelectorAll('.pq[data-next]').forEach(function(card){
       q.options.forEach(function(o){ var el=document.createElement('button'); el.type='button'; el.className='opt'; el.dataset.k=o.k;
         var bub=document.createElement('span'); bub.className='bub'; bub.textContent=LET[o.k]; var tx=document.createElement('span'); tx.textContent=o.v;
         el.append(bub,tx); card.insertBefore(el,note); });
-      strong.textContent='সঠিক উত্তর: '+LET[q.correct]; var ex=note.querySelector('.ex'); ex.textContent=q.explanation?(' — '+q.explanation):'';
+      strong.textContent='{% t "সঠিক উত্তর: " %}'+LET[q.correct]; var ex=note.querySelector('.ex'); ex.textContent=q.explanation?(' — '+q.explanation):'';
       note.hidden=true; bind(card); card.classList.remove('swap'); void card.offsetWidth; card.classList.add('swap');
     }).catch(function(){btn.disabled=false});
   });

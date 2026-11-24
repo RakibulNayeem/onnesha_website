@@ -24,7 +24,8 @@ def role(user):
 
 
 def label(user):
-    return LABELS[role(user)]
+    from .i18n import tr
+    return tr(LABELS[role(user)])
 
 
 def can_approve(user):

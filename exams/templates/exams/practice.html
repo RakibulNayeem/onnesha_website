@@ -1,25 +1,25 @@
 {% extends "exams/base.html" %}{% load bn %}
-{% block title %}প্র্যাকটিস{% endblock %}
+{% block title %}{% t "প্র্যাকটিস" %}{% endblock %}
 {% block body %}
-<div class="pagehead"><div class="wrap"><div class="crumb"><a href="{% url 'exam_build' %}?mode=quick">প্র্যাকটিস</a></div>
-  <h1>প্র্যাকটিস</h1>
+<div class="pagehead"><div class="wrap"><div class="crumb"><a href="{% url 'exam_build' %}?mode=quick">{% t "প্র্যাকটিস" %}</a></div>
+  <h1>{% t "প্র্যাকটিস" %}</h1>
   <div style="display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;margin-top:.6rem">
     {% for c in chips %}<span class="tag hl">{{ c }}</span>{% endfor %}
-    <a class="btn sm" href="{% url 'exam_build' %}?mode=quick"><i class="bi bi-sliders"></i> বিষয়/অধ্যায় বদলাও</a></div></div></div>
+    <a class="btn sm" href="{% url 'exam_build' %}?mode=quick"><i class="bi bi-sliders"></i> {% t "বিষয়/অধ্যায় বদলাও" %}</a></div></div></div>
 <section class="sec"><div class="wrap" style="max-width:780px">
-  <div class="tally"><span class="chip2">{{ page.paginator.count|bn }}টি প্রশ্ন</span><span class="chip2 ok"><i class="bi bi-check-lg"></i><b id="t-ok">০</b></span><span class="chip2 no"><i class="bi bi-x-lg"></i><b id="t-no">০</b></span>
-    <span class="pbar"><i id="t-bar"></i></span><span class="chip2"><b id="t-pct">০%</b></span><span class="chip2">🔥 <b id="t-streak">০</b></span><span class="chip2">⭐ <b id="t-pts">০</b></span></div>
+  <div class="tally"><span class="chip2">{{ page.paginator.count|bn }}{% t "টি প্রশ্ন" %}</span><span class="chip2 ok"><i class="bi bi-check-lg"></i><b id="t-ok">{% t "০" %}</b></span><span class="chip2 no"><i class="bi bi-x-lg"></i><b id="t-no">{% t "০" %}</b></span>
+    <span class="pbar"><i id="t-bar"></i></span><span class="chip2"><b id="t-pct">{% t "০" %}%</b></span><span class="chip2">🔥 <b id="t-streak">{% t "০" %}</b></span><span class="chip2">⭐ <b id="t-pts">{% t "০" %}</b></span></div>
   {% for q in page %}
   <div class="paper qcard pq" data-correct="{{ q.correct }}">
     <div class="qmeta"><span class="tag hl">{{ q.subject.name }}</span>{% if q.chapter %}<span class="tag">{{ q.chapter.name }}</span>{% endif %}{% if q.refs %}<span class="tag">{{ q.refs }}</span>{% elif q.source %}<span class="tag">{{ q.source.name }}</span>{% endif %}</div>
     <div class="qtext"><span class="qno">{{ page.start_index|add:forloop.counter0|bn }}.</span> {{ q.text|linebreaksbr }}</div>
     {% for k, v in q.options %}<button type="button" class="opt" data-k="{{ k }}"><span class="bub">{{ k|bnletter }}</span><span>{{ v }}</span></button>{% endfor %}
-    <div class="note" hidden><b>সঠিক উত্তর: {{ q.correct|bnletter }}</b>{% if q.explanation %} — {{ q.explanation|linebreaksbr }}{% endif %}</div>
+    <div class="note" hidden><b>{% t "সঠিক উত্তর" %}: {{ q.correct|bnletter }}</b>{% if q.explanation %} — {{ q.explanation|linebreaksbr }}{% endif %}</div>
   </div>
-  {% empty %}<div class="paper" style="text-align:center"><p class="muted">এই নির্বাচনে এখনো কোনো প্রশ্ন নেই।</p></div>{% endfor %}
+  {% empty %}<div class="paper" style="text-align:center"><p class="muted">{% t "এই নির্বাচনে এখনো কোনো প্রশ্ন নেই।" %}</p></div>{% endfor %}
   <div class="pager">
-    {% if page.has_previous %}<a class="btn" href="?{{ qs }}&page={{ page.previous_page_number }}">← আগের</a>{% else %}<span></span>{% endif %}
-    {% if page.has_next %}<a class="btn pri" href="?{{ qs }}&page={{ page.next_page_number }}">পরের →</a>{% endif %}
+    {% if page.has_previous %}<a class="btn" href="?{{ qs }}&page={{ page.previous_page_number }}">← {% t "আগের" %}</a>{% else %}<span></span>{% endif %}
+    {% if page.has_next %}<a class="btn pri" href="?{{ qs }}&page={{ page.next_page_number }}">{% t "পরের" %} →</a>{% endif %}
   </div>
 </div></section>
 {% endblock %}
