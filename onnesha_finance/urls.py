@@ -5,10 +5,8 @@ from django.urls import include, path
 
 urlpatterns = [
     path("django-admin/", admin.site.urls),
-    # The staff-only finance system now lives under /manage/
-    path("manage/", include("core.urls")),
-    # The public website is the front door
-    path("", include("website.urls")),
+    path("accounts/", include("allauth.urls")),
+    path("", include("exams.urls")),
 ]
 
 if settings.DEBUG:

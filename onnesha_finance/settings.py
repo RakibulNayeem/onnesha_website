@@ -32,8 +32,13 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
-    "core",
-    "website",
+    # exams must precede allauth so its template overrides win
+    "exams",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.facebook",
 ]
 
 MIDDLEWARE = [
@@ -44,6 +49,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
@@ -60,9 +66,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "core.context_processors.centre_info",
-                "core.context_processors.nav",
-                "website.context_processors.site",
+                "exams.context.hud",
             ],
         },
     },
@@ -117,23 +121,37 @@ WHITENOISE_MAX_AGE = 60 * 60 * 24 * 7
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-LOGIN_URL = "login"
+LOGIN_URL = "account_login"
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
-LOGIN_REDIRECT_URL = "dashboard"
-LOGOUT_REDIRECT_URL = "login"
+LOGIN_REDIRECT_URL = "exam_dashboard"
+LOGOUT_REDIRECT_URL = "exam_home"
 
-# --- Onnesha specific -----------------------------------------------------
-CENTRE_NAME = os.environ.get("CENTRE_NAME", "\u0985\u09a8\u09cd\u09ac\u09c7\u09b7\u09be | Onnesha")
-CENTRE_TAGLINE = os.environ.get(
-    "CENTRE_TAGLINE", "\u098f\u0995\u09be\u09a1\u09c7\u09ae\u09bf\u0995 \u098f\u09a8\u09cd\u09a1 \u098f\u09a1\u09ae\u09bf\u09b6\u09a8 \u0995\u09c7\u09df\u09be\u09b0"
-)
-CENTRE_ADDRESS = os.environ.get(
-    "CENTRE_ADDRESS", "Chowdhurypara, Town Colony Charmatha, Sherpur, Bogura"
-)
-CENTRE_PHONE = os.environ.get("CENTRE_PHONE", "")
-STUDENT_ID_PREFIX = os.environ.get("STUDENT_ID_PREFIX", "ONS")
+# --- Student accounts (django-allauth) -----------------------------------
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+# No mail server is wired up yet; turn this on once EMAIL_* is configured.
+ACCOUNT_EMAIL_VERIFICATION = os.environ.get("ACCOUNT_EMAIL_VERIFICATION", "none")
+ACCOUNT_LOGOUT_ON_GET = False
+SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+if not DEBUG:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+
+# A provider button appears only when its keys are set in the environment.
+SOCIALACCOUNT_PROVIDERS = {}
+for _name in ("google", "facebook"):
+    _id = os.environ.get(f"{_name.upper()}_CLIENT_ID")
+    _secret = os.environ.get(f"{_name.upper()}_CLIENT_SECRET")
+    if _id and _secret:
+        SOCIALACCOUNT_PROVIDERS[_name] = {"APP": {"client_id": _id, "secret": _secret}}
+
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

@@ -1,0 +1,40 @@
+{% extends "exams/base.html" %}{% load bn %}
+{% block title %}প্রোফাইল{% endblock %}
+{% block body %}
+<div class="pagehead"><div class="wrap" style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+  <span class="avatar">{{ user.get_username|slice:":1"|upper }}</span>
+  <div><h1 style="margin:0">{% firstof user.get_full_name user.username %}</h1>
+    <div style="display:flex;gap:.5rem;align-items:center;margin-top:.2rem"><span class="tag hl">{{ role }}</span><span class="muted">{{ user.email }}</span></div></div>
+</div></div>
+<section class="sec"><div class="wrap grid c2" style="align-items:start">
+  <form method="post" class="paper form">{% csrf_token %}
+    <h3 style="margin-bottom:.8rem">আমার তথ্য</h3>
+    {{ form.non_field_errors }}
+    <div class="grid c2">{% for f in form %}<div {% if f.name in "institution target" %}style="grid-column:1/-1"{% endif %}><label class="t">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}</div>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem"><button class="btn pri">সংরক্ষণ করো</button>
+      <a class="btn" href="{% url 'account_change_password' %}">পাসওয়ার্ড বদলাও</a></div>
+  </form>
+  <div>
+    <div class="tiles" style="margin-bottom:1rem">
+      <div class="tile"><b>{{ n_exams|bn }}</b><span>পরীক্ষা দিয়েছ</span></div>
+      <div class="tile ok"><b>{{ accuracy|bn }}%</b><span>গড় সঠিকতা</span></div>
+    </div>
+    {% if can_panel %}
+    <div class="paper"><h3 style="margin-bottom:.4rem">অ্যাডমিন প্যানেল</h3>
+      <p class="muted" style="margin-bottom:.8rem">আপনার ভূমিকা: <b>{{ role }}</b></p>
+      <div class="plinks">
+        <a href="/django-admin/exams/question/add/"><i class="bi bi-plus-circle"></i> নতুন প্রশ্ন লেখো</a>
+        <a href="/django-admin/exams/question/"><i class="bi bi-list-check"></i> {% if role_key == 'Teacher' %}আমার প্রশ্ন ({{ mine|bn }}){% else %}সব প্রশ্ন{% endif %}</a>
+        {% if drafts or role_key == 'Moderator' or role_key == 'Admin' or role_key == 'superuser' %}<a href="/django-admin/exams/question/?status__exact=draft"><i class="bi bi-clipboard-check"></i> রিভিউ কিউ ({{ drafts|bn }})</a>{% endif %}
+        {% if role_key == 'Admin' or role_key == 'superuser' %}<a href="/django-admin/auth/user/"><i class="bi bi-people"></i> ব্যবহারকারী ও ভূমিকা</a>
+        <a href="/django-admin/exams/source/"><i class="bi bi-archive"></i> প্রশ্নব্যাংক ও লোগো</a>{% endif %}
+        <a href="/django-admin/"><i class="bi bi-box-arrow-up-right"></i> সম্পূর্ণ প্যানেল</a>
+      </div></div>
+    {% else %}
+    <div class="paper"><h3 style="margin-bottom:.3rem">প্রশ্ন লিখতে চাও?</h3><p class="muted">শিক্ষক বা প্রশ্নকর্তা হিসেবে যুক্ত হতে অ্যাডমিনের সঙ্গে যোগাযোগ করো।</p></div>
+    {% endif %}
+    <form method="post" action="{% url 'account_logout' %}" style="margin-top:1rem">{% csrf_token %}
+      <button class="btn" style="width:100%"><i class="bi bi-box-arrow-right"></i> লগআউট</button></form>
+  </div>
+</div></section>
+{% endblock %}

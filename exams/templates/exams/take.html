@@ -1,0 +1,59 @@
+{% extends "exams/base.html" %}{% load bn %}
+{% block title %}{{ exam.title }}{% endblock %}
+{% block body %}
+<div class="examtop"><div class="wrap">
+  <span class="ttl">{{ exam.title }}</span>
+  <span class="clock" id="clock">--:--</span></div></div>
+<form method="post" id="exam" class="wrap" style="padding-top:1.1rem;padding-bottom:2rem">{% csrf_token %}
+  <div class="bar" style="margin-bottom:1rem"><i id="prog" style="width:0"></i></div>
+  <div class="examgrid">
+    <div>
+      {% for it in items %}
+      <div class="paper slide" data-i="{{ forloop.counter0 }}">
+        <div class="qmeta"><span class="qno">প্রশ্ন {{ forloop.counter|bn }} / {{ items|length|bn }}</span>
+          {% if it.question.chapter %}<span class="tag">{{ it.question.chapter.name }}</span>{% endif %}</div>
+        <div class="qtext">{{ it.question.text|linebreaksbr }}</div>
+        {% for k, v in it.question.options %}
+          <label class="opt"><input type="radio" name="q{{ it.question_id }}" value="{{ k }}" hidden><span class="bub">{{ k|bnletter }}</span><span>{{ v }}</span></label>{% endfor %}
+        <div style="margin-top:.8rem"><button type="button" class="btn link sm clear">উত্তর মুছো</button> <button type="button" class="btn link sm flag"><i class="bi bi-flag"></i> পরে দেখব</button></div>
+      </div>{% endfor %}
+      <div class="pager">
+        <button type="button" class="btn" id="prev">← আগের</button>
+        <button type="button" class="btn pri" id="next">পরের →</button>
+        <button type="submit" class="btn red" id="submit" hidden onclick="return confirm('জমা দেবে? উত্তর আর বদলানো যাবে না।')">জমা দাও</button>
+      </div>
+    </div>
+    <aside class="paper omr"><h4 style="margin-bottom:.5rem">OMR শিট</h4>
+      {% for it in items %}<div class="omr-row" data-i="{{ forloop.counter0 }}"><span class="n">{{ forloop.counter|bn }}</span>
+        {% for k, v in it.question.options %}<span class="b" data-k="{{ k }}">{{ k|bnletter }}</span>{% endfor %}</div>{% endfor %}
+      <button type="submit" class="btn red" style="width:100%;margin-top:.8rem" onclick="return confirm('জমা দেবে? উত্তর আর বদলানো যাবে না।')">জমা দাও</button>
+    </aside>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}<script>
+var slides=[...document.querySelectorAll('.slide')], rows=[...document.querySelectorAll('.omr-row')], cur=0;
+function show(i){ cur=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,j)=>s.classList.toggle('on',j===cur)); rows.forEach((r,j)=>r.classList.toggle('cur',j===cur));
+  document.getElementById('prev').style.visibility = cur? 'visible':'hidden';
+  document.getElementById('next').hidden = cur===slides.length-1; document.getElementById('submit').hidden = cur!==slides.length-1;
+  rows[cur].scrollIntoView({block:'nearest'}); window.scrollTo({top:0}); }
+function refresh(){ var done=0;
+  slides.forEach(function(s,j){ var c=s.querySelector('input:checked'); if(c) done++;
+    s.querySelectorAll('.opt').forEach(o=>o.classList.toggle('sel',o.querySelector('input').checked));
+    rows[j].querySelectorAll('.b').forEach(b=>b.classList.toggle('f',!!c && c.value===b.dataset.k)); });
+  document.getElementById('prog').style.width = (100*done/slides.length)+'%'; }
+slides.forEach(function(s,j){
+  s.addEventListener('change',refresh);
+  s.querySelector('.clear').onclick=function(){ var c=s.querySelector('input:checked'); if(c){c.checked=false;refresh();} };
+  s.querySelector('.flag').onclick=function(){ rows[j].classList.toggle('flag'); };
+});
+rows.forEach((r,j)=>r.onclick=()=>show(j));
+document.getElementById('prev').onclick=()=>show(cur-1); document.getElementById('next').onclick=()=>show(cur+1);
+document.addEventListener('keydown',function(e){ if(e.key==='ArrowRight')show(cur+1); if(e.key==='ArrowLeft')show(cur-1); });
+var left={{ remaining }}, el=document.getElementById('clock'), D='০১২৩৪৫৬৭৮৯';
+function bn(s){return s.replace(/\d/g,d=>D[d]);}
+(function tick(){ var m=Math.floor(left/60), s=left%60; el.textContent=bn(String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'));
+  el.classList.toggle('low', left<=60); if(left<=0){ document.getElementById('exam').submit(); return; } left--; setTimeout(tick,1000); })();
+show(0); refresh();
+</script>{% endblock %}

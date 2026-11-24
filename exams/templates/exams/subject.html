@@ -1,0 +1,17 @@
+{% extends "exams/base.html" %}{% load bn %}
+{% block title %}{{ subject.name }}{% endblock %}
+{% block body %}
+<div class="pagehead"><div class="wrap"><div class="crumb"><a href="{% url 'exam_home' %}">হোম</a> / <a href="{% url 'exam_track' subject.track.slug %}">{{ subject.track.name }}</a></div>
+  <h1>{{ subject.name }}</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1rem">
+    <a class="btn pri" href="{% url 'exam_practice' %}?subject={{ subject.id }}">প্র্যাকটিস ({{ total|bn }})</a>
+    <a class="btn" href="{% url 'exam_build' %}?subject={{ subject.id }}"><i class="bi bi-stopwatch"></i> মডেল টেস্ট</a></div></div></div>
+<section class="sec"><div class="wrap grid c2" style="align-items:start">
+  <div class="paper notebook"><h3 style="margin-bottom:.6rem">অধ্যায়</h3>
+    {% for c in chapters %}<a class="leader" href="{% url 'exam_practice' %}?subject={{ subject.id }}&chapter={{ c.id }}"><span>{{ forloop.counter|bn }}. {{ c.name }}</span><span class="dots"></span><b>{{ c.n|bn }}টি</b></a>
+    {% empty %}<p class="muted">অধ্যায় যোগ করা হয়নি।</p>{% endfor %}</div>
+  <div><h3 style="margin-bottom:.8rem">যে প্রশ্নব্যাংকে আছে</h3>
+    {% for s in sources %}<a class="paper folder" style="margin-bottom:.8rem" href="{% url 'exam_practice' %}?subject={{ subject.id }}&source={{ s.id }}"><i class="bi bi-folder2-open"></i><span><b>{{ s.name }}</b><small>{{ s.n|bn }}টি প্রশ্ন</small></span></a>
+    {% empty %}<p class="muted">—</p>{% endfor %}</div>
+</div></section>
+{% endblock %}

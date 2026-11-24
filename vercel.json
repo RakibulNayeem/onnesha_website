@@ -4,9 +4,9 @@
       "src": "onnesha_finance/wsgi.py",
       "use": "@vercel/python",
       "config": {
-        "maxLambdaSize": "15mb",
+        "maxLambdaSize": "30mb",
         "runtime": "python3.12",
-        "includeFiles": "{core,website,onnesha_finance,static}/**"
+        "includeFiles": "{exams,onnesha_finance,static}/**"
       }
     }
   ],
