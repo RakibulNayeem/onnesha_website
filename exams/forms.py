@@ -37,6 +37,7 @@ class ProfileForm(forms.ModelForm):
     last_name = forms.CharField(label=_("পদবি"), max_length=150, required=False)
     PERSONAL = ["first_name", "last_name", "birth_date", "gender", "phone", "address"]
     ACADEMIC = ["institution", "level", "division", "batch_year"]
+    batch_year = forms.TypedChoiceField(label=_("ব্যাচ (পরীক্ষার বছর)"), required=False, coerce=int, empty_value=None)
     field_order = PERSONAL + ACADEMIC
 
     class Meta:
@@ -45,14 +46,17 @@ class ProfileForm(forms.ModelForm):
         labels = {"phone": _("ফোন"), "birth_date": _("জন্ম তারিখ"), "gender": _("ছাত্র/ছাত্রী"),
                   "address": _("ঠিকানা"), "institution": _("শিক্ষা প্রতিষ্ঠানের নাম"),
                   "level": _("কী নিয়ে চর্চা করতে চাও?"), "division": _("বিভাগ"), "batch_year": _("ব্যাচ (পরীক্ষার বছর)")}
-        widgets = {"birth_date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
-                   "batch_year": forms.NumberInput(attrs={"min": 2000, "max": 2100, "placeholder": "2027"})}
+        widgets = {"birth_date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")}
 
     def __init__(self, *args, user, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
         self.fields["first_name"].initial, self.fields["last_name"].initial = user.first_name, user.last_name
+        from datetime import date
         from .i18n import tr
+        year = date.today().year
+        years = set(range(year - 1, year + 9)) | ({self.instance.batch_year} if self.instance.batch_year else set())
+        self.fields["batch_year"].choices = [("", tr("বাছাই করো"))] + [(y, y) for y in sorted(years)]
         for k in ("gender", "level", "division"):
             self.fields[k].choices = [("", tr("বাছাই করো"))] + [(v, tr(l)) for v, l in self.fields[k].choices if v]
 
