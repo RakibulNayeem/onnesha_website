@@ -54,6 +54,19 @@ class ExamFlow(TestCase):
         self.assertEqual(self.client.get(reverse("exam_result", args=[exam.pk])).status_code, 200)
         self.assertEqual(self.client.get(reverse("exam_dashboard")).status_code, 200)
 
+    def test_reserved_questions_stay_out_of_the_bank_but_reach_exams(self):
+        held = Source.objects.create(name="Model Test 1", kind="other")
+        r = mcq(self.subj, 500, source=held)
+        r.reserved = True
+        r.save()
+        page = self.client.get(reverse("exam_practice") + f"?subject={self.subj.id}")
+        self.assertNotContains(page, "Q500")                       # not in practice
+        self.assertNotContains(self.client.get(reverse("exam_bank")), "Model Test 1")
+        self.assertNotContains(self.client.get(reverse("exam_subject", args=[self.subj.id])), "Model Test 1")
+        self.client.force_login(self.user)
+        self.client.post(reverse("exam_build"), {"subjects": [self.subj.id], "count": 50})
+        self.assertIn(r.pk, Exam.objects.get().items.values_list("question_id", flat=True))  # but in exams
+
     def test_other_students_exam_is_private(self):
         exam = Exam.objects.create(user=self.user, title="t", duration_minutes=5)
         other = User.objects.create_user("o", "o@x.com", "pw12345!")

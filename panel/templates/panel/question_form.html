@@ -37,6 +37,7 @@
           {% for e in form.chapter.errors %}<small class="ferr">{{ e }}</small>{% endfor %}</div>
         {% include "panel/_field.html" with f=form.source %}
         {% include "panel/_field.html" with f=form.refs %}
+        <label class="pcheck">{{ form.reserved }} {{ form.reserved.label }} <small class="hint">— hidden from the bank and practice; shown only in self-test exams</small></label>
       </div>
       <div class="pcard pact">
         {% if problems %}<div class="pwarn"><b>Not ready to publish:</b> {{ problems|join:", " }}.</div>{% endif %}

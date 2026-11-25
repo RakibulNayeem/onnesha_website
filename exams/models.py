@@ -87,6 +87,9 @@ class Question(models.Model):
                             help_text="Where it appeared, as printed in the book, e.g. ঢা. বো.'২৩; ব. বো.'২২")
     # CQ only: [{"q": "...", "marks": 1, "answer": "..."}, ...]
     parts = models.JSONField(default=list, blank=True)
+    reserved = models.BooleanField(
+        default=False, db_index=True,
+        help_text="Held back for self-test exams: not shown in the question bank, practice or CQ pages.")
     status = models.CharField(max_length=10, choices=STATUSES, default=DRAFT, db_index=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
                                on_delete=models.SET_NULL, related_name="questions")

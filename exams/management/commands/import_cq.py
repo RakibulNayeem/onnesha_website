@@ -2,7 +2,7 @@
 
     python manage.py import_cq exams/data/ssc_physics/cq01.txt
 
-File format (same @headers as import_bank):
+File format (same @headers as import_bank, including @bank, @reserved and an optional @chapter):
     Q no || refs || stem (¶ = line break)
     ক || marks || question || model answer (may be empty)
     খ || ...                      (up to four part lines, in order, follow each Q line)
@@ -48,22 +48,25 @@ class Command(BaseCommand):
                     if cur is None or len(f) != 4 or f[0] not in LETTERS or f[0] != LETTERS[len(cur["parts"])]:
                         raise CommandError(f"{path}:{n}: bad part line (need ক/খ/গ/ঘ in order, 4 fields)")
                     cur["parts"].append({"q": f[2].replace(" ¶ ", "\n"), "marks": int(f[1].translate(BN)), "answer": f[3].replace(" ¶ ", "\n")})
-            for need in ("track", "subject", "chapter"):
+            for need in ("track", "subject"):
                 if need not in head:
                     raise CommandError(f"{path}: missing @{need} header")
             tslug, tname, tkind = head["track"].split(" ", 2)
-            order, cname = head["chapter"].split(" ", 1)
             track, _ = Track.objects.get_or_create(slug=tslug, defaults={"name": tname, "kind": tkind})
             subject, _ = Subject.objects.get_or_create(track=track, name=head["subject"])
-            chapter, _ = Chapter.objects.get_or_create(subject=subject, name=cname, defaults={"order": int(order)})
+            chapter, cname = None, "(no chapter)"
+            if "chapter" in head:
+                order, cname = head["chapter"].split(" ", 1)
+                chapter, _ = Chapter.objects.get_or_create(subject=subject, name=cname, defaults={"order": int(order)})
+            reserved = head.get("reserved") == "1"   # @reserved 1 -> held back for self-test exams
             for c in cqs:
                 if not c["parts"]:
                     raise CommandError(f"{path}:{c['n']}: Q{c['no']} has no parts")
-                name, year, kind = bank_for(c["refs"]) or (GENERAL_BANK, 2026, "other")
+                name, year, kind = (head["bank"], 2026, "other") if "bank" in head else bank_for(c["refs"]) or (GENERAL_BANK, 2026, "other")
                 source, _ = Source.objects.get_or_create(name=name, defaults={"kind": kind, "year": year})
                 Question.objects.update_or_create(
                     subject=subject, chapter=chapter, text=c["stem"], qtype=Question.CQ,
-                    defaults=dict(source=source, refs=c["refs"], parts=c["parts"], status=Question.APPROVED))
+                    defaults=dict(source=source, refs=c["refs"], parts=c["parts"], status=Question.APPROVED, reserved=reserved))
             total += len(cqs)
             self.stdout.write(f"{path}: {len(cqs)} CQs -> {subject.name} / {cname}")
         self.stdout.write(self.style.SUCCESS(f"done: {total} CQs imported"))

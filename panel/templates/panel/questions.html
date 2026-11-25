@@ -24,7 +24,7 @@
     <td><a href="{% url 'panel_question_edit' q.pk %}">{{ q.text|truncatechars:90 }}</a><small><span class="ptype">{{ q.get_qtype_display }}</span>{% if q.refs %} {{ q.refs|truncatechars:40 }}{% endif %}</small></td>
     <td>{{ q.subject.name }}<small>{{ q.chapter.name|default:"—" }}</small></td>
     <td>{{ q.source.name|default:"—"|truncatechars:26 }}</td>
-    <td><span class="pst {{ q.status }}">{% if q.status == 'approved' %}Published{% else %}Draft{% endif %}</span>{% if q.problems %}<small class="ferr" title="{{ q.problems|join:', ' }}">incomplete</small>{% endif %}</td>
+    <td><span class="pst {{ q.status }}">{% if q.status == 'approved' %}Published{% else %}Draft{% endif %}</span>{% if q.reserved %}<small class="hint" title="Held back for exams">exam-only</small>{% endif %}{% if q.problems %}<small class="ferr" title="{{ q.problems|join:', ' }}">incomplete</small>{% endif %}</td>
     <td>{{ q.author.username|default:"—" }}</td>
     <td class="r"><a class="btn sm" href="{% url 'panel_question_edit' q.pk %}">Edit</a></td></tr>
   {% empty %}<tr><td colspan="7" class="pempty muted">No questions match.</td></tr>{% endfor %}</tbody></table></div>

@@ -13,12 +13,13 @@ class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
         fields = ["qtype", "subject", "chapter", "source", "text", "option_a", "option_b", "option_c",
-                  "option_d", "correct", "explanation", "refs"]
+                  "option_d", "correct", "explanation", "refs", "reserved"]
         widgets = {"text": forms.Textarea(attrs={"rows": 5}), "explanation": forms.Textarea(attrs={"rows": 3}),
                    "correct": forms.RadioSelect}
         labels = {"qtype": "Type", "text": "Question (or CQ stem)", "refs": "Where it appeared",
                   "option_a": "ক  (a)", "option_b": "খ  (b)", "option_c": "গ  (c)", "option_d": "ঘ  (d)",
-                  "correct": "Correct option", "source": "Question bank"}
+                  "correct": "Correct option", "source": "Question bank",
+                  "reserved": "Hold back for exams"}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

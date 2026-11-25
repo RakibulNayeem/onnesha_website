@@ -5,6 +5,8 @@
 Safe to run again: a question is matched by subject + chapter + text, so re-runs update instead of duplicating.
 Each question goes into a bank named after the first board/year it carries (e.g. "ঢাকা বোর্ড ২০২৩").
 Questions without a valid printed answer are skipped, never guessed.
+Optional headers: "@bank NAME" puts every question in that bank; "@reserved 1" holds them back for self-test exams;
+"@chapter" may be omitted (model tests span several chapters).
 """
 import re
 from pathlib import Path
@@ -66,14 +68,17 @@ class Command(BaseCommand):
                     head[k] = v.strip()
                 else:
                     rows.append((n, line))
-            for need in ("track", "subject", "chapter"):
+            for need in ("track", "subject"):
                 if need not in head:
                     raise CommandError(f"{path}: missing @{need} header")
             tslug, tname, tkind = head["track"].split(" ", 2)
-            order, cname = head["chapter"].split(" ", 1)
             track, _ = Track.objects.get_or_create(slug=tslug, defaults={"name": tname, "kind": tkind})
             subject, _ = Subject.objects.get_or_create(track=track, name=head["subject"])
-            chapter, _ = Chapter.objects.get_or_create(subject=subject, name=cname, defaults={"order": int(order)})
+            chapter, cname = None, "(no chapter)"
+            if "chapter" in head:
+                order, cname = head["chapter"].split(" ", 1)
+                chapter, _ = Chapter.objects.get_or_create(subject=subject, name=cname, defaults={"order": int(order)})
+            reserved = head.get("reserved") == "1"   # @reserved 1 -> held back for self-test exams
             kept = 0
             for n, line in rows:
                 f = line.split(SEP)
@@ -86,7 +91,7 @@ class Command(BaseCommand):
                     continue
                 text = text.replace(" ¶ ", "\n")
                 found = bank_for(refs)
-                name, year, kind = found if found else (GENERAL_BANK, 2026, "other")
+                name, year, kind = (head["bank"], 2026, "other") if "bank" in head else found or (GENERAL_BANK, 2026, "other")
                 source, _ = Source.objects.get_or_create(name=name, defaults={"kind": kind, "year": year})
                 if not opts["dry_run"]:
                     # The stem alone is not unique ("নিচের কোনটি মৌলিক রাশি?" appears twice with different
@@ -94,7 +99,7 @@ class Command(BaseCommand):
                     Question.objects.update_or_create(
                         subject=subject, chapter=chapter, text=text, qtype=Question.MCQ,
                         option_a=opts_[0], option_b=opts_[1], option_c=opts_[2], option_d=opts_[3],
-                        defaults=dict(source=source, refs=refs, correct=ans, status=Question.APPROVED))
+                        defaults=dict(source=source, refs=refs, correct=ans, status=Question.APPROVED, reserved=reserved))
                 kept += 1
             total += kept
             self.stdout.write(f"{path}: {kept} questions -> {subject.name} / {cname}")

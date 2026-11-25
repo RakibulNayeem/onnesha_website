@@ -13,7 +13,7 @@ from .i18n import tr
 from .forms import ExamForm, ProfileForm
 from .models import Chapter, Exam, ExamQuestion, Profile, Question, Source, Subject, Track
 
-MCQ_OK = Q(questions__status=Question.APPROVED, questions__qtype=Question.MCQ)
+MCQ_OK = Q(questions__status=Question.APPROVED, questions__qtype=Question.MCQ, questions__reserved=False)
 
 
 def _scope(subject_ids, chapter_ids):
@@ -45,9 +45,9 @@ def home(request):
         questions__status=Question.APPROVED))).filter(n__gt=0)
     return render(request, "exams/home.html", {
         "tracks": tracks, "sources": sources,
-        "hero_q": Question.objects.filter(status=Question.APPROVED, qtype=Question.MCQ)
+        "hero_q": Question.objects.filter(status=Question.APPROVED, qtype=Question.MCQ, reserved=False)
                   .select_related("subject").order_by("?").first(),
-        "n_questions": Question.objects.filter(status=Question.APPROVED).count(),
+        "n_questions": Question.objects.filter(status=Question.APPROVED, reserved=False).count(),
         "n_subjects": Subject.objects.filter(MCQ_OK).distinct().count(),
         "n_banks": sources.count(),
         "n_tests": Exam.objects.filter(submitted_at__isnull=False).count(),
@@ -59,7 +59,7 @@ def home(request):
 
 def quick_question(request):
     """One random approved MCQ as JSON, for the 'next question' button on the home card."""
-    qs = Question.objects.filter(status=Question.APPROVED, qtype=Question.MCQ)
+    qs = Question.objects.filter(status=Question.APPROVED, qtype=Question.MCQ, reserved=False)
     if request.GET.get("exclude", "").isdigit():
         qs = qs.exclude(pk=request.GET["exclude"])
     q = qs.select_related("subject").order_by("?").first()
@@ -74,7 +74,7 @@ def track_detail(request, slug):
     track = get_object_or_404(Track, slug=slug)
     subjects = track.subjects.annotate(mcq=Count("questions", filter=MCQ_OK))
     sources = Source.objects.filter(questions__subject__track=track,
-                                    questions__status=Question.APPROVED)\
+                                    questions__status=Question.APPROVED, questions__reserved=False)\
         .annotate(n=Count("questions")).distinct()
     return render(request, "exams/track.html", {
         "track": track, "subjects": subjects, "sources": sources})
@@ -82,8 +82,11 @@ def track_detail(request, slug):
 
 def bank(request):
     """Question bank: subject cards, or institutions (universities A-Z, then boards / jobs), with search."""
-    approved = Q(questions__status=Question.APPROVED)
-    sources = list(Source.objects.annotate(n=Count("questions", filter=approved)))
+    approved = Q(questions__status=Question.APPROVED, questions__reserved=False)
+    sources = list(Source.objects.annotate(n=Count("questions", filter=approved),
+                                           held=Count("questions", filter=Q(questions__reserved=True)))
+                   )
+    sources = [x for x in sources if not (x.n == 0 and x.held)]   # model tests live only in exams
 
     def by_kind(kind):
         items = (x for x in sources if x.kind == kind)
@@ -106,9 +109,10 @@ def bank(request):
 def subject_detail(request, pk):
     subject = get_object_or_404(Subject.objects.select_related("track"), pk=pk)
     chapters = subject.chapters.annotate(n=Count("questions", filter=Q(
-        questions__status=Question.APPROVED, questions__qtype=Question.MCQ)))
-    total = subject.questions.filter(status=Question.APPROVED, qtype=Question.MCQ).count()
-    sources = Source.objects.filter(questions__subject=subject, questions__status=Question.APPROVED)\
+        questions__status=Question.APPROVED, questions__qtype=Question.MCQ, questions__reserved=False)))
+    total = subject.questions.filter(status=Question.APPROVED, qtype=Question.MCQ, reserved=False).count()
+    sources = Source.objects.filter(questions__subject=subject, questions__status=Question.APPROVED,
+                                    questions__reserved=False)\
         .annotate(n=Count("questions")).distinct()
     return render(request, "exams/subject.html", {
         "subject": subject, "chapters": chapters, "total": total, "sources": sources})
@@ -121,7 +125,7 @@ def practice(request):
     source_id = request.GET.get("source", "")
     if not (subject_ids or chapter_ids or source_id):
         return redirect(reverse("exam_build") + "?mode=quick")
-    qs = Question.objects.filter(status=Question.APPROVED, qtype=Question.MCQ).select_related(
+    qs = Question.objects.filter(status=Question.APPROVED, qtype=Question.MCQ, reserved=False).select_related(
         "subject", "chapter", "source")
     if subject_ids:
         qs = qs.filter(_scope(subject_ids, chapter_ids))
@@ -246,7 +250,7 @@ def leaderboard(request):
 
 
 def cq_practice(request):
-    qs = Question.objects.filter(status=Question.APPROVED, qtype=Question.CQ).select_related(
+    qs = Question.objects.filter(status=Question.APPROVED, qtype=Question.CQ, reserved=False).select_related(
         "subject", "chapter", "source")
     subject = request.GET.get("subject")
     chapter = request.GET.get("chapter")
@@ -261,10 +265,10 @@ def cq_practice(request):
         .get_page(request.GET.get("page"))
     return render(request, "exams/cq.html", {
         "page": page, "subjects": Subject.objects.filter(
-            questions__qtype=Question.CQ, questions__status=Question.APPROVED).distinct(),
+            questions__qtype=Question.CQ, questions__status=Question.APPROVED, questions__reserved=False).distinct(),
         "chapters": Chapter.objects.filter(subject_id=subject) if subject else [],
         "sources": Source.objects.filter(
-            questions__qtype=Question.CQ, questions__status=Question.APPROVED).distinct(),
+            questions__qtype=Question.CQ, questions__status=Question.APPROVED, questions__reserved=False).distinct(),
         "sel": {"subject": subject or "", "chapter": chapter or "", "source": source or ""}})
 
 
