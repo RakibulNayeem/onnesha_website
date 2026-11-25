@@ -781,3 +781,19 @@ html[lang=en] .rules li::before{content:counter(r)}
 .plan .btn.cur,.plan .plan-cta{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.7rem 1rem;font-weight:700;border-radius:10px;text-align:center}
 .plan .btn.cur{border:2px solid var(--ok);color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent);cursor:default;pointer-events:none}
 .plan .btn.cur.dim{border-color:var(--line);color:var(--muted);background:transparent}
+
+/* phones: one account button (bottom bar) that opens the account menu as a side drawer */
+.tabbar button{display:flex;flex-direction:column;align-items:center;background:none;border:0;color:var(--muted);font:inherit;font-size:.72rem;font-weight:700;padding:.2rem 0;cursor:pointer}
+.tabbar button.on{color:var(--red)}
+.am-close{display:none}
+@media(max-width:899px){
+  .desk-only{display:none!important}
+  .acctmenu{top:0!important;right:0!important;left:auto!important;bottom:0;width:min(86vw,320px);max-width:none;border-radius:18px 0 0 18px;padding:1rem .8rem;
+    box-shadow:0 0 0 100vmax rgba(8,15,20,.5);animation:drawerin .25s var(--ease);overflow-y:auto}
+  .am-close{display:flex;align-items:center;justify-content:center;width:2.2rem;height:2.2rem;margin:0 0 .4rem auto;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+  .acctmenu .am-item{padding:.8rem .7rem;font-size:1rem}
+}
+@keyframes drawerin{from{transform:translateX(100%);box-shadow:0 0 0 100vmax rgba(8,15,20,0)}to{transform:none;box-shadow:0 0 0 100vmax rgba(8,15,20,.5)}}
+@keyframes drawerout{from{transform:none;box-shadow:0 0 0 100vmax rgba(8,15,20,.5)}to{transform:translateX(100%);box-shadow:0 0 0 100vmax rgba(8,15,20,0)}}
+@media(max-width:899px){.acctmenu.closing{animation:drawerout .22s ease-in forwards}}
+@media(prefers-reduced-motion:reduce){.acctmenu{animation:none!important}}
