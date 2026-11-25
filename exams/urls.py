@@ -14,6 +14,7 @@ urlpatterns = [
     path("test/<int:pk>/result/", views.result, name="exam_result"),
     path("lang/<str:code>/", views.set_language, name="exam_lang"),
     path("profile/", views.profile, name="exam_profile"),
+    path("profile/username/", views.username_check, name="exam_username_check"),
     path("me/", views.dashboard, name="exam_dashboard"),
     path("leaderboard/", views.leaderboard, name="exam_leaderboard"),
     path("cq/", views.cq_practice, name="exam_cq"),

@@ -32,10 +32,17 @@ class ExamForm(forms.Form):
             questions__status=Question.APPROVED, questions__qtype=Question.MCQ).distinct()
 
 
+def username_taken(name, me):
+    """True if another account already uses this username (case-insensitive)."""
+    from django.contrib.auth import get_user_model
+    return get_user_model().objects.filter(username__iexact=name).exclude(pk=me.pk).exists()
+
+
 class ProfileForm(forms.ModelForm):
+    username = forms.CharField(label=_("ইউজারনেম"), max_length=150)
     first_name = forms.CharField(label=_("নাম"), max_length=150, required=False)
     last_name = forms.CharField(label=_("পদবি"), max_length=150, required=False)
-    PERSONAL = ["first_name", "last_name", "birth_date", "gender", "phone", "address"]
+    PERSONAL = ["username", "first_name", "last_name", "birth_date", "gender", "phone", "address"]
     ACADEMIC = ["institution", "level", "division", "batch_year"]
     batch_year = forms.TypedChoiceField(label=_("ব্যাচ (পরীক্ষার বছর)"), required=False, coerce=int, empty_value=None)
     field_order = PERSONAL + ACADEMIC
@@ -52,6 +59,8 @@ class ProfileForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.user = user
         self.fields["first_name"].initial, self.fields["last_name"].initial = user.first_name, user.last_name
+        self.fields["username"].initial = user.username
+        self.fields["username"].validators = list(user._meta.get_field("username").validators)
         from datetime import date
         from .i18n import tr
         year = date.today().year
@@ -59,6 +68,12 @@ class ProfileForm(forms.ModelForm):
         self.fields["batch_year"].choices = [("", tr("বাছাই করো"))] + [(y, y) for y in sorted(years)]
         for k in ("gender", "level", "division"):
             self.fields[k].choices = [("", tr("বাছাই করো"))] + [(v, tr(l)) for v, l in self.fields[k].choices if v]
+
+    def clean_username(self):
+        name = self.cleaned_data["username"].strip()
+        if username_taken(name, self.user):
+            raise forms.ValidationError(_("এই ইউজারনেম আগেই নেওয়া হয়েছে।"))
+        return name
 
     def clean(self):
         d = super().clean()
@@ -68,8 +83,10 @@ class ProfileForm(forms.ModelForm):
 
     def save(self, commit=True):
         obj = super().save(commit)
-        self.user.first_name, self.user.last_name = self.cleaned_data["first_name"], self.cleaned_data["last_name"]
-        self.user.save(update_fields=["first_name", "last_name"])
+        u = self.user
+        u.username, u.first_name, u.last_name = (self.cleaned_data["username"], self.cleaned_data["first_name"],
+                                                  self.cleaned_data["last_name"])
+        u.save(update_fields=["username", "first_name", "last_name"])
         return obj
 
     def personal(self):

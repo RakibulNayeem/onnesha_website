@@ -299,6 +299,24 @@ def profile(request):
 
 
 
+@login_required(login_url="account_login")
+def username_check(request):
+    """Live availability hint for the profile's username field."""
+    from django.contrib.auth.validators import UnicodeUsernameValidator
+    from django.core.exceptions import ValidationError
+    from .forms import username_taken
+    name = request.GET.get("u", "").strip()
+    try:
+        if not name:
+            raise ValidationError("empty")
+        UnicodeUsernameValidator()(name)
+    except ValidationError:
+        return JsonResponse({"ok": False, "msg": tr("ইউজারনেম সঠিক নয়।")})
+    if username_taken(name, request.user):
+        return JsonResponse({"ok": False, "msg": tr("এই ইউজারনেম আগেই নেওয়া হয়েছে।")})
+    return JsonResponse({"ok": True, "msg": tr("ইউজারনেমটি পাওয়া যাবে।")})
+
+
 def set_language(request, code):
     """Remember the interface language, then go back to where the visitor was."""
     from django.utils.http import url_has_allowed_host_and_scheme

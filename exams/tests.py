@@ -163,7 +163,7 @@ class Roles(TestCase):
         s = User.objects.create_user("stu8", "s8@x.com", "pw12345!")
         self.client.force_login(s)
         self.assertEqual(self.client.get(reverse("exam_profile")).status_code, 200)
-        self.client.post(reverse("exam_profile"), {"first_name": "রাকিব", "last_name": "", "phone": "017", "institution": "X", "target": ""})
+        self.client.post(reverse("exam_profile"), {"username": "stu8", "first_name": "রাকিব", "last_name": "", "phone": "017", "institution": "X", "target": ""})
         s.refresh_from_db()
         self.assertEqual((s.first_name, s.profile.phone), ("রাকিব", "017"))
 
@@ -338,7 +338,7 @@ class StudentProfile(TestCase):
         self.client.force_login(self.user)
 
     def save(self, **extra):
-        data = {"first_name": "Rakib", "last_name": "N", "phone": "", "birth_date": "2010-05-01", "gender": "m",
+        data = {"username": "stu", "first_name": "Rakib", "last_name": "N", "phone": "", "birth_date": "2010-05-01", "gender": "m",
                 "address": "Dhaka", "institution": "Govt School", "level": "ssc", "division": "science",
                 "batch_year": "2027", **extra}
         return self.client.post(reverse("exam_profile"), data)
@@ -378,3 +378,27 @@ class BackButtons(TestCase):
                     reverse("exam_practice") + f"?subject={subj.id}", reverse("exam_cq"), reverse("exam_bank"),
                     reverse("exam_dashboard"), reverse("exam_profile"), reverse("exam_leaderboard")):
             self.assertContains(self.client.get(url), 'class="back"', msg_prefix=url)
+
+
+class UsernameEdit(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user("stu", "s@x.com", "pw12345!")
+        User.objects.create_user("Taken", "t@x.com", "pw12345!")
+        self.client.force_login(self.user)
+
+    def test_username_can_be_changed_but_not_to_a_taken_one(self):
+        base = {"first_name": "", "last_name": "", "phone": "", "birth_date": "", "gender": "", "address": "",
+                "institution": "", "level": "", "division": "", "batch_year": ""}
+        r = self.client.post(reverse("exam_profile"), {**base, "username": "taken"})   # case-insensitive clash
+        self.assertContains(r, "আগেই নেওয়া হয়েছে")
+        self.assertRedirects(self.client.post(reverse("exam_profile"), {**base, "username": "new_name"}),
+                             reverse("exam_profile"))
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.username, "new_name")
+
+    def test_live_check(self):
+        url = reverse("exam_username_check")
+        self.assertTrue(self.client.get(url, {"u": "free_name"}).json()["ok"])
+        self.assertFalse(self.client.get(url, {"u": "TAKEN"}).json()["ok"])
+        self.assertFalse(self.client.get(url, {"u": "bad name!"}).json()["ok"])
+        self.assertTrue(self.client.get(url, {"u": "stu"}).json()["ok"])             # your own name is fine

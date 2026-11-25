@@ -10,7 +10,7 @@
   <form method="post" class="paper form">{% csrf_token %}
     {{ form.non_field_errors }}
     <h3 style="margin-bottom:.8rem">{% t "ব্যক্তিগত তথ্য" %}</h3>
-    <div class="grid c2">{% for f in form.personal %}<div {% if f.name == "address" %}style="grid-column:1/-1"{% endif %}><label class="t">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}</div>
+    <div class="grid c2">{% for f in form.personal %}<div {% if f.name == "address" or f.name == "username" %}style="grid-column:1/-1"{% endif %}><label class="t">{{ f.label }}</label>{{ f }}{% if f.name == "username" %}<small id="uhint" class="muted"></small>{% endif %}{{ f.errors }}</div>{% endfor %}</div>
     <h3 style="margin:1.4rem 0 .8rem">{% t "একাডেমিক তথ্য" %}</h3>
     <div class="grid c2">{% for f in form.academic %}<div id="w-{{ f.name }}" {% if f.name == "institution" or f.name == "level" %}style="grid-column:1/-1"{% endif %}><label class="t">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}</div>
     <p class="muted" style="margin-top:.6rem;font-size:.85rem">{% t "তোমার স্তর অনুযায়ী প্রশ্নব্যাংকে প্রাসঙ্গিক ট্যাব দেখানো হবে।" %}</p>
@@ -43,5 +43,9 @@
 {% endblock %}
 {% block scripts %}<script>
 var lv=document.getElementById('id_level'), dv=document.getElementById('w-division');
+var un=document.getElementById('id_username'), uh=document.getElementById('uhint'), ut, u0=un.value;
+un.addEventListener('input',function(){ clearTimeout(ut); if(un.value===u0){uh.textContent='';return;}
+  ut=setTimeout(function(){ fetch('{% url "exam_username_check" %}?u='+encodeURIComponent(un.value)).then(r=>r.json()).then(function(d){
+    uh.textContent=d.msg; uh.style.color=d.ok?'var(--ok,#1a7f4b)':'var(--bad,#c0392b)'; }); },300); });
 function sync(){ dv.hidden=!['ssc','dakhil','hsc','alim'].includes(lv.value); } lv.addEventListener('change',sync); sync();
 </script>{% endblock %}
