@@ -194,7 +194,8 @@ class UniversityList(TestCase):
         groups = r.context["uni_groups"]
         self.assertEqual([g for g, _ in groups], sorted({n[:1] for n in ("খুলনা", "ঢাকা", "কুমিল্লা", "ক্যাম্পাস")}))
         self.assertEqual([s.name for s in dict(groups)["ক"]], sorted(["কুমিল্লা বিশ্ববিদ্যালয়", "ক্যাম্পাস টেস্ট"]))
-        self.assertEqual([lab for lab, _ in r.context["other_groups"]], ["বোর্ড"])
+        self.assertEqual(r.context["other_groups"], [])            # boards now have their own tab
+        self.assertEqual(len(r.context["board_groups"]), 1)
 
 
 class ImportBank(TestCase):
