@@ -38,6 +38,9 @@
     <div class="paper"><h3 style="margin-bottom:.7rem">{% t "ব্যাজ" %}</h3>
       <div class="badges">{% for b in badges %}<div class="badge {% if b.earned %}on{% endif %}" title="{{ b.hint|tr }}"><i class="bi bi-{% if b.earned %}patch-check-fill{% else %}lock{% endif %}"></i><span>{{ b.title|tr }}</span></div>{% endfor %}</div></div>
   </div>
+  <div style="margin-top:1.2rem"><div class="paper actweek"><div class="aw-h"><div><h3>{% t "পড়ার সময়" %}</h3><p class="muted">{{ act.week_study.h|bn }} {% t "ঘণ্টা" %} {{ act.week_study.m|bn }} {% t "মিনিট" %} ({% t "এই সপ্তাহ" %}) · {% t "মোট" %} {{ act.total_study.h|bn }} {% t "ঘণ্টা" %} {{ act.total_study.m|bn }} {% t "মিনিট" %}</p></div></div>
+      <div class="aw-days">{% for d in act.week %}<div class="aw-d {% if d.mins %}on{% endif %} {% if d.today %}today{% endif %} {% if d.future %}future{% endif %}"><span class="aw-pts">{{ d.mins|bn }}</span><i class="aw-bar" style="height:{% widthratio d.mins act.max_min 70 %}px"></i><b>{{ d.date|date:"D" }}</b><small>{{ d.date|date:"j"|bn }}</small></div>{% endfor %}</div>
+      <p class="muted" style="margin-top:.6rem;font-size:.82rem">{% t "পরীক্ষায় কাটানো সময় থেকে হিসাব করা হয়।" %}</p></div></div>
 
   <div class="paper" style="margin-top:1.2rem"><h3 style="margin-bottom:.6rem">{% t "সাম্প্রতিক অ্যাক্টিভিটি" %}</h3>
     {% for e in exams %}<div class="chrow"><span><a href="{% url 'exam_result' e.pk %}">{{ e.title }}</a><small class="muted"> · {{ e.submitted_at|date:"j M, H:i" }}</small></span><b>{{ e.correct|bn }}/{{ e.total|bn }}</b></div>

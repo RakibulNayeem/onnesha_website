@@ -18,6 +18,20 @@ def daily_points(user):
     return out
 
 
+def daily_minutes(user):
+    """{date: minutes} spent in finished exams: start to submit, never more than the exam's time limit."""
+    out = {}
+    for start, end, limit in user.exams.filter(submitted_at__isnull=False).values_list(
+            "created", "submitted_at", "duration_minutes")[:600]:
+        d = timezone.localtime(end).date()
+        out[d] = out.get(d, 0) + min((end - start).total_seconds() / 60, limit)
+    return {d: round(m) for d, m in out.items()}
+
+
+def hm(minutes):
+    return {"h": minutes // 60, "m": minutes % 60}
+
+
 def streak(days):
     """Consecutive active days ending today (or yesterday, so the streak survives until tonight)."""
     day = timezone.localdate()
@@ -29,19 +43,26 @@ def streak(days):
     return n
 
 
-def week(days):
-    """The seven days of this week (Sat..Fri) with whether each was active and its points."""
+def week(days, minutes=None):
+    """The seven days of this week (Sat..Fri) with whether each was active, its points and study minutes."""
+    minutes = minutes or {}
     today = timezone.localdate()
     start = today - timedelta(days=(today.weekday() - WEEK_START) % 7)
-    return [{"date": d, "active": d in days, "points": days.get(d, 0), "today": d == today, "future": d > today}
+    return [{"date": d, "active": d in days, "points": days.get(d, 0), "mins": minutes.get(d, 0), "today": d == today, "future": d > today}
             for d in (start + timedelta(days=i) for i in range(7))]
 
 
-def summary(user):
+def summary(user, study=False):
+    """Streak and this week's points; with study=True also study time (own dashboard only, never shown to friends)."""
     days = daily_points(user)
-    w = week(days)
-    return {"streak": streak(days), "week": w, "week_points": sum(x["points"] for x in w),
+    mins = daily_minutes(user) if study else {}
+    w = week(days, mins)
+    out = {"streak": streak(days), "week": w, "week_points": sum(x["points"] for x in w),
             "max_day": max([x["points"] for x in w] + [1])}
+    if study:
+        out.update(week_study=hm(sum(x["mins"] for x in w)), max_min=max([x["mins"] for x in w] + [1]),
+                   total_study=hm(sum(mins.values())))
+    return out
 
 
 def month_grid(days, today=None):

@@ -262,7 +262,7 @@ def dashboard(request):
             .filter(c__gt=mine).count() + 1) if mine else None
     prof, _ = Profile.objects.get_or_create(user=me)
     batch = " ".join(x for x in (prof.get_level_display() if prof.level else "", str(prof.batch_year or "")) if x)
-    act = activity.summary(me)
+    act = activity.summary(me, study=True)
     return render(request, "exams/dashboard.html", {
         "n_exams": done.count(), "overall": round(100 * right / total) if total else 0,
         "exams": done[:8], "open_exams": me.exams.filter(submitted_at__isnull=True)[:3],
