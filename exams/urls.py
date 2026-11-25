@@ -16,6 +16,7 @@ urlpatterns = [
     path("profile/", views.profile, name="exam_profile"),
     path("premium/", views.premium, name="exam_premium"),
     path("friends/", views.friends, name="exam_friends"),
+    path("u/<str:username>/", views.public_profile, name="exam_public_profile"),
     path("profile/username/", views.username_check, name="exam_username_check"),
     path("me/", views.dashboard, name="exam_dashboard"),
     path("leaderboard/", views.leaderboard, name="exam_leaderboard"),

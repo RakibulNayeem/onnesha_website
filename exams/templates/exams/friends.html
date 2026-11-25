@@ -6,16 +6,17 @@
   <div>
     <div class="paper"><h3 style="margin-bottom:.6rem">{% t "আমার বন্ধুরা" %} <small class="muted">· {{ rows|length|bn }}</small></h3>
       {% for r in rows %}<div class="frow"><span class="avatar sm">{{ r.u.username|slice:":1"|upper }}</span>
-        <div class="fmain"><b>{{ r.u.username }}</b><small class="muted">{{ r.streak|bn }} {% t "দিনের স্ট্রিক" %} · {{ r.week_points|bn }} {% t "পয়েন্ট (এই সপ্তাহ)" %}</small></div>
+        <div class="fmain"><a href="{% url 'exam_public_profile' r.u.username %}"><b>{{ r.u.username }}</b></a><small class="muted">{{ r.streak|bn }} {% t "দিনের স্ট্রিক" %} · {{ r.week_points|bn }} {% t "পয়েন্ট (এই সপ্তাহ)" %}</small></div>
         {% if r.today %}<span class="tag hl">{% t "আজ সক্রিয়" %}</span>{% endif %}
-        <form method="post">{% csrf_token %}<input type="hidden" name="user" value="{{ r.u.pk }}"><button class="btn sm" name="do" value="remove" title="{% t "বন্ধু তালিকা থেকে সরাও" %}"><i class="bi bi-person-dash"></i></button></form></div>
+        <a class="btn sm" href="{% url 'exam_public_profile' r.u.username %}" title="{% t "প্রোফাইল দেখো" %}"><i class="bi bi-person-lines-fill"></i></a>
+        <button type="button" class="btn sm" data-confirm-remove="{{ r.u.pk }}" data-name="{{ r.u.username }}" title="{% t "বন্ধু তালিকা থেকে সরাও" %}"><i class="bi bi-person-dash"></i></button></div>
       {% empty %}<p class="muted">{% t "এখনো কোনো বন্ধু নেই। ইউজারনেম দিয়ে খুঁজে অনুরোধ পাঠাও।" %}</p>{% endfor %}</div>
   </div>
   <div>
     <div class="paper"><h3 style="margin-bottom:.6rem">{% t "বন্ধু খোঁজো" %}</h3>
       <form method="get" class="frow" style="border:0;padding:0"><input type="search" name="q" value="{{ q }}" placeholder="{% t "ইউজারনেম লেখো (কমপক্ষে ৩ অক্ষর)" %}" style="flex:1"><button class="btn pri">{% t "খোঁজো" %}</button></form>
       {% for x in found %}<div class="frow"><span class="avatar sm">{{ x.u.username|slice:":1"|upper }}</span><div class="fmain"><b>{{ x.u.username }}</b></div>
-        {% if x.friend %}<span class="tag">{% t "বন্ধু" %}</span>{% else %}<form method="post">{% csrf_token %}<input type="hidden" name="user" value="{{ x.u.pk }}"><button class="btn sm pri" name="do" value="send"><i class="bi bi-person-plus"></i> {% t "অনুরোধ পাঠাও" %}</button></form>{% endif %}</div>
+        {% if x.friend %}<a class="tag" href="{% url 'exam_public_profile' x.u.username %}">{% t "বন্ধু" %}</a>{% else %}<form method="post">{% csrf_token %}<input type="hidden" name="user" value="{{ x.u.pk }}"><button class="btn sm pri" name="do" value="send"><i class="bi bi-person-plus"></i> {% t "অনুরোধ পাঠাও" %}</button></form>{% endif %}</div>
       {% empty %}{% if q %}<p class="muted" style="margin-top:.8rem">{% t "কাউকে পাওয়া যায়নি।" %}</p>{% endif %}{% endfor %}</div>
     {% if incoming %}<div class="paper" style="margin-top:1rem"><h3 style="margin-bottom:.6rem">{% t "বন্ধুর অনুরোধ" %}</h3>
       {% for r in incoming %}<div class="frow"><span class="avatar sm">{{ r.from_user.username|slice:":1"|upper }}</span><div class="fmain"><b>{{ r.from_user.username }}</b></div>
@@ -24,4 +25,5 @@
       {% for r in outgoing %}<div class="frow"><span class="avatar sm">{{ r.to_user.username|slice:":1"|upper }}</span><div class="fmain"><b>{{ r.to_user.username }}</b><small class="muted">{% t "অপেক্ষায়" %}</small></div></div>{% endfor %}</div>{% endif %}
   </div>
 </div></section>
+{% include "exams/_confirm_remove.html" %}
 {% endblock %}

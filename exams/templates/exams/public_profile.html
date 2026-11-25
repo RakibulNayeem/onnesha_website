@@ -1,0 +1,34 @@
+{% extends "exams/base.html" %}{% load bn %}
+{% block title %}{{ who.username }}{% endblock %}
+{% block body %}
+<section class="sec" style="padding-top:1rem"><div class="wrap" style="max-width:860px">
+  <a class="back" href="{% url 'exam_friends' %}" aria-label="{% t "ফিরে যাও" %}" title="{% t "ফিরে যাও" %}"><i class="bi bi-arrow-left"></i></a>
+  <div class="pbanner">
+    <div class="pb-top"><span class="avatar xl">{{ who.username|slice:":1"|upper }}</span>
+      <div><h1>{% firstof who.get_full_name who.username %}</h1><p>{% if is_friend and batch %}{{ batch }} · {% endif %}@{{ who.username }}</p></div></div>
+    {% if is_friend %}
+    <div class="pb-stats">
+      <div><i class="bi bi-star-fill" style="color:#f5b83d"></i><b>{{ p.points|bn }}</b><span>{% t "পয়েন্ট" %}</span></div>
+      <div><i class="bi bi-trophy-fill" style="color:#12606c"></i><b>{% if p.rank %}#{{ p.rank|bn }}{% else %}—{% endif %}</b><span>{% t "র‍্যাংক" %}</span></div>
+      <div><i class="bi bi-journal-check" style="color:#2563eb"></i><b>{{ p.exams|bn }}</b><span>{% t "পরীক্ষা" %}</span></div>
+      <div><i class="bi bi-fire" style="color:#ea580c"></i><b>{{ p.streak|bn }}</b><span>{% t "স্ট্রিক" %}</span></div>
+      <div><i class="bi bi-bullseye" style="color:#16a34a"></i><b>{{ p.accuracy|bn }}%</b><span>{% t "সঠিকতা" %}</span></div></div>
+    {% endif %}
+  </div>
+  {% if is_friend %}
+  <div class="grid c2" style="align-items:start;margin-top:1.2rem">
+    <div class="paper actweek"><div class="aw-h"><div><h3>{% t "দৈনিক পয়েন্ট" %}</h3><p class="muted">{{ p.week_points|bn }} {% t "পয়েন্ট (এই সপ্তাহ)" %} · {% t "সেরা স্ট্রিক" %} {{ p.best_streak|bn }}</p></div></div>
+      <div class="aw-days">{% for d in p.week %}<div class="aw-d {% if d.active %}on{% endif %} {% if d.today %}today{% endif %} {% if d.future %}future{% endif %}"><span class="aw-pts">{{ d.points|bn }}</span><i class="aw-bar" style="height:{% widthratio d.points p.max_day 70 %}px"></i><b>{{ d.date|date:"D" }}</b><small>{{ d.date|date:"j"|bn }}</small></div>{% endfor %}</div></div>
+    <div class="paper"><h3 style="margin-bottom:.7rem">{% t "ব্যাজ" %}</h3>
+      <div class="badges">{% for b in p.badges %}<div class="badge {% if b.earned %}on{% endif %}" title="{{ b.hint|tr }}"><i class="bi bi-{% if b.earned %}patch-check-fill{% else %}lock{% endif %}"></i><span>{{ b.title|tr }}</span></div>{% endfor %}</div></div>
+  </div>
+  {% if not is_me %}<div class="paper" style="margin-top:1.2rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap"><span class="muted">{% t "তোমরা বন্ধু। ব্যক্তিগত তথ্য (ইমেইল, ফোন, ঠিকানা) দেখানো হয় না।" %}</span>
+    <button type="button" class="btn" data-confirm-remove="{{ who.pk }}" data-name="{{ who.username }}"><i class="bi bi-person-dash"></i> {% t "বন্ধু তালিকা থেকে সরাও" %}</button></div>{% endif %}
+  {% else %}
+  <div class="paper" style="margin-top:1.2rem;text-align:center"><p class="muted" style="margin-bottom:1rem">{% t "বন্ধু হলে এর স্ট্রিক, পয়েন্ট ও ব্যাজ দেখতে পাবে।" %}</p>
+    {% if link and link.status == "pending" %}<span class="btn cur" style="display:inline-flex">{% t "অপেক্ষায়" %}</span>
+    {% else %}<form method="post" action="{% url 'exam_friends' %}">{% csrf_token %}<input type="hidden" name="user" value="{{ who.pk }}"><button class="btn pri" name="do" value="send"><i class="bi bi-person-plus"></i> {% t "অনুরোধ পাঠাও" %}</button></form>{% endif %}</div>
+  {% endif %}
+</div></section>
+{% include "exams/_confirm_remove.html" %}
+{% endblock %}

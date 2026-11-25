@@ -797,3 +797,6 @@ html[lang=en] .rules li::before{content:counter(r)}
 @keyframes drawerout{from{transform:none;box-shadow:0 0 0 100vmax rgba(8,15,20,.5)}to{transform:translateX(100%);box-shadow:0 0 0 100vmax rgba(8,15,20,0)}}
 @media(max-width:899px){.acctmenu.closing{animation:drawerout .22s ease-in forwards}}
 @media(prefers-reduced-motion:reduce){.acctmenu{animation:none!important}}
+.dlg{border:1px solid var(--line);border-radius:16px;padding:1.4rem;max-width:min(92vw,26rem);background:var(--card);color:var(--ink);box-shadow:0 24px 60px rgba(15,23,42,.35)}
+.dlg::backdrop{background:rgba(8,15,20,.55)}.dlg h3{margin:0 0 .5rem}.dlg-btns{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1.2rem}
+.dlg[open]{animation:dlgin .2s var(--ease)}@keyframes dlgin{from{transform:translateY(10px) scale(.97);opacity:0}to{transform:none;opacity:1}}

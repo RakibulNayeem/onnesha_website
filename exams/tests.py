@@ -621,3 +621,49 @@ class PaymentReceipt(TestCase):
 
     def test_page_shows_the_payment_number(self):
         self.assertContains(self.client.get(self.url), "01774517825")
+
+
+class PublicProfile(TestCase):
+    def setUp(self):
+        from django.utils import timezone
+        self.me = User.objects.create_user("meena", "meena@x.com", "pw12345!")
+        self.pal = User.objects.create_user("palash", "secret-mail@x.com", "pw12345!", first_name="Pal")
+        p = Profile.objects.get(user=self.pal)
+        p.phone, p.address, p.institution, p.level, p.batch_year = "01711111111", "12 Hidden Road", "Secret School", "ssc", 2027
+        p.save()
+        Exam.objects.create(user=self.pal, title="t", duration_minutes=5, correct=7, submitted_at=timezone.now())
+        self.client.force_login(self.me)
+        self.url = reverse("exam_public_profile", args=["palash"])
+
+    def befriend(self):
+        from .models import Friendship
+        Friendship.objects.create(from_user=self.me, to_user=self.pal, status="accepted")
+
+    def test_a_stranger_sees_no_stats_and_no_private_details(self):
+        page = self.client.get(self.url)
+        self.assertEqual(page.status_code, 200)
+        self.assertFalse(page.context["is_friend"])
+        self.assertNotIn("p", page.context)                           # the stats are not even handed to the template
+        for secret in ("secret-mail", "01711111111", "Hidden Road", "Secret School"):
+            self.assertNotContains(page, secret)
+
+    def test_a_friend_sees_progress_but_never_contact_details_or_school(self):
+        self.befriend()
+        page = self.client.get(self.url)
+        self.assertEqual((page.context["p"]["points"], page.context["p"]["streak"], page.context["p"]["rank"]), (70, 1, 1))
+        self.assertContains(page, "এসএসসি")                                   # batch is fine to show
+        for secret in ("secret-mail", "01711111111", "Hidden Road", "Secret School"):
+            self.assertNotContains(page, secret)
+
+    def test_removing_a_friend_is_confirmed_in_the_page_and_still_works(self):
+        from . import friends
+        self.befriend()
+        self.assertContains(self.client.get(reverse("exam_friends")), 'id="rmdlg"')     # confirm dialog is on the list
+        self.assertContains(self.client.get(self.url), 'data-confirm-remove')
+        self.client.post(reverse("exam_friends"), {"do": "remove", "user": self.pal.pk})
+        self.assertEqual(list(friends.friends_of(self.me)), [])
+        self.assertFalse(self.client.get(self.url).context["is_friend"])
+
+    def test_profiles_need_login(self):
+        self.client.logout()
+        self.assertEqual(self.client.get(self.url).status_code, 302)

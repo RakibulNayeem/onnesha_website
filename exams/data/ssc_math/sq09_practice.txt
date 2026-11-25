@@ -1,0 +1,20 @@
+# Source: Udvash SSC 2026 Math Question Bank, chapter 9 প্র্যাকটিস টেস্ট খ-বিভাগ (সংক্ষিপ্ত প্রশ্ন) (book p. 161 = PDF p. 167). Solutions are the printed "সংক্ষিপ্ত উত্তরমালা"; (a)-(e) have none printed.
+
+@track ssc এসএসসি academic
+
+@subject গণিত
+
+@chapter 9 ত্রিকোণমিতিক অনুপাত
+
+@bank উদ্ভাস প্র্যাকটিস টেস্ট ২০২৬ — অধ্যায় ৯
+
+ক ||  || cot⁴θ − cot²θ = 1 হলে প্রমাণ কর যে, cos⁴θ + cos²θ = 1 ||
+খ ||  || cosA − sinA = √2 sinA হলে প্রমাণ কর যে, cosA + sinA = √2 cosA ||
+গ ||  || A = 30° হলে, 4cos³A − 3cosA = cos3A প্রমাণ কর। ||
+ঘ ||  || a = sinA, b = tanA এবং a⁴ + a² = 1 হলে প্রমাণ কর যে, b⁴ − b² = 1 ||
+ঙ ||  || দেখাও যে, sec²A + cosec²A = sec²A·cosec²A ||
+চ ||  || cotθ + cosθ = x এবং cotθ − cosθ = y হলে x² − y² এর মান কত? || 4cotθ·cosθ
+ছ ||  || secθ − tanθ = 2/5 হলে secθ + tanθ = কত? || 5/2
+জ ||  || p = cosecθ + cotθ ও q = cosecθ − cotθ এবং θ = 60° হলে pq এর মান নির্ণয় কর। || 1
+ঝ ||  || tanθ + cotθ = 2 হলে, θ এর মান নির্ণয় কর। || 45°
+ঞ ||  || cot(A + 15°) = 1 হলে, A এর মান নির্ণয় কর। || 30°

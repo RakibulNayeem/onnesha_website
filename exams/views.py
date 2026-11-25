@@ -284,6 +284,22 @@ def leaderboard(request):
 
 
 @login_required(login_url="account_login")
+def public_profile(request, username):
+    """A student's profile as friends see it: progress only. Contact details, birth date, address and school never appear."""
+    who = get_object_or_404(User, username=username, is_active=True)
+    link = fr.between(request.user, who) if who.pk != request.user.pk else None
+    is_friend = who.pk == request.user.pk or bool(link and link.status == "accepted")
+    prof = Profile.objects.filter(user=who).first()
+    ctx = {"who": who, "is_friend": is_friend, "link": link, "is_me": who.pk == request.user.pk}
+    if is_friend:
+        ctx.update(p=activity.progress(who), month=activity.month_grid(activity.daily_points(who)),
+                   month_label=timezone.localdate(),
+                   batch=" ".join(x for x in (prof.get_level_display() if prof and prof.level else "",
+                                              str(prof.batch_year) if prof and prof.batch_year else "") if x))
+    return render(request, "exams/public_profile.html", ctx)
+
+
+@login_required(login_url="account_login")
 def friends(request):
     """Friends: search students, send/accept/decline requests, see each friend's streak and week."""
     me = request.user

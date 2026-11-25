@@ -75,3 +75,21 @@ def best_streak(days):
 
 def badges(stats):
     return [{"key": k, "title": t, "hint": h, "earned": bool(test(stats))} for k, t, h, test in BADGES]
+
+
+def progress(user):
+    """Everything about a student's progress that is fine to show friends (no contact or personal details)."""
+    from django.db.models import Sum
+    from .models import Exam
+    done = user.exams.filter(submitted_at__isnull=False)
+    agg = done.aggregate(c=Sum("correct"), w=Sum("wrong"), s=Sum("skipped"))
+    correct, answered = agg["c"] or 0, (agg["c"] or 0) + (agg["w"] or 0) + (agg["s"] or 0)
+    days = daily_points(user)
+    rank = (Exam.objects.filter(submitted_at__isnull=False).values("user").annotate(c=Sum("correct"))
+            .filter(c__gt=correct).count() + 1) if correct else None
+    s = summary(user)
+    return {"points": correct * POINTS_PER_CORRECT, "rank": rank, "exams": done.count(), "streak": s["streak"],
+            "best_streak": best_streak(days), "accuracy": round(100 * correct / answered) if answered else 0,
+            "week": s["week"], "week_points": s["week_points"], "max_day": s["max_day"], "days": days,
+            "badges": badges({"exams": done.count(), "best_streak": best_streak(days), "correct": correct,
+                              "answered": answered})}
