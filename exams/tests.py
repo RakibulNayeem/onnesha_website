@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Chapter, Exam, Question, Source, Subject, Track
+from .models import Chapter, Exam, Profile, Question, Source, Subject, Track
 
 User = get_user_model()
 
@@ -330,3 +330,51 @@ class BankTabs(TestCase):
         self.assertContains(inst, "ঢাকা বিশ্ববিদ্যালয়")
         self.assertNotContains(inst, "ঢাকা বোর্ড ২০২৪")      # boards moved out of the institution tab
         self.assertEqual(self.client.get(reverse("exam_bank")).status_code, 200)
+
+
+class StudentProfile(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user("stu", "s@x.com", "pw12345!")
+        self.client.force_login(self.user)
+
+    def save(self, **extra):
+        data = {"first_name": "Rakib", "last_name": "N", "phone": "", "birth_date": "2010-05-01", "gender": "m",
+                "address": "Dhaka", "institution": "Govt School", "level": "ssc", "division": "science",
+                "batch_year": "2027", **extra}
+        return self.client.post(reverse("exam_profile"), data)
+
+    def test_personal_and_academic_details_are_saved(self):
+        self.assertEqual(self.client.get(reverse("exam_profile")).status_code, 200)
+        self.assertRedirects(self.save(), reverse("exam_profile"))
+        p = Profile.objects.get(user=self.user)
+        self.assertEqual((p.level, p.division, p.batch_year, p.gender, p.address),
+                         ("ssc", "science", 2027, "m", "Dhaka"))
+
+    def test_school_levels_see_only_subject_and_board_tabs_and_have_no_division_for_junior_classes(self):
+        self.save()
+        r = self.client.get(reverse("exam_bank") + "?tab=institution")        # not allowed for SSC
+        self.assertEqual(r.context["tabs"], ("subject", "board"))
+        self.assertEqual(r.context["tab"], "subject")
+        self.save(level="c7", division="science")
+        self.assertEqual(Profile.objects.get(user=self.user).division, "")                      # classes 6-8 have no division
+        self.save(level="hsc")
+        r = self.client.get(reverse("exam_bank") + "?tab=institution")
+        self.assertEqual(r.context["tabs"], ("subject", "board", "institution"))
+        self.assertEqual(r.context["tab"], "institution")
+
+    def test_visitors_without_a_level_see_every_tab(self):
+        self.client.logout()
+        self.assertEqual(self.client.get(reverse("exam_bank")).context["tabs"], ("subject", "board", "institution"))
+
+
+class BackButtons(TestCase):
+    def test_inner_pages_have_a_back_arrow(self):
+        track = Track.objects.create(name="SSC", slug="ssc", kind="academic")
+        subj = Subject.objects.create(track=track, name="Physics")
+        mcq(subj, 1)
+        user = User.objects.create_user("b", "b@x.com", "pw12345!")
+        self.client.force_login(user)
+        for url in (reverse("exam_subject", args=[subj.id]), reverse("exam_track", args=[track.slug]),
+                    reverse("exam_practice") + f"?subject={subj.id}", reverse("exam_cq"), reverse("exam_bank"),
+                    reverse("exam_dashboard"), reverse("exam_profile"), reverse("exam_leaderboard")):
+            self.assertContains(self.client.get(url), 'class="back"', msg_prefix=url)

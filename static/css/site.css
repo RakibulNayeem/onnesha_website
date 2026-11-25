@@ -697,3 +697,5 @@ html[lang=en] .rules li::before{content:counter(r)}
 .btn.danger{color:var(--red);border-color:var(--red);background:var(--card)}
 .btn.danger:hover{background:var(--red);border-color:var(--red);color:#fff}
 [data-bs-theme="dark"] .btn.danger:hover{color:#2a0a08}
+
+.back{display:inline-flex;align-items:center;justify-content:center;width:2.2rem;height:2.2rem;border-radius:50%;color:var(--ink,inherit);font-size:1.2rem;margin:0 .6rem .4rem 0;transition:background .15s}.back:hover{background:var(--line)}.examtop .back{margin:0 .6rem 0 0}

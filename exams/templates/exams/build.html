@@ -1,7 +1,7 @@
 {% extends "exams/base.html" %}{% load bn %}
 {% block title %}{% t "পরীক্ষা" %}{% endblock %}
 {% block body %}
-<div class="pagehead"><div class="wrap"><div class="crumb">{% t "পরীক্ষা" %}</div><h1 id="ttl">{% t "পরীক্ষা শুরু করো" %}</h1></div></div>
+<div class="pagehead"><div class="wrap"><a class="back" href="{% url 'exam_home' %}" aria-label="{% t "ফিরে যাও" %}" title="{% t "ফিরে যাও" %}"><i class="bi bi-arrow-left"></i></a><div class="crumb">{% t "পরীক্ষা" %}</div><h1 id="ttl">{% t "পরীক্ষা শুরু করো" %}</h1></div></div>
 <form method="post" id="hub" class="wrap" style="padding-top:1.2rem">{% csrf_token %}
   {{ form.non_field_errors }}{{ form.subjects.errors }}
   <div class="top-row">

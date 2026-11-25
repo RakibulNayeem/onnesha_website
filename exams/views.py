@@ -94,6 +94,9 @@ def bank(request):
             return sorted(items, key=lambda x: (-(x.year or 0), x.name))
         return sorted(items, key=lambda x: x.name)
 
+    prof = getattr(request.user, "profile", None) if request.user.is_authenticated else None
+    tabs = prof.bank_tabs if prof else ("subject", "board", "institution")   # school levels have no institution tab
+    tab = request.GET.get("tab") if request.GET.get("tab") in tabs else "subject"
     letters = {}
     for x in by_kind("university"):          # Bangla alphabetical order, grouped by first letter
         letters.setdefault(x.name[:1], []).append(x)
@@ -102,7 +105,7 @@ def bank(request):
     for x in by_kind("board"):
         board_groups.setdefault(x.year, []).append(x)
     return render(request, "exams/bank.html", {
-        "tab": request.GET.get("tab") if request.GET.get("tab") in ("board", "institution") else "subject",
+        "tab": tab, "tabs": tabs,
         "board_groups": list(board_groups.items()),
         "tracks": Track.objects.all(),
         "subjects": Subject.objects.select_related("track").annotate(

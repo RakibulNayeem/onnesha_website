@@ -1,7 +1,7 @@
 {% extends "exams/base.html" %}{% load bn %}
 {% block title %}{% t "প্র্যাকটিস" %}{% endblock %}
 {% block body %}
-<div class="pagehead"><div class="wrap"><div class="crumb"><a href="{% url 'exam_build' %}?mode=quick">{% t "প্র্যাকটিস" %}</a></div>
+<div class="pagehead"><div class="wrap"><a class="back" href="{% url 'exam_bank' %}" aria-label="{% t "ফিরে যাও" %}" title="{% t "ফিরে যাও" %}"><i class="bi bi-arrow-left"></i></a><div class="crumb"><a href="{% url 'exam_build' %}?mode=quick">{% t "প্র্যাকটিস" %}</a></div>
   <h1>{% t "প্র্যাকটিস" %}</h1>
   <div style="display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;margin-top:.6rem">
     {% for c in chips %}<span class="tag hl">{{ c }}</span>{% endfor %}

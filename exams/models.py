@@ -186,6 +186,25 @@ class Profile(models.Model):
     institution = models.CharField("school / college", max_length=120, blank=True)
     target = models.ForeignKey(Track, null=True, blank=True, on_delete=models.SET_NULL,
                                verbose_name="preparing for")
+    birth_date = models.DateField(null=True, blank=True)
+    gender = models.CharField(max_length=1, blank=True, choices=[("m", "ছাত্র"), ("f", "ছাত্রী"), ("o", "অন্যান্য")])
+    address = models.CharField(max_length=200, blank=True)
+    # What the student is studying for. It decides which bank tabs they see (see bank_tabs).
+    LEVELS = [("c6", "ক্লাস ৬"), ("c7", "ক্লাস ৭"), ("c8", "ক্লাস ৮"), ("ssc", "এসএসসি"),
+              ("dakhil", "দাখিল"), ("hsc", "এইচএসসি / অ্যাডমিশন"), ("alim", "আলিম")]
+    DIVISIONS = [("science", "বিজ্ঞান"), ("humanities", "মানবিক"), ("commerce", "ব্যবসায় শিক্ষা")]
+    level = models.CharField(max_length=6, blank=True, choices=LEVELS)
+    division = models.CharField(max_length=10, blank=True, choices=DIVISIONS)
+    batch_year = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    @property
+    def uses_division(self):
+        return self.level in ("ssc", "dakhil", "hsc", "alim")
+
+    @property
+    def bank_tabs(self):
+        """Bank tabs this student sees: university/job institutions only matter after school."""
+        return ("subject", "board", "institution") if self.level in ("", "hsc") else ("subject", "board")
 
     def __str__(self):
         return f"Profile of {self.user}"

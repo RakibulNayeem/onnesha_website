@@ -35,21 +35,41 @@ class ExamForm(forms.Form):
 class ProfileForm(forms.ModelForm):
     first_name = forms.CharField(label=_("নাম"), max_length=150, required=False)
     last_name = forms.CharField(label=_("পদবি"), max_length=150, required=False)
-    field_order = ["first_name", "last_name", "phone", "institution", "target"]
+    PERSONAL = ["first_name", "last_name", "birth_date", "gender", "phone", "address"]
+    ACADEMIC = ["institution", "level", "division", "batch_year"]
+    field_order = PERSONAL + ACADEMIC
 
     class Meta:
         model = Profile
-        fields = ["phone", "institution", "target"]
-        labels = {"phone": _("ফোন"), "institution": _("স্কুল / কলেজ"), "target": _("যে পরীক্ষার প্রস্তুতি নিচ্ছ")}
+        fields = ["phone", "birth_date", "gender", "address", "institution", "level", "division", "batch_year"]
+        labels = {"phone": _("ফোন"), "birth_date": _("জন্ম তারিখ"), "gender": _("ছাত্র/ছাত্রী"),
+                  "address": _("ঠিকানা"), "institution": _("শিক্ষা প্রতিষ্ঠানের নাম"),
+                  "level": _("কী নিয়ে চর্চা করতে চাও?"), "division": _("বিভাগ"), "batch_year": _("ব্যাচ (পরীক্ষার বছর)")}
+        widgets = {"birth_date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+                   "batch_year": forms.NumberInput(attrs={"min": 2000, "max": 2100, "placeholder": "2027"})}
 
     def __init__(self, *args, user, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
         self.fields["first_name"].initial, self.fields["last_name"].initial = user.first_name, user.last_name
         from .i18n import tr
-        self.fields["target"].empty_label = tr("বাছাই করো")
+        for k in ("gender", "level", "division"):
+            self.fields[k].choices = [("", tr("বাছাই করো"))] + [(v, tr(l)) for v, l in self.fields[k].choices if v]
+
+    def clean(self):
+        d = super().clean()
+        if d.get("level") and d["level"] not in ("ssc", "dakhil", "hsc", "alim"):
+            d["division"] = ""            # classes 6-8 have no division
+        return d
 
     def save(self, commit=True):
+        obj = super().save(commit)
         self.user.first_name, self.user.last_name = self.cleaned_data["first_name"], self.cleaned_data["last_name"]
         self.user.save(update_fields=["first_name", "last_name"])
-        return super().save(commit)
+        return obj
+
+    def personal(self):
+        return [self[n] for n in self.PERSONAL]
+
+    def academic(self):
+        return [self[n] for n in self.ACADEMIC]

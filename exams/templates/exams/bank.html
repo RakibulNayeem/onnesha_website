@@ -1,10 +1,10 @@
 {% extends "exams/base.html" %}{% load bn static %}
 {% block title %}{% t "প্রশ্নব্যাংক" %}{% endblock %}
 {% block body %}
-<div class="pagehead"><div class="wrap"><h1>{% t "প্রশ্নব্যাংক" %}</h1><p class="muted">{% t "বিষয়, বোর্ড বা প্রতিষ্ঠান বেছে নাও, তারপর অধ্যায় ধরে অনুশীলন করো।" %}</p></div></div>
+<div class="pagehead"><div class="wrap"><a class="back" href="{% url 'exam_home' %}" aria-label="{% t "ফিরে যাও" %}" title="{% t "ফিরে যাও" %}"><i class="bi bi-arrow-left"></i></a><h1>{% t "প্রশ্নব্যাংক" %}</h1><p class="muted">{% t "বিষয়, বোর্ড বা প্রতিষ্ঠান বেছে নাও, তারপর অধ্যায় ধরে অনুশীলন করো।" %}</p></div></div>
 <section class="sec"><div class="wrap">
   <div class="bank-tools">
-    <nav class="tabs-u"><a class="{% if tab == 'subject' %}on{% endif %}" href="?tab=subject">{% t "বিষয় ভিত্তিক" %}</a><a class="{% if tab == 'board' %}on{% endif %}" href="?tab=board">{% t "বোর্ড ভিত্তিক" %}</a><a class="{% if tab == 'institution' %}on{% endif %}" href="?tab=institution">{% t "প্রতিষ্ঠান ভিত্তিক" %}</a></nav>
+    <nav class="tabs-u">{% for k in tabs %}<a class="{% if tab == k %}on{% endif %}" href="?tab={{ k }}">{% if k == 'subject' %}{% t "বিষয় ভিত্তিক" %}{% elif k == 'board' %}{% t "বোর্ড ভিত্তিক" %}{% else %}{% t "প্রতিষ্ঠান ভিত্তিক" %}{% endif %}</a>{% endfor %}</nav>
     <label class="search"><i class="bi bi-search"></i><input type="search" id="q" placeholder="{% t "খুঁজুন…" %}" autocomplete="off"></label>
   </div>
   {% if tab == 'subject' %}

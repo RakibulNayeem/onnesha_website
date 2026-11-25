@@ -1,16 +1,19 @@
 {% extends "exams/base.html" %}{% load bn %}
 {% block title %}{% t "প্রোফাইল" %}{% endblock %}
 {% block body %}
-<div class="pagehead"><div class="wrap" style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+<div class="pagehead"><div class="wrap" style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap"><a class="back" href="{% url 'exam_home' %}" aria-label="{% t "ফিরে যাও" %}" title="{% t "ফিরে যাও" %}"><i class="bi bi-arrow-left"></i></a>
   <span class="avatar">{{ user.get_username|slice:":1"|upper }}</span>
   <div><h1 style="margin:0">{% firstof user.get_full_name user.username %}</h1>
     <div style="display:flex;gap:.5rem;align-items:center;margin-top:.2rem"><span class="tag hl">{{ role }}</span><span class="muted">{{ user.email }}</span></div></div>
 </div></div>
 <section class="sec"><div class="wrap grid c2" style="align-items:start">
   <form method="post" class="paper form">{% csrf_token %}
-    <h3 style="margin-bottom:.8rem">{% t "আমার তথ্য" %}</h3>
     {{ form.non_field_errors }}
-    <div class="grid c2">{% for f in form %}<div {% if f.name in "institution target" %}style="grid-column:1/-1"{% endif %}><label class="t">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}</div>
+    <h3 style="margin-bottom:.8rem">{% t "ব্যক্তিগত তথ্য" %}</h3>
+    <div class="grid c2">{% for f in form.personal %}<div {% if f.name == "address" %}style="grid-column:1/-1"{% endif %}><label class="t">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}</div>
+    <h3 style="margin:1.4rem 0 .8rem">{% t "একাডেমিক তথ্য" %}</h3>
+    <div class="grid c2">{% for f in form.academic %}<div id="w-{{ f.name }}" {% if f.name == "institution" or f.name == "level" %}style="grid-column:1/-1"{% endif %}><label class="t">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}</div>
+    <p class="muted" style="margin-top:.6rem;font-size:.85rem">{% t "তোমার স্তর অনুযায়ী প্রশ্নব্যাংকে প্রাসঙ্গিক ট্যাব দেখানো হবে।" %}</p>
     <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem"><button class="btn pri">{% t "সংরক্ষণ করো" %}</button>
       <a class="btn" href="{% url 'account_change_password' %}">{% t "পাসওয়ার্ড বদলাও" %}</a></div>
   </form>
@@ -38,3 +41,7 @@
   </div>
 </div></section>
 {% endblock %}
+{% block scripts %}<script>
+var lv=document.getElementById('id_level'), dv=document.getElementById('w-division');
+function sync(){ dv.hidden=!['ssc','dakhil','hsc','alim'].includes(lv.value); } lv.addEventListener('change',sync); sync();
+</script>{% endblock %}

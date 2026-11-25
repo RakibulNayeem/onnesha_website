@@ -1,7 +1,7 @@
 {% extends "exams/base.html" %}{% load bn %}
 {% block title %}{% t "আমার অগ্রগতি" %}{% endblock %}
 {% block body %}
-<div class="pagehead"><div class="wrap"><h1>{% t "আমার অগ্রগতি" %}</h1><p class="muted">{{ user.username }}</p></div></div>
+<div class="pagehead"><div class="wrap"><a class="back" href="{% url 'exam_home' %}" aria-label="{% t "ফিরে যাও" %}" title="{% t "ফিরে যাও" %}"><i class="bi bi-arrow-left"></i></a><h1>{% t "আমার অগ্রগতি" %}</h1><p class="muted">{{ user.username }}</p></div></div>
 <section class="sec"><div class="wrap">
   {% for e in open_exams %}<div class="note" style="margin-bottom:1rem"><b>{% t "অসমাপ্ত পরীক্ষা" %}:</b> <a href="{% url 'exam_take' e.pk %}">{{ e.title }}</a> — {% t "চালিয়ে যাও" %}</div>{% endfor %}
   <div class="paper" style="display:flex;gap:1.4rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem">

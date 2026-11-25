@@ -1,7 +1,7 @@
 {% extends "exams/base.html" %}{% load bn %}
 {% block title %}{{ exam.title }}{% endblock %}
 {% block body %}
-<div class="examtop"><div class="wrap">
+<div class="examtop"><div class="wrap"><a class="back" href="{% url 'exam_dashboard' %}" aria-label="{% t "ফিরে যাও" %}" title="{% t "ফিরে যাও" %}"><i class="bi bi-arrow-left"></i></a>
   <span class="ttl">{{ exam.title }}</span>
   <span class="clock" id="clock">--:--</span></div></div>
 <form method="post" id="exam" class="wrap" style="padding-top:1.1rem;padding-bottom:2rem">{% csrf_token %}

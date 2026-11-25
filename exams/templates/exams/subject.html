@@ -1,7 +1,7 @@
 {% extends "exams/base.html" %}{% load bn %}
 {% block title %}{{ subject.name }}{% endblock %}
 {% block body %}
-<div class="pagehead"><div class="wrap"><div class="crumb"><a href="{% url 'exam_home' %}">{% t "হোম" %}</a> / <a href="{% url 'exam_track' subject.track.slug %}">{{ subject.track.name }}</a></div>
+<div class="pagehead"><div class="wrap"><a class="back" href="{% url 'exam_bank' %}" aria-label="{% t "ফিরে যাও" %}" title="{% t "ফিরে যাও" %}"><i class="bi bi-arrow-left"></i></a><div class="crumb"><a href="{% url 'exam_home' %}">{% t "হোম" %}</a> / <a href="{% url 'exam_track' subject.track.slug %}">{{ subject.track.name }}</a></div>
   <h1>{{ subject.name }}</h1>
   <div style="display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1rem">
     <a class="btn pri" href="{% url 'exam_practice' %}?subject={{ subject.id }}">{% t "প্র্যাকটিস" %} ({{ total|bn }})</a>

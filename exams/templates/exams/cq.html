@@ -1,7 +1,7 @@
 {% extends "exams/base.html" %}{% load bn %}
 {% block title %}{% t "সৃজনশীল প্রশ্ন" %}{% endblock %}
 {% block body %}
-<div class="pagehead"><div class="wrap"><h1>{% t "সৃজনশীল প্রশ্ন" %}</h1><p class="muted">{% t "উদ্দীপক পড়ো, প্রতিটি প্রশ্নের উত্তর ভাবো, তারপর মডেল উত্তর খুলে মিলিয়ে নাও।" %}</p>
+<div class="pagehead"><div class="wrap"><a class="back" href="{% url 'exam_home' %}" aria-label="{% t "ফিরে যাও" %}" title="{% t "ফিরে যাও" %}"><i class="bi bi-arrow-left"></i></a><h1>{% t "সৃজনশীল প্রশ্ন" %}</h1><p class="muted">{% t "উদ্দীপক পড়ো, প্রতিটি প্রশ্নের উত্তর ভাবো, তারপর মডেল উত্তর খুলে মিলিয়ে নাও।" %}</p>
   <form method="get" class="filters" style="margin-top:1rem">
     <select name="subject" onchange="this.form.chapter.value='';this.form.submit()"><option value="">{% t "সব বিষয়" %}</option>{% for s in subjects %}<option value="{{ s.id }}" {% if sel.subject == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>{% endfor %}</select>
     <select name="chapter" onchange="this.form.submit()"><option value="">{% t "সব অধ্যায়" %}</option>{% for c in chapters %}<option value="{{ c.id }}" {% if sel.chapter == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>
