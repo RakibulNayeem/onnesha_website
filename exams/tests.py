@@ -311,3 +311,21 @@ class ImportCQ(TestCase):
             self.assertEqual([p["marks"] for p in q.parts], [1, 2, 3, 4])
             self.assertEqual(q.problems(), [])
         self.assertContains(self.client.get("/cq/"), "মধ্যবিন্দু")  # newest CQ is on page 1
+
+
+class BankTabs(TestCase):
+    def test_boards_have_their_own_tab_grouped_by_year(self):
+        track = Track.objects.create(name="SSC", slug="ssc", kind="academic")
+        subj = Subject.objects.create(track=track, name="Physics")
+        for name, year in (("ঢাকা বোর্ড ২০২৪", 2024), ("রাজশাহী বোর্ড ২০২৩", 2023)):
+            src = Source.objects.create(name=name, kind="board", year=year)
+            mcq(subj, year, source=src)
+        Source.objects.create(name="ঢাকা বিশ্ববিদ্যালয়", kind="university")
+        board = self.client.get(reverse("exam_bank") + "?tab=board")
+        self.assertContains(board, "ঢাকা বোর্ড ২০২৪")
+        self.assertContains(board, "রাজশাহী বোর্ড ২০২৩")
+        self.assertNotContains(board, "ঢাকা বিশ্ববিদ্যালয়")
+        inst = self.client.get(reverse("exam_bank") + "?tab=institution")
+        self.assertContains(inst, "ঢাকা বিশ্ববিদ্যালয়")
+        self.assertNotContains(inst, "ঢাকা বোর্ড ২০২৪")      # boards moved out of the institution tab
+        self.assertEqual(self.client.get(reverse("exam_bank")).status_code, 200)

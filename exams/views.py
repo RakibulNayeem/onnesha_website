@@ -97,9 +97,13 @@ def bank(request):
     letters = {}
     for x in by_kind("university"):          # Bangla alphabetical order, grouped by first letter
         letters.setdefault(x.name[:1], []).append(x)
-    others = [(tr(label), by_kind(k)) for k, label in Source.KINDS[1:] if by_kind(k)]
+    others = [(tr(label), by_kind(k)) for k, label in Source.KINDS[1:] if k != "board" and by_kind(k)]
+    board_groups = {}                          # boards get their own tab, grouped by exam year (newest first)
+    for x in by_kind("board"):
+        board_groups.setdefault(x.year, []).append(x)
     return render(request, "exams/bank.html", {
-        "tab": "institution" if request.GET.get("tab") == "institution" else "subject",
+        "tab": request.GET.get("tab") if request.GET.get("tab") in ("board", "institution") else "subject",
+        "board_groups": list(board_groups.items()),
         "tracks": Track.objects.all(),
         "subjects": Subject.objects.select_related("track").annotate(
             n=Count("questions", filter=approved, distinct=True), chs=Count("chapters", distinct=True)),

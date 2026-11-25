@@ -1,10 +1,10 @@
 {% extends "exams/base.html" %}{% load bn static %}
 {% block title %}{% t "প্রশ্নব্যাংক" %}{% endblock %}
 {% block body %}
-<div class="pagehead"><div class="wrap"><h1>{% t "প্রশ্নব্যাংক" %}</h1><p class="muted">{% t "বিষয় বা প্রতিষ্ঠান বেছে নাও, তারপর অধ্যায় ধরে অনুশীলন করো।" %}</p></div></div>
+<div class="pagehead"><div class="wrap"><h1>{% t "প্রশ্নব্যাংক" %}</h1><p class="muted">{% t "বিষয়, বোর্ড বা প্রতিষ্ঠান বেছে নাও, তারপর অধ্যায় ধরে অনুশীলন করো।" %}</p></div></div>
 <section class="sec"><div class="wrap">
   <div class="bank-tools">
-    <nav class="tabs-u"><a class="{% if tab == 'subject' %}on{% endif %}" href="?tab=subject">{% t "বিষয় ভিত্তিক" %}</a><a class="{% if tab == 'institution' %}on{% endif %}" href="?tab=institution">{% t "প্রতিষ্ঠান ভিত্তিক" %}</a></nav>
+    <nav class="tabs-u"><a class="{% if tab == 'subject' %}on{% endif %}" href="?tab=subject">{% t "বিষয় ভিত্তিক" %}</a><a class="{% if tab == 'board' %}on{% endif %}" href="?tab=board">{% t "বোর্ড ভিত্তিক" %}</a><a class="{% if tab == 'institution' %}on{% endif %}" href="?tab=institution">{% t "প্রতিষ্ঠান ভিত্তিক" %}</a></nav>
     <label class="search"><i class="bi bi-search"></i><input type="search" id="q" placeholder="{% t "খুঁজুন…" %}" autocomplete="off"></label>
   </div>
   {% if tab == 'subject' %}
@@ -17,6 +17,16 @@
           {% if s.n %}<span class="n"><strong>{{ s.n|bn }}</strong><span>{% t "প্রশ্ন" %}</span></span>{% else %}<span class="n soon"><strong>{% t "শীঘ্রই" %}</strong></span>{% endif %}
         </a>{% endfor %}</div></div>
     {% empty %}<p class="muted">{% t "এখনো কোনো বিষয় যোগ করা হয়নি।" %}</p>{% endfor %}
+  {% elif tab == 'board' %}
+    {% for year, items in board_groups %}
+    <div class="grp"><div class="grp-h"><h3>{{ year|bn }}</h3><span>{{ items|length|bn }}{% t "টি বোর্ড" %}</span></div>
+      <div class="cards">{% for s in items %}
+      <a class="icard {{ s.pk|tile }}" href="{% url 'exam_practice' %}?source={{ s.pk }}" data-name="{{ s.name }}">
+        {% if s.logo %}<span class="logo"><img src="{% static 'img/logos/' %}{{ s.logo }}" alt="" loading="lazy"></span>{% else %}<span class="mono">{{ s.name|initial }}</span>{% endif %}
+        <span class="t"><b>{{ s.name }}</b><small>{% t "আগের বছরের প্রশ্ন" %}</small></span>
+        {% if s.n %}<span class="n"><strong>{{ s.n|bn }}</strong><span>{% t "প্রশ্ন" %}</span></span>{% else %}<span class="n soon"><strong>{% t "শীঘ্রই" %}</strong></span>{% endif %}
+      </a>{% endfor %}</div></div>
+    {% empty %}<p class="muted">{% t "এখনো কোনো বোর্ডের প্রশ্ন যোগ করা হয়নি।" %}</p>{% endfor %}
   {% else %}
     {% if uni_groups %}
     <nav class="azbar" aria-label="{% t "বর্ণানুক্রমিক সূচি" %}">{% for letter, items in uni_groups %}<a href="#L-{{ forloop.counter }}">{{ letter }}</a>{% endfor %}</nav>
