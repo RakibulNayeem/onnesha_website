@@ -708,7 +708,7 @@ html[lang=en] .rules li::before{content:counter(r)}
 .livecard.pq::before{content:"";position:absolute;left:28px;top:-15px;width:26px;height:26px;border-radius:50%;z-index:3;
   background:radial-gradient(circle at 32% 28%,#fff 0 7%,#fecaca 8% 18%,#ef4444 40%,#b91c1c 70%,#7f1d1d);
   box-shadow:0 0 0 2px #7f1d1d,0 9px 8px -2px rgba(0,0,0,.45),inset -3px -4px 5px rgba(0,0,0,.28)}
-.livecard.pq::after{content:"";position:absolute;left:39px;top:9px;width:4px;height:15px;border-radius:0 0 2px 2px;z-index:2;
-  background:linear-gradient(90deg,#f3f4f6,#9ca3af 55%,#4b5563);transform:rotate(-14deg);transform-origin:50% 0;
+.livecard.pq::after{content:"";position:absolute;left:39px;top:9px;width:4px;height:17px;border-radius:0 0 2px 2px;z-index:2;
+  background:linear-gradient(90deg,#ffffff,#d6dde6 22%,#8e9bab 55%,#5b6878 80%,#2f3a48);transform:rotate(-14deg);transform-origin:50% 0;
   box-shadow:3px 4px 4px rgba(0,0,0,.3)}
 @media (prefers-reduced-motion:reduce){.livecard.pq{transform:none}}
