@@ -281,3 +281,20 @@ class SignInWithUsername(TestCase):
         self.client.logout()
         r = self.client.post(reverse("account_login"), {"login": "onnesha_admin_rakib", "password": "wrong-password"})
         self.assertEqual(r.status_code, 200)                                # wrong password is still refused
+
+
+class ImportCQ(TestCase):
+    def test_transcribed_cq_files_import_with_ordered_parts_and_are_idempotent(self):
+        from pathlib import Path
+        from django.core.management import call_command
+        files = sorted(str(p) for p in Path("exams/data/ssc_physics").glob("cq*.txt"))
+        call_command("import_cq", *files, verbosity=0)
+        n = Question.objects.filter(qtype="cq").count()
+        call_command("import_cq", *files, verbosity=0)
+        self.assertEqual(Question.objects.filter(qtype="cq").count(), n)
+        self.assertGreaterEqual(n, 30)
+        for q in Question.objects.filter(qtype="cq"):
+            self.assertEqual(q.status, "approved")
+            self.assertEqual([p["marks"] for p in q.parts], [1, 2, 3, 4])
+            self.assertEqual(q.problems(), [])
+        self.assertContains(self.client.get("/cq/"), "মধ্যবিন্দু")  # newest CQ is on page 1
