@@ -6,7 +6,7 @@
 <title>{% block title %}{% t "অন্বেষা পরীক্ষা" %}{% endblock %} · Onnesha Exam</title>
 <meta name="description" content="{% block meta_desc %}SSC, HSC, {% t "ভর্তি ও চাকরির MCQ-CQ প্র্যাকটিস, টাইমড মডেল টেস্ট এবং আগের বছরের প্রশ্নব্যাংক।" %}{% endblock %}">
 <script src="{% asset 'js/theme.js' %}"></script>
-<link rel="icon" type="image/png" href="{% static 'img/logo-new/favicon-a-64.png' %}">
+<link rel="icon" type="image/png" href="{% static 'img/logo-new/favicon-c-64.png' %}">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -24,6 +24,8 @@
   {% if user.is_authenticated %}
   <div class="am-user"><span class="avatar sm">{{ user.get_username|slice:":1"|upper }}</span><div><b>{% firstof user.get_full_name user.username %}</b><small>{{ user.email }}</small></div></div>
   <a href="{% url 'exam_profile' %}" role="menuitem" class="am-item"><i class="bi bi-person"></i><span>{% t "প্রোফাইল" %}</span></a>
+  <a href="{% url 'exam_premium' %}" role="menuitem" class="am-item"><i class="bi bi-gem"></i><span>{% t "প্রিমিয়াম" %}</span></a>
+  <a href="{% url 'exam_friends' %}" role="menuitem" class="am-item"><i class="bi bi-people"></i><span>{% t "বন্ধু" %}</span></a>
   <div class="am-sep"></div>
   {% endif %}
   <div class="am-label"><i class="bi bi-translate"></i> {% t "ভাষা" %}</div>
@@ -32,7 +34,7 @@
 </div>
 <aside class="side">
   <div class="side-head">
-  <a class="brand" href="{{ u_home }}"><img src="{% static 'img/logo-new/mark-a.svg' %}" alt=""><span>{% t "অন্বেষা" %}<small>{% t "পরীক্ষা ও প্রশ্নব্যাংক" %}</small></span></a>
+  <a class="brand" href="{{ u_home }}"><img src="{% static 'img/logo-new/mark-c-anim.svg' %}" alt=""><span>{% t "অন্বেষা" %}<small>{% t "পরীক্ষা ও প্রশ্নব্যাংক" %}</small></span></a>
   <button type="button" class="side-toggle" id="sideClose" aria-label="{% t "মেনু ছোট/বড় করো" %}" data-tip="{% t "মেনু ছোট/বড় করো" %}" aria-label="{% t "মেনু ছোট/বড় করো" %}"><i class="bi bi-chevron-left"></i></button></div>
   <nav class="side-links">
     <a href="{{ u_home }}" class="{% if request.path == u_home %}on{% endif %}" data-tip="{% t "হোম" %}" aria-label="{% t "হোম" %}"><i class="bi bi-house-door"></i><span>{% t "হোম" %}</span></a>
@@ -42,6 +44,7 @@
     <a href="{{ u_cq }}" class="{% if request.path == u_cq %}on{% endif %}" data-tip="{% t "সৃজনশীল" %}" aria-label="{% t "সৃজনশীল" %}"><i class="bi bi-journal-text"></i><span>{% t "সৃজনশীল" %}</span></a>
     <a href="{{ u_lb }}" class="{% if request.path == u_lb %}on{% endif %}" data-tip="{% t "মেধাতালিকা" %}" aria-label="{% t "মেধাতালিকা" %}"><i class="bi bi-trophy"></i><span>{% t "মেধাতালিকা" %}</span></a>
     <a href="{{ u_me }}" class="{% if request.path == u_me %}on{% endif %}" data-tip="{% t "আমার অগ্রগতি" %}" aria-label="{% t "আমার অগ্রগতি" %}"><i class="bi bi-graph-up-arrow"></i><span>{% t "আমার অগ্রগতি" %}</span></a>
+    {% url 'exam_premium' as u_plan %}<a href="{{ u_plan }}" class="{% if request.path == u_plan %}on{% endif %}" data-tip="{% t "প্ল্যান" %}" aria-label="{% t "প্ল্যান" %}"><i class="bi bi-gem"></i><span>{% t "প্ল্যান" %}</span></a>
     {% if user.is_staff %}<a href="{% url 'panel_home' %}" data-tip="{% t "প্যানেল" %}" aria-label="{% t "রিভিউ" %}"><i class="bi bi-speedometer2"></i><span>{% t "প্যানেল" %}</span></a>{% endif %}
   </nav>
   <div class="side-foot">
@@ -63,7 +66,7 @@
   <button type="button" class="themepill" data-theme-toggle aria-label="{% t "দিন / রাত" %}"><span class="ic sun"><b class="bi bi-sun"></b></span><span class="ic moon"><b class="bi bi-moon-stars"></b></span></button>
 </div>
 <header class="nav"><div class="wrap">
-  <a class="brand" href="{{ u_home }}"><img src="{% static 'img/logo-new/mark-a.svg' %}" alt=""><span>{% t "অন্বেষা" %}<small>{% t "পরীক্ষা ও প্রশ্নব্যাংক" %}</small></span></a>
+  <a class="brand" href="{{ u_home }}"><img src="{% static 'img/logo-new/mark-c-anim.svg' %}" alt=""><span>{% t "অন্বেষা" %}<small>{% t "পরীক্ষা ও প্রশ্নব্যাংক" %}</small></span></a>
   <nav class="links">
     <a href="{{ u_home }}" class="{% if request.path == u_home %}on{% endif %}">{% t "হোম" %}</a>
     <a href="{{ u_bank }}" class="{% if request.path == u_bank %}on{% endif %}">{% t "প্রশ্নব্যাংক" %}</a>
@@ -85,7 +88,7 @@
 {% block body %}{% endblock %}
 <footer class="foot"><div class="wrap">
   <div class="cols">
-    <div><div class="brand" style="color:#fff"><img src="{% static 'img/logo-new/mark-a.svg' %}" alt="" style="border-radius:8px"><span>{% t "অন্বেষা" %}</span></div>
+    <div><div class="brand" style="color:#fff"><img src="{% static 'img/logo-new/mark-c-anim.svg' %}" alt="" style="border-radius:8px"><span>{% t "অন্বেষা" %}</span></div>
       <p style="margin-top:.6rem;max-width:22rem">{% t "একাডেমিক এন্ড এডমিশন কেয়ার। নিজের গতিতে প্রস্তুতি নাও, পরীক্ষার মতো করে।" %}</p></div>
     <div><h5>{% t "প্রস্তুতি" %}</h5><a href="{{ u_build }}?mode=quick">{% t "প্র্যাকটিস" %}</a><a href="{{ u_build }}">{% t "মডেল টেস্ট" %}</a><a href="{{ u_cq }}">{% t "সৃজনশীল প্রশ্ন" %}</a></div>
     <div><h5>{% t "প্রতিযোগিতা" %}</h5><a href="{{ u_lb }}">{% t "মেধাতালিকা" %}</a><a href="{{ u_me }}">{% t "আমার অগ্রগতি" %}</a></div>

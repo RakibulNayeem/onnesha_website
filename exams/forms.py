@@ -1,7 +1,7 @@
 from django import forms
 
 from .i18n import tr_lazy as _
-from .models import Chapter, Profile, Question, Source, Subject
+from .models import Chapter, Profile, Question, Source, Subject, Subscription
 
 COUNTS = [(n, f"{n} questions") for n in (10, 20, 25, 30, 40, 50)]
 
@@ -94,3 +94,37 @@ class ProfileForm(forms.ModelForm):
 
     def academic(self):
         return [self[n] for n in self.ACADEMIC]
+
+
+RECEIPT_TYPES = {b"\x89PNG\r\n\x1a\n": "image/png", b"\xff\xd8\xff": "image/jpeg", b"%PDF-": "application/pdf"}
+RECEIPT_MAX = 3 * 1024 * 1024
+
+
+class PaymentForm(forms.ModelForm):
+    proof = forms.FileField(label=_("পেমেন্টের স্ক্রিনশট বা রসিদ (PNG, JPG, PDF — সর্বোচ্চ ৩ MB)"),
+                            widget=forms.ClearableFileInput(attrs={"accept": ".png,.jpg,.jpeg,.pdf,image/png,image/jpeg,application/pdf"}))
+
+    class Meta:
+        model = Subscription
+        fields = ["method", "sender_number", "txn_id"]
+        labels = {"method": _("পেমেন্ট মাধ্যম"), "sender_number": _("যে নম্বর থেকে পাঠিয়েছ"),
+                  "txn_id": _("ট্রানজ্যাকশন আইডি (ঐচ্ছিক)")}
+    field_order = ["method", "sender_number", "txn_id", "proof"]
+
+    def clean_txn_id(self):
+        t = self.cleaned_data["txn_id"].strip().upper()
+        if t and Subscription.objects.filter(txn_id=t).exists():
+            raise forms.ValidationError(_("এই ট্রানজ্যাকশন আইডি আগেই জমা দেওয়া হয়েছে।"))
+        return t
+
+    def clean_proof(self):
+        f = self.cleaned_data["proof"]
+        if f.size > RECEIPT_MAX:
+            raise forms.ValidationError(_("ফাইল ৩ MB-এর বেশি হতে পারবে না।"))
+        head = f.read(8)
+        f.seek(0)
+        kind = next((t for sig, t in RECEIPT_TYPES.items() if head.startswith(sig)), None)   # trust the bytes, not the name
+        if not kind:
+            raise forms.ValidationError(_("শুধু PNG, JPG বা PDF ফাইল দেওয়া যাবে।"))
+        f.detected_type = kind
+        return f

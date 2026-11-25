@@ -1,0 +1,14 @@
+{% extends "panel/base.html" %}{% block title %}Premium payments{% endblock %}
+{% block body %}
+<header class="phead"><div><h1>Premium payments</h1><p class="muted">Students pay ৳{{ price }} by bKash, Nagad or Rocket and upload a receipt (transaction id is optional). Open the receipt and check the payment in your wallet, then approve. Approving starts a 365-day Premium year (added after any current one).</p></div></header>
+<form method="get" class="pfilters"><select name="status" onchange="this.form.submit()">
+  <option value="pending" {% if status == 'pending' %}selected{% endif %}>Waiting for approval</option><option value="active" {% if status == 'active' %}selected{% endif %}>Active</option><option value="rejected" {% if status == 'rejected' %}selected{% endif %}>Rejected</option><option value="all" {% if status == 'all' %}selected{% endif %}>All</option></select></form>
+<div class="pcard flush"><table class="ptable"><thead><tr><th>Student</th><th>Payment</th><th>Status</th><th>Valid</th><th></th></tr></thead><tbody>
+{% for s in page %}<tr>
+  <td><b>{{ s.user.username }}</b><small>{{ s.user.email|default:"no email" }}</small></td>
+  <td>{{ s.get_method_display }}{% if s.txn_id %} · <b>{{ s.txn_id }}</b>{% endif %} · <a href="{% url 'panel_payment_proof' s.pk %}" target="_blank" rel="noopener">View receipt</a><small>from {{ s.sender_number }} · ৳{{ s.amount }} · {{ s.created|date:"j M Y H:i" }}</small></td>
+  <td><span class="pst {% if s.status == 'active' %}approved{% else %}draft{% endif %}">{{ s.get_status_display }}</span></td>
+  <td>{% if s.ends_at %}{{ s.starts_at|date:"j M Y" }} → {{ s.ends_at|date:"j M Y" }}{% endif %}</td>
+  <td class="r">{% if s.status == 'pending' %}<form method="post" style="display:inline">{% csrf_token %}<input type="hidden" name="id" value="{{ s.pk }}"><button class="btn sm pri" name="do" value="approve">Approve</button> <button class="btn sm" name="do" value="reject">Reject</button></form>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="5" class="pempty muted">No payments here.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

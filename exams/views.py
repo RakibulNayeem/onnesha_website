@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
 from django.core.paginator import Paginator
@@ -10,8 +11,10 @@ from django.utils import timezone
 
 from . import roles
 from .i18n import tr
-from .forms import ExamForm, ProfileForm
-from .models import Chapter, Exam, ExamQuestion, Profile, Question, Source, Subject, Track
+from . import activity, friends as fr, plans
+from .forms import ExamForm, PaymentForm, ProfileForm
+User = get_user_model()
+from .models import Chapter, Exam, ExamQuestion, Friendship, PaymentProof, Profile, Question, Source, Subject, Subscription, Track
 
 MCQ_OK = Q(questions__status=Question.APPROVED, questions__qtype=Question.MCQ, questions__reserved=False)
 
@@ -160,8 +163,14 @@ def build(request):
     form = ExamForm(request.POST or None, initial={"source": request.GET.get("source") or None})
     if request.method == "POST" and form.is_valid():
         d = form.cleaned_data
+        left = plans.exams_left(request.user)
+        if left == 0:                                    # Free allowance used up
+            messages.warning(request, tr("এই মাসের ফ্রি পরীক্ষা শেষ। আনলিমিটেড পরীক্ষার জন্য প্রিমিয়াম নাও।"))
+            return redirect("exam_premium")
         pool = Question.objects.filter(status=Question.APPROVED, qtype=Question.MCQ).filter(
             _scope([x.pk for x in d["subjects"]], [c.pk for c in d["chapters"]]))
+        if not plans.is_premium(request.user):          # held-back model-test questions are Premium only
+            pool = pool.filter(reserved=False)
         if d["source"]:
             pool = pool.filter(source=d["source"])
         chosen = list(pool.order_by("?")[:d["count"]])
@@ -192,7 +201,8 @@ def build(request):
         "picked": [int(x) for x in picked if str(x).isdigit()],
         "picked_chapters": [int(x) for x in request.POST.getlist("chapters") if x.isdigit()],
         "picked_count": request.POST.get("count", "25"),
-        "mode": "quick" if request.GET.get("mode") == "quick" else "mock"})
+        "mode": "quick" if request.GET.get("mode") == "quick" else "mock",
+        "exams_left": plans.exams_left(request.user) if request.user.is_authenticated else None})
 
 
 @login_required(login_url="account_login")
@@ -233,32 +243,87 @@ def _pct(rows):
 
 @login_required(login_url="account_login")
 def dashboard(request):
-    graded = ExamQuestion.objects.filter(
-        exam__user=request.user, exam__submitted_at__isnull=False)
+    """Progress page: banner and stats, this week, month calendar, subject report, badges, recent exams."""
+    me = request.user
+    graded = ExamQuestion.objects.filter(exam__user=me, exam__submitted_at__isnull=False)
     stats = dict(total=Count("id"), right=Count("id", filter=Q(is_correct=True)))
-    subjects = _pct(graded.values(name=F("question__subject__name"))
-                    .annotate(**stats).order_by("name"))
+    subjects = _pct(graded.values(name=F("question__subject__name")).annotate(**stats).order_by("name"))
     chapters = _pct(graded.filter(question__chapter__isnull=False).values(
-        name=F("question__chapter__name"),
-        subject=F("question__subject__name"))
-        .annotate(**stats))
+        name=F("question__chapter__name"), subject=F("question__subject__name")).annotate(**stats))
+    for sj in subjects:
+        sj["chapters"] = sorted((c for c in chapters if c["subject"] == sj["name"]), key=lambda c: c["pct"])
     weak = sorted((c for c in chapters if c["total"] >= 3), key=lambda c: c["pct"])[:5]
     total = sum(x["total"] for x in subjects)
+    right = sum(x["right"] for x in subjects)
+    done = me.exams.filter(submitted_at__isnull=False)
+    days = activity.daily_points(me)
+    mine = done.aggregate(c=Sum("correct"))["c"] or 0
+    rank = (Exam.objects.filter(submitted_at__isnull=False).values("user").annotate(c=Sum("correct"))
+            .filter(c__gt=mine).count() + 1) if mine else None
+    prof, _ = Profile.objects.get_or_create(user=me)
+    batch = " ".join(x for x in (prof.get_level_display() if prof.level else "", str(prof.batch_year or "")) if x)
+    act = activity.summary(me)
     return render(request, "exams/dashboard.html", {
-        "n_exams": request.user.exams.filter(submitted_at__isnull=False).count(),
-        "overall": round(100 * sum(x["right"] for x in subjects) / total) if total else 0,
-        "exams": request.user.exams.filter(submitted_at__isnull=False)[:15],
-        "open_exams": request.user.exams.filter(submitted_at__isnull=True)[:3],
-        "subjects": subjects, "weak": weak})
+        "n_exams": done.count(), "overall": round(100 * right / total) if total else 0,
+        "exams": done[:8], "open_exams": me.exams.filter(submitted_at__isnull=True)[:3],
+        "subjects": subjects, "weak": weak, "act": act, "batch": batch,
+        "points": mine * activity.POINTS_PER_CORRECT, "rank": rank,
+        "month": activity.month_grid(days), "month_label": timezone.localdate(),
+        "badges": activity.badges({"exams": done.count(), "best_streak": activity.best_streak(days),
+                                   "correct": right, "answered": total})})
 
 
 def leaderboard(request):
+    mine = []
+    if request.user.is_authenticated:                      # you and your friends, this week
+        group = [request.user, *fr.friends_of(request.user)]
+        mine = sorted(({"user": u.username, "points": activity.summary(u)["week_points"], "me": u.pk == request.user.pk}
+                       for u in group), key=lambda r: -r["points"])
     return render(request, "exams/leaderboard.html", {
-        "week": _top_students(20, 7), "month": _top_students(20, 30)})
+        "week": _top_students(20, 7), "month": _top_students(20, 30), "friends_board": mine if len(mine) > 1 else []})
+
+
+@login_required(login_url="account_login")
+def friends(request):
+    """Friends: search students, send/accept/decline requests, see each friend's streak and week."""
+    me = request.user
+    if request.method == "POST":
+        do, other = request.POST.get("do"), User.objects.filter(pk=request.POST.get("user") or 0).first()
+        if other and do == "send":
+            msg = {"sent": "অনুরোধ পাঠানো হয়েছে।", "accepted": "তোমরা এখন বন্ধু!", "waiting": "অনুরোধ আগেই পাঠানো হয়েছে।",
+                   "already": "তোমরা আগেই বন্ধু।", "self": "নিজেকে বন্ধু বানানো যায় না।"}[fr.send(me, other)]
+            messages.info(request, tr(msg))
+        elif other and do in ("accept", "decline"):
+            link = Friendship.objects.filter(from_user=other, to_user=me, status="pending").first()
+            if link and do == "accept":
+                link.status = "accepted"
+                link.save(update_fields=["status"])
+            elif link:
+                link.delete()
+        elif other and do == "remove":
+            link = fr.between(me, other)
+            if link:
+                link.delete()
+        return redirect("exam_friends")
+    q = request.GET.get("q", "").strip()
+    found = []
+    if len(q) >= 3:
+        taken = {f.pk for f in fr.friends_of(me)}
+        found = [{"u": u, "friend": u.pk in taken} for u in
+                 User.objects.filter(username__icontains=q, is_active=True).exclude(pk=me.pk)[:8]]
+    rows = []
+    for f in fr.friends_of(me)[:50]:
+        s = activity.summary(f)
+        rows.append({"u": f, "streak": s["streak"], "week_points": s["week_points"], "today": any(d["active"] and d["today"] for d in s["week"])})
+    return render(request, "exams/friends.html", {
+        "q": q, "found": found, "rows": sorted(rows, key=lambda r: -r["week_points"]),
+        "incoming": fr.incoming(me), "outgoing": fr.outgoing(me)})
 
 
 def cq_practice(request):
-    qs = Question.objects.filter(status=Question.APPROVED, qtype=Question.CQ, reserved=False).select_related(
+    kinds = (Question.CQ, Question.SQ)       # creative and short questions share this page
+    kind = request.GET.get("type") if request.GET.get("type") in kinds else ""
+    qs = Question.objects.filter(status=Question.APPROVED, qtype__in=[kind] if kind else kinds, reserved=False).select_related(
         "subject", "chapter", "source")
     subject = request.GET.get("subject")
     chapter = request.GET.get("chapter")
@@ -273,11 +338,11 @@ def cq_practice(request):
         .get_page(request.GET.get("page"))
     return render(request, "exams/cq.html", {
         "page": page, "subjects": Subject.objects.filter(
-            questions__qtype=Question.CQ, questions__status=Question.APPROVED, questions__reserved=False).distinct(),
+            questions__qtype__in=kinds, questions__status=Question.APPROVED, questions__reserved=False).distinct(),
         "chapters": Chapter.objects.filter(subject_id=subject) if subject else [],
         "sources": Source.objects.filter(
-            questions__qtype=Question.CQ, questions__status=Question.APPROVED, questions__reserved=False).distinct(),
-        "sel": {"subject": subject or "", "chapter": chapter or "", "source": source or ""}})
+            questions__qtype__in=kinds, questions__status=Question.APPROVED, questions__reserved=False).distinct(),
+        "sel": {"subject": subject or "", "chapter": chapter or "", "source": source or "", "type": kind}})
 
 
 @login_required(login_url="account_login")
@@ -295,6 +360,8 @@ def profile(request):
         "form": form, "role": roles.label(request.user), "role_key": roles.role(request.user),
         "n_exams": done.count(), "accuracy": round(100 * totals["right"] / totals["n"]) if totals["n"] else 0,
         "can_panel": request.user.is_staff,
+        "premium_until": getattr(plans.active_subscription(request.user), "ends_at", None),
+        "is_premium": plans.is_premium(request.user), "exams_left": plans.exams_left(request.user) or 0,
         "mine": Question.objects.filter(author=request.user).count() if request.user.is_staff else 0,
         "drafts": Question.objects.filter(status=Question.DRAFT).count() if roles.can_approve(request.user) else 0})
 
@@ -316,6 +383,29 @@ def username_check(request):
     if username_taken(name, request.user):
         return JsonResponse({"ok": False, "msg": tr("এই ইউজারনেম আগেই নেওয়া হয়েছে।")})
     return JsonResponse({"ok": True, "msg": tr("ইউজারনেমটি পাওয়া যাবে।")})
+
+
+def premium(request):
+    """Plans page: Free vs Premium, and the payment form (bKash / Nagad / Rocket + transaction id)."""
+    user = request.user
+    form = PaymentForm(request.POST or None, request.FILES or None)
+    if request.method == "POST":
+        if not user.is_authenticated:
+            return redirect_to_login(request.get_full_path(), "account_login")
+        if form.is_valid():
+            sub = form.save(commit=False)
+            sub.user, sub.amount = user, plans.PRICE
+            sub.save()
+            f = form.cleaned_data["proof"]
+            PaymentProof.objects.create(subscription=sub, data=f.read(), content_type=f.detected_type,
+                                        filename=f.name[:120])
+            messages.success(request, tr("পেমেন্ট জমা হয়েছে। যাচাই শেষ হলেই প্রিমিয়াম চালু হবে।"))
+            return redirect("exam_premium")
+    mine = list(user.subscriptions.all()[:5]) if user.is_authenticated else []
+    return render(request, "exams/premium.html", {
+        "form": form, "price": plans.PRICE, "per_month": round(plans.PRICE / 12), "free_exams": plans.FREE_EXAMS_PER_MONTH,
+        "active": plans.active_subscription(user), "pending": any(s.status == "pending" for s in mine),
+        "mine": mine, "number": plans.pay_number()})
 
 
 def set_language(request, code):

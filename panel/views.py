@@ -7,13 +7,14 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.views import redirect_to_login
 from django.core.paginator import Paginator
 from django.db.models import Count, ProtectedError, Q
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
 from exams import roles
-from exams.models import Chapter, Exam, Question, Source, Subject, Track
+from exams import plans
+from exams.models import Chapter, Exam, Question, PaymentProof, Source, Subject, Subscription, Track
 
 from .forms import CONTENT, QuestionForm, UserForm, content_form
 
@@ -38,7 +39,8 @@ def nav(request):
     u = request.user
     return {"can_approve": roles.can_approve(u), "can_content": roles.can_manage_content(u),
             "can_users": roles.can_manage_users(u), "role": ROLE_NAMES[roles.role(u)] if u.is_authenticated else "",
-            "drafts": visible(u).filter(status=Question.DRAFT).count() if roles.can_use_panel(u) else 0}
+            "drafts": visible(u).filter(status=Question.DRAFT).count() if roles.can_use_panel(u) else 0,
+            "pending_payments": Subscription.objects.filter(status=Subscription.PENDING).count() if roles.can_manage_users(u) else 0}
 
 
 def visible(user):
@@ -84,7 +86,7 @@ def questions(request):
         qs = qs.filter(Q(text__icontains=f["q"]) | Q(refs__icontains=f["q"]))
     if f["status"] in (Question.DRAFT, Question.APPROVED):
         qs = qs.filter(status=f["status"])
-    if f["type"] in (Question.MCQ, Question.CQ):
+    if f["type"] in (Question.MCQ, Question.CQ, Question.SQ):
         qs = qs.filter(qtype=f["type"])
     for key, col in (("subject", "subject_id"), ("chapter", "chapter_id"), ("source", "source_id"), ("author", "author_id")):
         if f[key].isdigit():
@@ -246,3 +248,37 @@ def user_edit(request, pk=None):
         u = form.save(); messages.success(request, f"Saved {u.username} as {ROLE_NAMES[roles.role(u)]}.")
         return redirect("panel_users")
     return render(request, "panel/user_form.html", {"nav": nav(request), "form": form, "obj": obj, "section": "users"})
+
+
+# ---------------------------------------------------------------- premium payments
+@panel_view(roles.can_manage_users)
+def payments(request):
+    """Premium payments students have submitted. Approving starts their year."""
+    if request.method == "POST":
+        sub = get_object_or_404(Subscription, pk=request.POST.get("id"))
+        if sub.status == Subscription.PENDING:
+            if request.POST.get("do") == "approve":
+                plans.approve(sub)
+                messages.success(request, f"Premium started for {sub.user.username} until {sub.ends_at:%d %b %Y}.")
+            elif request.POST.get("do") == "reject":
+                sub.status = Subscription.REJECTED
+                sub.save(update_fields=["status"])
+                messages.info(request, f"Payment {sub.txn_id} rejected.")
+        return redirect(request.get_full_path())
+    status = request.GET.get("status", "pending")
+    qs = Subscription.objects.select_related("user")
+    if status in ("pending", "active", "rejected"):
+        qs = qs.filter(status=status)
+    return render(request, "panel/payments.html", {"nav": nav(request), "page": page(request, list(qs), 30),
+                                                    "status": status, "section": "payments", "price": plans.PRICE})
+
+
+@panel_view(roles.can_manage_users)
+def payment_proof(request, pk):
+    """The receipt a student uploaded. Staff only; the stored type decides what the browser is told."""
+    proof = get_object_or_404(PaymentProof, subscription_id=pk)
+    resp = HttpResponse(bytes(proof.data), content_type=proof.content_type)
+    resp["Content-Disposition"] = 'inline; filename="receipt-%s"' % pk
+    resp["X-Content-Type-Options"] = "nosniff"
+    resp["Content-Security-Policy"] = "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'"
+    return resp

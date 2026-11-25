@@ -148,6 +148,9 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 if not DEBUG:
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
+# Mobile-banking number students send the Premium fee to (shown on /premium/).
+PAYMENT_NUMBER = os.environ.get("PAYMENT_NUMBER", "01774517825")   # bKash / Nagad / Rocket (personal)
+
 # A provider button appears only when its keys are set in the environment.
 SOCIALACCOUNT_PROVIDERS = {}
 for _name in ("google", "facebook"):

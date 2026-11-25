@@ -65,7 +65,14 @@ class ExamFlow(TestCase):
         self.assertNotContains(self.client.get(reverse("exam_subject", args=[self.subj.id])), "Model Test 1")
         self.client.force_login(self.user)
         self.client.post(reverse("exam_build"), {"subjects": [self.subj.id], "count": 50})
-        self.assertIn(r.pk, Exam.objects.get().items.values_list("question_id", flat=True))  # but in exams
+        self.assertNotIn(r.pk, Exam.objects.get().items.values_list("question_id", flat=True))  # Free: no
+        from datetime import timedelta
+        from django.utils import timezone
+        from .models import Subscription
+        Subscription.objects.create(user=self.user, method="bkash", sender_number="1", txn_id="X1", status="active",
+                                    starts_at=timezone.now(), ends_at=timezone.now() + timedelta(days=30))
+        self.client.post(reverse("exam_build"), {"subjects": [self.subj.id], "count": 50})
+        self.assertIn(r.pk, Exam.objects.latest("id").items.values_list("question_id", flat=True))  # Premium: yes
 
     def test_other_students_exam_is_private(self):
         exam = Exam.objects.create(user=self.user, title="t", duration_minutes=5)
@@ -429,3 +436,188 @@ class LeaderboardRanges(TestCase):
         page = self.client.get(reverse("exam_leaderboard"))      # both boards on one page, no tabs
         self.assertEqual([r["user__username"] for r in page.context["week"]], ["recent"])
         self.assertEqual({r["user__username"] for r in page.context["month"]}, {"recent", "older"})
+
+
+def png(name="slip.png", body=b"\x89PNG\r\n\x1a\n" + b"0" * 50):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    return SimpleUploadedFile(name, body, content_type="image/png")
+
+
+class PremiumPlan(TestCase):
+    def setUp(self):
+        from . import plans
+        self.plans = plans
+        track = Track.objects.create(name="SSC", slug="ssc2", kind="academic")
+        self.subj = Subject.objects.create(track=track, name="Physics")
+        for i in range(4):
+            mcq(self.subj, i)
+        held = mcq(self.subj, 90); held.reserved = True; held.save()
+        self.stu = User.objects.create_user("stu", "s@x.com", "pw12345!")
+        self.client.force_login(self.stu)
+
+    def start(self, count=50):
+        return self.client.post(reverse("exam_build"), {"subjects": [self.subj.id], "count": count})
+
+    def test_free_students_get_three_exams_a_month_and_no_held_back_questions(self):
+        self.start()
+        qids = list(Exam.objects.get().items.values_list("question__reserved", flat=True))
+        self.assertEqual(qids, [False] * 4)                       # model-test question excluded
+        self.start(); self.start()
+        self.assertEqual(Exam.objects.count(), 3)
+        r = self.start()                                          # fourth is refused
+        self.assertRedirects(r, reverse("exam_premium"), fetch_redirect_response=False)
+        self.assertEqual(Exam.objects.count(), 3)
+
+    def test_payment_then_approval_makes_a_student_premium_for_a_year(self):
+        from .models import Subscription
+        r = self.client.post(reverse("exam_premium"), {"method": "bkash", "sender_number": "017", "txn_id": "tx1",
+                                                       "proof": png()})
+        sub = Subscription.objects.get()
+        self.assertEqual((sub.status, sub.amount), ("pending", 199))
+        self.assertFalse(self.plans.is_premium(self.stu))         # waiting is not premium
+        dup = self.client.post(reverse("exam_premium"), {"method": "nagad", "sender_number": "018", "txn_id": "TX1",
+                                                         "proof": png()})
+        self.assertContains(dup, "আগেই জমা")                      # same transaction id cannot be reused
+        self.plans.approve(sub)
+        self.assertTrue(self.plans.is_premium(self.stu))
+        self.assertEqual((sub.ends_at - sub.starts_at).days, 365)
+        for _ in range(4):
+            self.start()
+        self.assertEqual(Exam.objects.count(), 4)                 # no monthly limit
+        self.assertIn(True, Exam.objects.latest("id").items.values_list("question__reserved", flat=True))
+
+    def test_only_admins_approve_payments_in_the_panel(self):
+        from .models import Subscription
+        sub = Subscription.objects.create(user=self.stu, method="bkash", sender_number="1", txn_id="T9")
+        self.assertEqual(self.client.get(reverse("panel_payments")).status_code, 403)
+        admin = User.objects.create_user("boss", "b@x.com", "pw12345!", is_staff=True, is_superuser=True)
+        self.client.force_login(admin)
+        self.client.post(reverse("panel_payments"), {"id": sub.pk, "do": "approve"})
+        sub.refresh_from_db()
+        self.assertEqual(sub.status, "active")
+
+
+class StreakAndFriends(TestCase):
+    def setUp(self):
+        self.a = User.objects.create_user("alice", "a@x.com", "pw12345!")
+        self.b = User.objects.create_user("bobby", "b@x.com", "pw12345!")
+
+    def exam(self, user, days_ago, correct):
+        from django.utils import timezone
+        return Exam.objects.create(user=user, title="t", duration_minutes=5, correct=correct,
+                                   submitted_at=timezone.now() - timezone.timedelta(days=days_ago))
+
+    def test_streak_counts_consecutive_days_and_points_come_from_correct_answers(self):
+        from . import activity
+        self.exam(self.a, 0, 3); self.exam(self.a, 1, 2); self.exam(self.a, 3, 5)   # gap on day 2
+        s = activity.summary(self.a)
+        self.assertEqual(s["streak"], 2)
+        self.assertEqual(sum(d["points"] for d in activity.week(activity.daily_points(self.a))) % 10, 0)
+        self.assertEqual(activity.daily_points(self.a)[__import__("django.utils.timezone", fromlist=["x"]).localdate()], 30)
+        self.assertEqual(len(s["week"]), 7)
+        self.assertEqual(s["week"][0]["date"].weekday(), 5)                        # weeks start on Saturday
+
+    def test_friend_request_accept_and_remove(self):
+        from . import friends
+        self.client.force_login(self.a)
+        self.client.post(reverse("exam_friends"), {"do": "send", "user": self.b.pk})
+        self.assertEqual(friends.outgoing(self.a).count(), 1)
+        self.assertEqual(list(friends.friends_of(self.a)), [])                    # pending is not a friend yet
+        self.client.post(reverse("exam_friends"), {"do": "accept", "user": self.a.pk})   # alice cannot accept her own request
+        self.assertEqual(list(friends.friends_of(self.a)), [])
+        self.client.force_login(self.b)
+        self.assertEqual(self.client.get(reverse("exam_friends")).context["incoming"].count(), 1)
+        self.client.post(reverse("exam_friends"), {"do": "accept", "user": self.a.pk})
+        self.assertEqual([u.username for u in friends.friends_of(self.b)], ["alice"])
+        self.assertEqual([u.username for u in friends.friends_of(self.a)], ["bobby"])
+        self.exam(self.a, 0, 4)
+        row = self.client.get(reverse("exam_friends")).context["rows"][0]
+        self.assertEqual((row["u"].username, row["streak"], row["week_points"]), ("alice", 1, 40))
+        self.client.post(reverse("exam_friends"), {"do": "remove", "user": self.a.pk})
+        self.assertEqual(list(friends.friends_of(self.b)), [])
+
+    def test_a_crossed_request_becomes_a_friendship_and_self_request_is_refused(self):
+        from . import friends
+        self.assertEqual(friends.send(self.a, self.a), "self")
+        friends.send(self.a, self.b)
+        self.assertEqual(friends.send(self.b, self.a), "accepted")
+        self.assertEqual(friends.send(self.a, self.b), "already")
+
+    def test_search_needs_three_letters_and_dashboard_shows_the_week(self):
+        self.client.force_login(self.a)
+        self.assertEqual(self.client.get(reverse("exam_friends") + "?q=bo").context["found"], [])
+        self.assertEqual([x["u"].username for x in self.client.get(reverse("exam_friends") + "?q=bob").context["found"]], ["bobby"])
+        self.assertContains(self.client.get(reverse("exam_dashboard")), "aw-days")
+
+
+class ProgressPage(TestCase):
+    def test_progress_page_shows_stats_calendar_and_badges(self):
+        from django.utils import timezone
+        u = User.objects.create_user("prog", "p@x.com", "pw12345!")
+        self.client.force_login(u)
+        page = self.client.get(reverse("exam_dashboard"))
+        self.assertEqual(page.status_code, 200)
+        self.assertIsNone(page.context["rank"])                       # no exam yet, no rank
+        Exam.objects.create(user=u, title="t", duration_minutes=5, correct=6, submitted_at=timezone.now())
+        Exam.objects.create(user=User.objects.create_user("o", "o@x.com", "pw12345!"), title="t", duration_minutes=5,
+                            correct=9, submitted_at=timezone.now())
+        page = self.client.get(reverse("exam_dashboard"))
+        self.assertEqual((page.context["points"], page.context["rank"]), (60, 2))   # one student is ahead
+        self.assertTrue(any(b["earned"] and b["key"] == "first" for b in page.context["badges"]))
+        self.assertTrue(any(d["active"] and d["today"] for w in page.context["month"] for d in w))
+
+
+class PaymentReceipt(TestCase):
+    def setUp(self):
+        self.stu = User.objects.create_user("stu", "s@x.com", "pw12345!")
+        self.client.force_login(self.stu)
+        self.url = reverse("exam_premium")
+
+    def pay(self, **kw):
+        data = {"method": "rocket", "sender_number": "017", "proof": png(), **kw}
+        return self.client.post(self.url, {k: v for k, v in data.items() if v is not None})
+
+    def test_transaction_id_is_optional_but_receipt_and_the_rest_are_required(self):
+        from .models import Subscription
+        self.pay(txn_id="")
+        self.pay(txn_id="")                                              # two payments without an id are fine
+        self.assertEqual(Subscription.objects.count(), 2)
+        for missing in ("method", "sender_number", "proof"):
+            r = self.pay(**{missing: None})
+            self.assertEqual(r.status_code, 200, missing)                # form redisplayed, nothing saved
+        self.assertEqual(Subscription.objects.count(), 2)
+
+    def test_only_png_jpg_and_pdf_are_accepted_judged_by_content_not_name(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from .models import PaymentProof, Subscription
+        fake = SimpleUploadedFile("evil.png", b"<script>alert(1)</script>", content_type="image/png")
+        self.assertContains(self.pay(proof=fake), "শুধু PNG")
+        big = png(body=b"\x89PNG\r\n\x1a\n" + b"0" * (3 * 1024 * 1024))
+        self.assertContains(self.pay(proof=big), "৩ MB")
+        pdf = SimpleUploadedFile("slip.pdf", b"%PDF-1.4 test", content_type="application/pdf")
+        jpg = SimpleUploadedFile("slip.jpg", b"\xff\xd8\xff\xe0" + b"0" * 20, content_type="image/jpeg")
+        self.pay(proof=pdf); self.pay(proof=jpg)
+        self.assertEqual(Subscription.objects.count(), 2)
+        self.assertEqual(sorted(PaymentProof.objects.values_list("content_type", flat=True)),
+                         ["application/pdf", "image/jpeg"])
+
+    def test_only_payment_admins_can_open_a_receipt(self):
+        from .models import Subscription
+        self.pay()
+        sub = Subscription.objects.get()
+        link = reverse("panel_payment_proof", args=[sub.pk])
+        self.assertEqual(self.client.get(link).status_code, 403)         # the student themself cannot
+        boss = User.objects.create_user("boss", "b@x.com", "pw12345!", is_staff=True, is_superuser=True)
+        self.client.force_login(boss)
+        r = self.client.get(link)
+        self.assertEqual((r.status_code, r["Content-Type"], r["X-Content-Type-Options"]), (200, "image/png", "nosniff"))
+        self.assertContains(self.client.get(reverse("panel_payments")), link)
+        self.assertEqual(self.client.get(reverse("exam_home")).context["hud"]["notes"][0]["url"], reverse("panel_payments"))
+        self.assertContains(self.client.get(reverse("panel_home")), 'class="pcount"')   # badge shows the waiting payment
+        mod = User.objects.create_user("mod", "m@x.com", "pw12345!", is_staff=True)
+        mod.groups.add(__import__("django.contrib.auth.models", fromlist=["Group"]).Group.objects.get_or_create(name="Moderator")[0])
+        self.client.force_login(mod)
+        self.assertEqual(self.client.get(reverse("panel_payments")).status_code, 403)   # moderators cannot
+
+    def test_page_shows_the_payment_number(self):
+        self.assertContains(self.client.get(self.url), "01774517825")

@@ -64,8 +64,8 @@ class Source(models.Model):
 
 
 class Question(models.Model):
-    MCQ, CQ = "mcq", "cq"
-    TYPES = [(MCQ, "MCQ"), (CQ, "CQ")]
+    MCQ, CQ, SQ = "mcq", "cq", "sq"
+    TYPES = [(MCQ, "MCQ"), (CQ, "CQ"), (SQ, "SQ")]
     DRAFT, APPROVED = "draft", "approved"
     STATUSES = [(DRAFT, "Draft - needs review"), (APPROVED, "Approved")]
 
@@ -75,7 +75,7 @@ class Question(models.Model):
     source = models.ForeignKey(Source, null=True, blank=True, on_delete=models.SET_NULL,
                                related_name="questions")
     qtype = models.CharField("type", max_length=3, choices=TYPES, default=MCQ)
-    text = models.TextField("question / CQ stem")
+    text = models.TextField("question / CQ stem")  # SQ: the question; its solution goes in `explanation`
     option_a = models.CharField(max_length=500, blank=True)
     option_b = models.CharField(max_length=500, blank=True)
     option_c = models.CharField(max_length=500, blank=True)
@@ -114,7 +114,7 @@ class Question(models.Model):
                 out.append("needs four options")
             if self.correct not in OPTION_KEYS:
                 out.append("needs a correct answer")
-        elif not self.parts:
+        elif self.qtype == self.CQ and not self.parts:
             out.append("needs at least one part")
         return out
 
@@ -209,3 +209,54 @@ class Profile(models.Model):
     def __str__(self):
         return f"Profile of {self.user}"
 
+
+
+class Subscription(models.Model):
+    """A Premium purchase. Students pay by mobile banking and submit the transaction id;
+    an admin approves it, which starts the year (see plans.py)."""
+    METHODS = [("bkash", "bKash"), ("nagad", "Nagad"), ("rocket", "Rocket")]
+    PENDING, ACTIVE, REJECTED = "pending", "active", "rejected"
+    STATUSES = [(PENDING, "Waiting for approval"), (ACTIVE, "Active"), (REJECTED, "Rejected")]
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="subscriptions")
+    method = models.CharField(max_length=10, choices=METHODS)
+    sender_number = models.CharField(max_length=20)
+    txn_id = models.CharField("transaction id", max_length=40, blank=True)
+    amount = models.PositiveIntegerField(default=199)
+    status = models.CharField(max_length=10, choices=STATUSES, default=PENDING, db_index=True)
+    starts_at = models.DateTimeField(null=True, blank=True)
+    ends_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created"]
+        constraints = [models.UniqueConstraint(fields=["txn_id"], condition=~models.Q(txn_id=""),
+                                               name="unique_txn_when_given")]
+
+    def __str__(self):
+        return f"{self.user} - {self.get_status_display()} ({self.txn_id or 'no id'})"
+
+
+class PaymentProof(models.Model):
+    """The receipt screenshot or PDF for a payment. Kept in the database because the web host's disk
+    is temporary; separate from Subscription so lists of payments never load the file bytes."""
+    subscription = models.OneToOneField(Subscription, on_delete=models.CASCADE, related_name="proof")
+    data = models.BinaryField()
+    content_type = models.CharField(max_length=30)
+    filename = models.CharField(max_length=120, blank=True)
+
+
+class Friendship(models.Model):
+    """A friend request (pending) that becomes a friendship once the other student accepts."""
+    PENDING, ACCEPTED = "pending", "accepted"
+    from_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="friend_requests_sent")
+    to_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="friend_requests_received")
+    status = models.CharField(max_length=10, default=PENDING, db_index=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["from_user", "to_user"], name="one_request_per_pair"),
+                       models.CheckConstraint(check=~models.Q(from_user=models.F("to_user")), name="no_self_friend")]
+        ordering = ["-created"]
+
+    def __str__(self):
+        return f"{self.from_user} -> {self.to_user} ({self.status})"

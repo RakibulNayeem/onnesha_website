@@ -5,23 +5,10 @@ from django.urls import reverse
 from django.utils import timezone
 
 from . import roles
+from . import friends as fr
+from .activity import POINTS_PER_CORRECT, daily_points, streak
 from .i18n import num, tr
 from .models import ExamQuestion, Question
-
-POINTS_PER_CORRECT = 10
-
-
-def _streak(user):
-    """Consecutive days (ending today or yesterday) with at least one finished test."""
-    days = {timezone.localtime(t).date() for t in
-            user.exams.filter(submitted_at__isnull=False).values_list("submitted_at", flat=True)[:400]}
-    day = timezone.localdate()
-    if day not in days:
-        day -= timedelta(days=1)
-    n = 0
-    while day in days:
-        n, day = n + 1, day - timedelta(days=1)
-    return n
 
 
 def lang(request):
@@ -38,9 +25,18 @@ def hud(request):
     # Reminders stay until the thing they point at is done (finish the test, clear the queue).
     notes = [{"text": f"{tr('অসমাপ্ত পরীক্ষা')}: {e.title}", "url": reverse("exam_take", args=[e.pk]), "icon": "stopwatch"}
              for e in user.exams.filter(submitted_at__isnull=True)[:3]]
+    n_req = fr.incoming(user).count()
+    if n_req:
+        notes.append({"text": f"{num(n_req)}{tr('টি বন্ধুর অনুরোধ')}", "icon": "person-plus", "url": reverse("exam_friends")})
+    if roles.can_manage_users(user):
+        from .models import Subscription
+        n_pay = Subscription.objects.filter(status="pending").count()
+        if n_pay:
+            notes.append({"text": f"{num(n_pay)}{tr('টি প্রিমিয়াম পেমেন্ট যাচাইয়ের অপেক্ষায়')}", "icon": "gem",
+                          "url": reverse("panel_payments")})
     if roles.can_approve(user):
         n = Question.objects.filter(status=Question.DRAFT).count()
         if n:
             notes.append({"text": f"{num(n)}{tr('টি প্রশ্ন রিভিউয়ের অপেক্ষায়')}", "icon": "clipboard-check",
                           "url": reverse("panel_questions") + "?status=draft"})
-    return {"hud": {"points": points, "streak": _streak(user), "notes": notes}}
+    return {"hud": {"points": points, "streak": streak(daily_points(user)), "notes": notes}}

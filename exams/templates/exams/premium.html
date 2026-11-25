@@ -1,0 +1,32 @@
+{% extends "exams/base.html" %}{% load bn %}
+{% block title %}{% t "প্রিমিয়াম" %}{% endblock %}
+{% block body %}
+<div class="pagehead"><div class="wrap"><a class="back" href="{% url 'exam_home' %}" aria-label="{% t "ফিরে যাও" %}" title="{% t "ফিরে যাও" %}"><i class="bi bi-arrow-left"></i></a><h1>{% t "প্রিমিয়াম" %}</h1><p class="muted">{% t "সব ফিচার আনলক করো — আনলিমিটেড পরীক্ষা ও মডেল টেস্ট।" %}</p></div></div>
+<section class="sec"><div class="wrap" style="max-width:860px">
+  {% if active %}<div class="note" style="margin-bottom:1.2rem"><b>{% t "তুমি প্রিমিয়াম সদস্য" %}</b> — {% t "মেয়াদ শেষ" %}: {{ active.ends_at|date:"j M Y" }}</div>
+  {% elif pending %}<div class="note" style="margin-bottom:1.2rem">{% t "তোমার পেমেন্ট যাচাই চলছে। অনুমোদন হলেই প্রিমিয়াম চালু হবে।" %}</div>{% endif %}
+  <div class="grid c2 plans" style="align-items:stretch">
+    <div class="paper plan"><h3>{% t "ফ্রি" %}</h3><p class="price">৳০ <small>/ {% t "সবসময়" %}</small></p><p class="muted">{% t "শুরু করার জন্য যা দরকার" %}</p>
+      <ul class="plist ticks"><li>{% t "প্রশ্নব্যাংক ও অনুশীলন" %}</li><li>{% t "সৃজনশীল প্রশ্ন" %}</li><li>{% t "প্রতি মাসে" %} {{ free_exams|bn }} {% t "টি টাইমড পরীক্ষা" %}</li><li>{% t "মেধাতালিকা ও বন্ধু" %}</li></ul>
+      {% if active %}<span class="btn cur dim" aria-disabled="true">{% t "প্রিমিয়ামে অন্তর্ভুক্ত" %}</span>{% else %}<span class="btn cur" aria-current="true"><i class="bi bi-check-circle-fill"></i> {% t "বর্তমান প্ল্যান" %}</span>{% endif %}</div>
+    <div class="paper plan prem"><span class="ribbon">{% t "সবচেয়ে জনপ্রিয়" %}</span><h3>{% t "প্রিমিয়াম" %}</h3>
+      <p class="price">৳{{ price|bn }} <small>/ {% t "১ বছর" %}</small></p><p class="muted"><b>{% t "সেরা মূল্য" %}</b> · {% t "মাত্র" %} ৳{{ per_month|bn }}{% t "/মাস" %}</p>
+      <ul class="plist ticks"><li>{% t "ফ্রি-র সবকিছু" %}</li><li>{% t "আনলিমিটেড টাইমড পরীক্ষা" %}</li><li>{% t "মডেল টেস্টের প্রশ্ন (শুধু পরীক্ষায়)" %}</li><li>{% t "যেকোনো সময় বাতিলের ঝামেলা নেই — এককালীন পেমেন্ট" %}</li></ul>
+      {% if not active %}<a class="btn pri plan-cta" href="#pay"><i class="bi bi-gem"></i> {% t "প্রিমিয়াম নিন" %}</a>{% else %}<span class="btn cur" aria-current="true"><i class="bi bi-check-circle-fill"></i> {% t "বর্তমান প্ল্যান" %}</span>{% endif %}</div>
+  </div>
+  {% if not active %}
+  <div class="paper" id="pay" style="margin-top:1.2rem"><h3 style="margin-bottom:.6rem">{% t "প্রিমিয়াম আনলক করো — পেমেন্ট করো" %}</h3>
+    <div class="paynum"><span class="pm bkash">bKash</span><span class="pm nagad">Nagad</span><span class="pm rocket">Rocket</span>
+      <b id="paynum">{{ number }}</b><button type="button" class="btn sm" id="copynum" data-n="{{ number }}"><i class="bi bi-clipboard"></i> {% t "কপি" %}</button></div>
+    <ol class="plist" style="margin:.8rem 0 1rem"><li>{% t "উপরের নম্বরে" %} <b>৳{{ price|bn }}</b> {% t "Send Money করো" %}</li><li>{% t "পেমেন্টের স্ক্রিনশট বা রসিদ আপলোড করো; ট্রানজ্যাকশন আইডি দিলে যাচাই আরও দ্রুত হয়" %}</li><li>{% t "যাচাই শেষে প্রিমিয়াম চালু হবে" %}</li></ol>
+    {% if user.is_authenticated %}
+    <form method="post" class="form" enctype="multipart/form-data">{% csrf_token %}{{ form.non_field_errors }}
+      <div class="grid c2">{% for f in form %}<div><label class="t">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}</div>
+      <button class="btn pri" style="margin-top:1rem">{% t "প্রিমিয়াম আনলক করো" %}</button></form>
+    {% else %}<a class="btn pri" href="{% url 'account_login' %}?next={% url 'exam_premium' %}">{% t "লগইন করে এগিয়ে যাও" %}</a>{% endif %}
+  </div>{% endif %}
+  {% if mine %}<div class="paper" style="margin-top:1.2rem"><h3 style="margin-bottom:.6rem">{% t "আমার পেমেন্ট" %}</h3>
+    <table class="merit"><tbody>{% for s in mine %}<tr><td>{{ s.created|date:"j M Y" }}</td><td>{{ s.get_method_display }} · {{ s.txn_id }}</td><td>{{ s.get_status_display }}</td></tr>{% endfor %}</tbody></table></div>{% endif %}
+</div></section>
+{% endblock %}
+{% block scripts %}<script>var cb=document.getElementById('copynum');if(cb)cb.onclick=function(){var n=cb.dataset.n;(navigator.clipboard?navigator.clipboard.writeText(n):Promise.reject()).catch(function(){var r=document.createRange();r.selectNode(document.getElementById('paynum'));getSelection().removeAllRanges();getSelection().addRange(r)});cb.textContent='✓'}</script>{% endblock %}

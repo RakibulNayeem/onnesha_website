@@ -4,7 +4,7 @@
 <div class="pagehead"><div class="wrap" style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap"><a class="back" href="{% url 'exam_home' %}" aria-label="{% t "ফিরে যাও" %}" title="{% t "ফিরে যাও" %}"><i class="bi bi-arrow-left"></i></a>
   <span class="avatar">{{ user.get_username|slice:":1"|upper }}</span>
   <div><h1 style="margin:0">{% firstof user.get_full_name user.username %}</h1>
-    <div style="display:flex;gap:.5rem;align-items:center;margin-top:.2rem"><span class="tag hl">{{ role }}</span><span class="muted">{{ user.email }}</span></div></div>
+    <div style="display:flex;gap:.5rem;align-items:center;margin-top:.2rem"><span class="tag hl">{{ role }}</span><span class="muted">{{ user.email }}</span>{% if premium_until %}<span class="tag">{% t "প্রিমিয়াম" %} · {{ premium_until|date:"j M Y" }}</span>{% endif %}</div></div>
 </div></div>
 <section class="sec"><div class="wrap grid c2" style="align-items:start">
   <form method="post" class="paper form">{% csrf_token %}
@@ -21,6 +21,9 @@
       <div class="tile"><b>{{ n_exams|bn }}</b><span>{% t "পরীক্ষা দিয়েছ" %}</span></div>
       <div class="tile ok"><b>{{ accuracy|bn }}%</b><span>{% t "গড় সঠিকতা" %}</span></div>
     </div>
+    <div class="paper" style="margin-bottom:1rem"><h3 style="margin-bottom:.4rem">{% t "আমার প্ল্যান" %}</h3>
+      {% if is_premium %}<p class="muted">{% t "প্রিমিয়াম চালু আছে" %}{% if premium_until %} — {% t "মেয়াদ শেষ" %}: <b>{{ premium_until|date:"j M Y" }}</b>{% endif %}</p>
+      {% else %}<p class="muted">{% t "ফ্রি প্ল্যান" %} · {% t "এই মাসে বাকি পরীক্ষা" %}: <b>{{ exams_left|bn }}</b></p><a class="btn pri" href="{% url 'exam_premium' %}">{% t "প্রিমিয়াম নাও — ৳১৯৯ / বছর" %}</a>{% endif %}</div>
     {% if can_panel %}
     <div class="paper"><h3 style="margin-bottom:.4rem">{% t "অ্যাডমিন প্যানেল" %}</h3>
       <p class="muted" style="margin-bottom:.8rem">{% t "আপনার ভূমিকা" %}: <b>{{ role }}</b></p>

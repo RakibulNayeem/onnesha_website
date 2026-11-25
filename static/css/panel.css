@@ -69,3 +69,4 @@
 .pwarn{background:#fef3c7;border:1px solid #d97706;color:#92400e;border-radius:9px;padding:.55rem .75rem;font-size:.88rem}[data-bs-theme="dark"] .pwarn{background:#3b2f10;color:#fbbf24}
 .bigico{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:1.8rem;margin:0 auto 1rem;background:var(--paper)}.bigico.red{background:var(--red-l);color:var(--red)}
 .pbulk[hidden]{display:none}
+.pcount{margin-left:auto;background:#ef4444;color:#fff;border-radius:99px;font-size:.72rem;font-weight:700;padding:.05rem .5rem}

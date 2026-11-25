@@ -13,5 +13,7 @@
     {% for r in month %}<tr {% if r.user__username == user.username %}class="me"{% endif %}><td><span class="medal {% if forloop.counter <= 3 %}m{{ forloop.counter }}{% endif %}">{{ forloop.counter|bn }}</span></td><td>{{ r.user__username }}</td><td>{{ r.exams|bn }}</td><td><b>{{ r.points|floatformat:"-2"|bn }}</b></td></tr>
     {% empty %}<tr><td colspan="4" class="muted" style="text-align:center;padding:2rem 0">{% t "এখনো কেউ পরীক্ষা দেয়নি — তুমিই প্রথম হও" %}!</td></tr>{% endfor %}</table></div>
   </div>
+  {% if friends_board %}<div class="paper" style="margin-top:1.2rem"><h3 style="margin-bottom:.6rem"><i class="bi bi-people"></i> {% t "আমি ও বন্ধুরা" %} <small class="muted">· {% t "এই সপ্তাহ" %}</small></h3>
+    <table class="merit"><tbody>{% for r in friends_board %}<tr {% if r.me %}class="me"{% endif %}><td><span class="medal {% if forloop.counter <= 3 %}m{{ forloop.counter }}{% endif %}">{{ forloop.counter|bn }}</span></td><td>{{ r.user }}</td><td style="text-align:right"><b>{{ r.points|bn }}</b></td></tr>{% endfor %}</tbody></table></div>{% endif %}
   <p style="text-align:center;margin-top:1.2rem"><a class="btn pri" href="{% url 'exam_build' %}">{% t "পরীক্ষা দিয়ে তালিকায় ওঠো" %}</a></p></div></section>
 {% endblock %}

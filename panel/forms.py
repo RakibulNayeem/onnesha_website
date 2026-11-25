@@ -47,8 +47,8 @@ class QuestionForm(forms.ModelForm):
         if ch and subj and ch.subject_id != subj.id:
             self.add_error("chapter", "That chapter belongs to a different subject.")
         self.parts = []
-        if d.get("qtype") == Question.CQ:
-            for i in PARTS:
+        if d.get("qtype") in (Question.CQ, Question.SQ):
+            for i in PARTS if d["qtype"] == Question.CQ else ():
                 q = (d.get(f"p{i}_q") or "").strip()
                 if q:
                     self.parts.append({"q": q, "marks": d.get(f"p{i}_marks") or 0, "answer": (d.get(f"p{i}_answer") or "").strip()})

@@ -6,7 +6,7 @@
 <form method="get" class="pfilters">
   <input type="search" name="q" value="{{ f.q }}" placeholder="Search text or reference…">
   <select name="status"><option value="">Any status</option><option value="draft" {% if f.status == 'draft' %}selected{% endif %}>Draft</option><option value="approved" {% if f.status == 'approved' %}selected{% endif %}>Published</option></select>
-  <select name="type"><option value="">MCQ + CQ</option><option value="mcq" {% if f.type == 'mcq' %}selected{% endif %}>MCQ</option><option value="cq" {% if f.type == 'cq' %}selected{% endif %}>Creative</option></select>
+  <select name="type"><option value="">All types</option><option value="mcq" {% if f.type == 'mcq' %}selected{% endif %}>MCQ</option><option value="cq" {% if f.type == 'cq' %}selected{% endif %}>Creative</option><option value="sq" {% if f.type == 'sq' %}selected{% endif %}>Short (SQ)</option></select>
   <select name="subject" onchange="this.form.chapter&&(this.form.chapter.value='');this.form.submit()"><option value="">All subjects</option>{% for s in subjects %}<option value="{{ s.pk }}" {% if f.subject == s.pk|stringformat:"s" %}selected{% endif %}>{{ s.name }} · {{ s.track.name }}</option>{% endfor %}</select>
   {% if chapters %}<select name="chapter"><option value="">All chapters</option>{% for c in chapters %}<option value="{{ c.pk }}" {% if f.chapter == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>{% endif %}
   <select name="source"><option value="">All banks</option>{% for s in sources %}<option value="{{ s.pk }}" {% if f.source == s.pk|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>{% endfor %}</select>

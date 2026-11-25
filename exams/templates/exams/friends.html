@@ -1,0 +1,27 @@
+{% extends "exams/base.html" %}{% load bn %}
+{% block title %}{% t "বন্ধু" %}{% endblock %}
+{% block body %}
+<div class="pagehead"><div class="wrap"><a class="back" href="{% url 'exam_home' %}" aria-label="{% t "ফিরে যাও" %}" title="{% t "ফিরে যাও" %}"><i class="bi bi-arrow-left"></i></a><h1>{% t "বন্ধু" %}</h1><p class="muted">{% t "বন্ধুদের স্ট্রিক ও সাপ্তাহিক পয়েন্ট দেখো, একসাথে এগিয়ে যাও।" %}</p></div></div>
+<section class="sec"><div class="wrap grid c2" style="align-items:start">
+  <div>
+    <div class="paper"><h3 style="margin-bottom:.6rem">{% t "আমার বন্ধুরা" %} <small class="muted">· {{ rows|length|bn }}</small></h3>
+      {% for r in rows %}<div class="frow"><span class="avatar sm">{{ r.u.username|slice:":1"|upper }}</span>
+        <div class="fmain"><b>{{ r.u.username }}</b><small class="muted">{{ r.streak|bn }} {% t "দিনের স্ট্রিক" %} · {{ r.week_points|bn }} {% t "পয়েন্ট (এই সপ্তাহ)" %}</small></div>
+        {% if r.today %}<span class="tag hl">{% t "আজ সক্রিয়" %}</span>{% endif %}
+        <form method="post">{% csrf_token %}<input type="hidden" name="user" value="{{ r.u.pk }}"><button class="btn sm" name="do" value="remove" title="{% t "বন্ধু তালিকা থেকে সরাও" %}"><i class="bi bi-person-dash"></i></button></form></div>
+      {% empty %}<p class="muted">{% t "এখনো কোনো বন্ধু নেই। ইউজারনেম দিয়ে খুঁজে অনুরোধ পাঠাও।" %}</p>{% endfor %}</div>
+  </div>
+  <div>
+    <div class="paper"><h3 style="margin-bottom:.6rem">{% t "বন্ধু খোঁজো" %}</h3>
+      <form method="get" class="frow" style="border:0;padding:0"><input type="search" name="q" value="{{ q }}" placeholder="{% t "ইউজারনেম লেখো (কমপক্ষে ৩ অক্ষর)" %}" style="flex:1"><button class="btn pri">{% t "খোঁজো" %}</button></form>
+      {% for x in found %}<div class="frow"><span class="avatar sm">{{ x.u.username|slice:":1"|upper }}</span><div class="fmain"><b>{{ x.u.username }}</b></div>
+        {% if x.friend %}<span class="tag">{% t "বন্ধু" %}</span>{% else %}<form method="post">{% csrf_token %}<input type="hidden" name="user" value="{{ x.u.pk }}"><button class="btn sm pri" name="do" value="send"><i class="bi bi-person-plus"></i> {% t "অনুরোধ পাঠাও" %}</button></form>{% endif %}</div>
+      {% empty %}{% if q %}<p class="muted" style="margin-top:.8rem">{% t "কাউকে পাওয়া যায়নি।" %}</p>{% endif %}{% endfor %}</div>
+    {% if incoming %}<div class="paper" style="margin-top:1rem"><h3 style="margin-bottom:.6rem">{% t "বন্ধুর অনুরোধ" %}</h3>
+      {% for r in incoming %}<div class="frow"><span class="avatar sm">{{ r.from_user.username|slice:":1"|upper }}</span><div class="fmain"><b>{{ r.from_user.username }}</b></div>
+        <form method="post" style="display:flex;gap:.4rem">{% csrf_token %}<input type="hidden" name="user" value="{{ r.from_user.pk }}"><button class="btn sm pri" name="do" value="accept">{% t "গ্রহণ" %}</button><button class="btn sm" name="do" value="decline">{% t "বাদ দাও" %}</button></form></div>{% endfor %}</div>{% endif %}
+    {% if outgoing %}<div class="paper" style="margin-top:1rem"><h3 style="margin-bottom:.6rem">{% t "পাঠানো অনুরোধ" %}</h3>
+      {% for r in outgoing %}<div class="frow"><span class="avatar sm">{{ r.to_user.username|slice:":1"|upper }}</span><div class="fmain"><b>{{ r.to_user.username }}</b><small class="muted">{% t "অপেক্ষায়" %}</small></div></div>{% endfor %}</div>{% endif %}
+  </div>
+</div></section>
+{% endblock %}

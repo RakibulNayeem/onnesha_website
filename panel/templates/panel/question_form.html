@@ -8,8 +8,9 @@
   <div class="qgrid">
     <div class="pcard qmain">
       <div class="seg2" role="radiogroup" aria-label="Question type">
-        <label><input type="radio" name="qtype" value="mcq" {% if form.qtype.value != 'cq' %}checked{% endif %}><span><i class="bi bi-ui-radios"></i> Multiple choice</span></label>
+        <label><input type="radio" name="qtype" value="mcq" {% if form.qtype.value != 'cq' and form.qtype.value != 'sq' %}checked{% endif %}><span><i class="bi bi-ui-radios"></i> Multiple choice</span></label>
         <label><input type="radio" name="qtype" value="cq" {% if form.qtype.value == 'cq' %}checked{% endif %}><span><i class="bi bi-journal-text"></i> Creative (CQ)</span></label>
+        <label><input type="radio" name="qtype" value="sq" {% if form.qtype.value == 'sq' %}checked{% endif %}><span><i class="bi bi-pencil-square"></i> Short (SQ)</span></label>
       </div>
       {% include "panel/_field.html" with f=form.text %}
       <div id="mcq">
@@ -59,7 +60,7 @@
 {% endblock %}
 {% block scripts %}<script>
 var types=document.querySelectorAll('input[name=qtype]'),mcq=document.getElementById('mcq'),cq=document.getElementById('cq');
-function showType(){var isCq=document.querySelector('input[name=qtype]:checked').value==='cq';mcq.hidden=isCq;cq.hidden=!isCq}
+function showType(){var t=document.querySelector('input[name=qtype]:checked').value;mcq.hidden=t!=='mcq';cq.hidden=t!=='cq'}
 types.forEach(t=>t.addEventListener('change',showType));showType();
 var subj=document.getElementById('id_subject'),chap=document.getElementById('id_chapter');
 function filterChapters(){[...chap.options].forEach(function(o){if(!o.value)return;var ok=o.dataset.s===subj.value;o.hidden=!ok;o.disabled=!ok;if(!ok&&o.selected)chap.value=''})}
