@@ -14,8 +14,7 @@
     <h3 style="margin:1.4rem 0 .8rem">{% t "একাডেমিক তথ্য" %}</h3>
     <div class="grid c2">{% for f in form.academic %}<div id="w-{{ f.name }}" {% if f.name == "institution" or f.name == "level" %}style="grid-column:1/-1"{% endif %}><label class="t">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}</div>
     <p class="muted" style="margin-top:.6rem;font-size:.85rem">{% t "তোমার স্তর অনুযায়ী প্রশ্নব্যাংকে প্রাসঙ্গিক ট্যাব দেখানো হবে।" %}</p>
-    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem"><button class="btn pri">{% t "সংরক্ষণ করো" %}</button>
-      <a class="btn" href="{% url 'account_change_password' %}">{% t "পাসওয়ার্ড বদলাও" %}</a></div>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem"><button class="btn pri">{% t "সংরক্ষণ করো" %}</button></div>
   </form>
   <div>
     <div class="tiles" style="margin-bottom:1rem">
@@ -36,8 +35,14 @@
     {% else %}
     <div class="paper"><h3 style="margin-bottom:.3rem">{% t "প্রশ্ন লিখতে চাও" %}?</h3><p class="muted">{% t "শিক্ষক বা প্রশ্নকর্তা হিসেবে যুক্ত হতে অ্যাডমিনের সঙ্গে যোগাযোগ করো।" %}</p></div>
     {% endif %}
-    <form method="post" action="{% url 'account_logout' %}" style="margin-top:1rem">{% csrf_token %}
-      <button class="btn danger" style="width:100%"><i class="bi bi-box-arrow-right"></i> {% t "লগআউট" %}</button></form>
+    <div class="paper" style="margin-top:1rem"><h3 style="margin-bottom:.8rem">{% t "অ্যাকাউন্ট" %}</h3>
+      <div class="plinks">
+        {% if user.has_usable_password %}<a href="{% url 'account_change_password' %}"><i class="bi bi-key"></i> {% t "পাসওয়ার্ড বদলাও" %}</a>
+        {% else %}<a href="{% url 'account_set_password' %}"><i class="bi bi-key"></i> {% t "পাসওয়ার্ড সেট করো" %}</a>{% endif %}
+      </div>
+      <form method="post" action="{% url 'account_logout' %}" style="margin-top:.8rem">{% csrf_token %}
+        <button class="btn danger" style="width:100%"><i class="bi bi-box-arrow-right"></i> {% t "লগআউট" %}</button></form>
+    </div>
   </div>
 </div></section>
 {% endblock %}

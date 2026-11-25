@@ -402,3 +402,30 @@ class UsernameEdit(TestCase):
         self.assertFalse(self.client.get(url, {"u": "TAKEN"}).json()["ok"])
         self.assertFalse(self.client.get(url, {"u": "bad name!"}).json()["ok"])
         self.assertTrue(self.client.get(url, {"u": "stu"}).json()["ok"])             # your own name is fine
+
+
+class AccountCard(TestCase):
+    def test_password_and_logout_sit_together_and_google_only_users_set_a_password(self):
+        u = User.objects.create_user("p", "p@x.com", "pw12345!")
+        self.client.force_login(u)
+        page = self.client.get(reverse("exam_profile"))
+        self.assertContains(page, reverse("account_change_password"))
+        self.assertContains(page, reverse("account_logout"))
+        u.set_unusable_password(); u.save(); self.client.force_login(u)
+        self.assertContains(self.client.get(reverse("exam_profile")), reverse("account_set_password"))
+
+
+class LeaderboardRanges(TestCase):
+    def test_weekly_and_monthly_boards_use_different_windows(self):
+        from django.utils import timezone
+        track = Track.objects.create(name="T", slug="t", kind="academic")
+        subj = Subject.objects.create(track=track, name="S")
+        a = User.objects.create_user("recent", "a@x.com", "pw12345!")
+        b = User.objects.create_user("older", "b@x.com", "pw12345!")
+        now = timezone.now()
+        for u, days in ((a, 1), (b, 15)):
+            Exam.objects.create(user=u, title="t", duration_minutes=5, score=5,
+                                submitted_at=now - timezone.timedelta(days=days))
+        page = self.client.get(reverse("exam_leaderboard"))      # both boards on one page, no tabs
+        self.assertEqual([r["user__username"] for r in page.context["week"]], ["recent"])
+        self.assertEqual({r["user__username"] for r in page.context["month"]}, {"recent", "older"})

@@ -28,8 +28,8 @@ def _scope(subject_ids, chapter_ids):
     return cond
 
 
-def _top_students(limit):
-    since = timezone.now() - timezone.timedelta(days=30)
+def _top_students(limit, days=30):
+    since = timezone.now() - timezone.timedelta(days=days)
     return (Exam.objects.filter(submitted_at__gte=since)
             .values("user__username").annotate(points=Sum("score"), exams=Count("id"))
             .order_by("-points")[:limit])
@@ -253,7 +253,8 @@ def dashboard(request):
 
 
 def leaderboard(request):
-    return render(request, "exams/leaderboard.html", {"rows": _top_students(20)})
+    return render(request, "exams/leaderboard.html", {
+        "week": _top_students(20, 7), "month": _top_students(20, 30)})
 
 
 def cq_practice(request):

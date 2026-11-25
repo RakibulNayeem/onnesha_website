@@ -700,3 +700,9 @@ html[lang=en] .rules li::before{content:counter(r)}
 
 .back{display:inline-flex;align-items:center;justify-content:center;width:2.2rem;height:2.2rem;border-radius:50%;color:var(--ink,inherit);font-size:1.2rem;margin:0 .6rem .4rem 0;transition:background .15s}.back:hover{background:var(--line)}.examtop .back{margin:0 .6rem 0 0}
 .sbtn .gicon{flex:none}
+.merit tr.me{background:color-mix(in srgb,var(--accent,#0f766e) 10%,transparent);font-weight:600}
+
+.livecard.pq{position:relative;transform-origin:39px 0;transform:rotate(1.6deg);box-shadow:0 2px 4px rgba(15,23,42,.10),0 14px 28px rgba(15,23,42,.16),0 30px 60px rgba(15,23,42,.18)}
+.livecard.pq::before{content:"";position:absolute;top:-11px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fca5a5,#dc2626 55%,#991b1b);box-shadow:0 6px 7px rgba(0,0,0,.35),inset -2px -2px 3px rgba(0,0,0,.25);z-index:2}
+.livecard.pq::before{left:28px}
+@media (prefers-reduced-motion:reduce){.livecard.pq{transform:none}}
