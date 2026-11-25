@@ -321,6 +321,20 @@ class ImportCQ(TestCase):
         self.assertContains(self.client.get("/cq/"), "মধ্যবিন্দু")  # newest CQ is on page 1
 
 
+class ShortQuestions(TestCase):
+    def test_sq_files_import_idempotently_and_held_back_ones_stay_off_the_cq_page(self):
+        from django.core.management import call_command
+        data = Path(__file__).parent / "data" / "ssc_math"
+        call_command("import_sq", str(data / "sq02.txt"), str(data / "mt01_sq.txt"), stdout=__import__("io").StringIO())
+        call_command("import_sq", str(data / "sq02.txt"), stdout=__import__("io").StringIO())      # re-run: no duplicates
+        self.assertEqual(Question.objects.filter(qtype="sq", reserved=False).count(), 10)
+        self.assertEqual(Question.objects.filter(qtype="sq", reserved=True).count(), 15)
+        page = self.client.get(reverse("exam_cq") + "?type=sq")
+        self.assertContains(page, "উপসেট বলতে কী বুঝ?")                  # a bank SQ shows with its solution
+        self.assertNotContains(page, "ক্রমিক সমানুপাতী বলতে কী বুঝ?")     # a model-test SQ never does
+        self.assertEqual(self.client.get(reverse("exam_cq") + "?type=cq").status_code, 200)
+
+
 class BankTabs(TestCase):
     def test_boards_have_their_own_tab_grouped_by_year(self):
         track = Track.objects.create(name="SSC", slug="ssc", kind="academic")

@@ -97,6 +97,15 @@ class Questions(PanelBase):
         self.assertEqual(q.parts, [{"q": "Define velocity", "marks": 1, "answer": "Rate of change of displacement"}])
         self.assertEqual((q.option_a, q.correct), ("", ""))
 
+    def test_short_question_keeps_its_solution_and_drops_options(self):
+        self.client.force_login(self.teacher)
+        d = self.post_q(qtype="sq", text="Find x", explanation="x = 2", p1_q="stray", p1_marks="1")
+        self.client.post(reverse("panel_question_new"), d)
+        q = Question.objects.get(text="Find x")
+        self.assertEqual((q.qtype, q.explanation, q.parts), ("sq", "x = 2", []))
+        self.assertEqual((q.option_a, q.correct), ("", ""))
+        self.assertEqual(q.problems(), [])                      # an SQ needs no options or parts
+
     def test_only_reviewers_can_delete(self):
         q = self.q(self.teacher)
         self.client.force_login(self.teacher)
