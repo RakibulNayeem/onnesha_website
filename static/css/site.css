@@ -702,7 +702,13 @@ html[lang=en] .rules li::before{content:counter(r)}
 .sbtn .gicon{flex:none}
 .merit tr.me{background:color-mix(in srgb,var(--accent,#0f766e) 10%,transparent);font-weight:600}
 
-.livecard.pq{position:relative;transform-origin:39px 0;transform:rotate(1.6deg);box-shadow:0 2px 4px rgba(15,23,42,.10),0 14px 28px rgba(15,23,42,.16),0 30px 60px rgba(15,23,42,.18)}
-.livecard.pq::before{content:"";position:absolute;top:-11px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fca5a5,#dc2626 55%,#991b1b);box-shadow:0 6px 7px rgba(0,0,0,.35),inset -2px -2px 3px rgba(0,0,0,.25);z-index:2}
-.livecard.pq::before{left:28px}
+.livecard.pq{position:relative;transform:rotate(1.6deg);box-shadow:0 2px 4px rgba(15,23,42,.10),0 14px 28px rgba(15,23,42,.16),0 30px 60px rgba(15,23,42,.18)}
+.livecard.pq{transform-origin:41px 0;padding-top:1.7rem}
+/* push pin: glossy head (::before) over a metal needle (::after) driven into the card */
+.livecard.pq::before{content:"";position:absolute;left:28px;top:-15px;width:26px;height:26px;border-radius:50%;z-index:3;
+  background:radial-gradient(circle at 32% 28%,#fff 0 7%,#fecaca 8% 18%,#ef4444 40%,#b91c1c 70%,#7f1d1d);
+  box-shadow:0 0 0 2px #7f1d1d,0 9px 8px -2px rgba(0,0,0,.45),inset -3px -4px 5px rgba(0,0,0,.28)}
+.livecard.pq::after{content:"";position:absolute;left:39px;top:9px;width:4px;height:15px;border-radius:0 0 2px 2px;z-index:2;
+  background:linear-gradient(90deg,#f3f4f6,#9ca3af 55%,#4b5563);transform:rotate(-14deg);transform-origin:50% 0;
+  box-shadow:3px 4px 4px rgba(0,0,0,.3)}
 @media (prefers-reduced-motion:reduce){.livecard.pq{transform:none}}
