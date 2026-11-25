@@ -669,7 +669,7 @@ html[lang=en] .rules li::before{content:counter(r)}
 @media(min-width:820px){.authcard{grid-template-columns:5fr 6fr}}
 .authside{background:linear-gradient(150deg,#0a3b44,#12606c 60%,#1a7a89);color:#fff;padding:2rem 1.8rem;display:flex;flex-direction:column;gap:1.2rem;position:relative;overflow:hidden}
 .authside::after{content:"";position:absolute;right:-70px;bottom:-70px;width:220px;height:220px;border-radius:50%;border:34px solid rgba(255,255,255,.07)}
-.authside .brand{color:#fff;font-size:1.2rem}.authside .brand img{background:#fff;border-radius:50%;padding:2px}
+.authside .brand{color:#fff;font-size:1.2rem}.authside .brand img{border-radius:8px}
 .authside h2{color:#fff;font-size:1.45rem;line-height:1.4}
 .authside ul{list-style:none;margin:0;padding:0;display:grid;gap:.7rem}
 .authside li{display:flex;gap:.7rem;align-items:center;color:#dff3f6;font-weight:500}.authside li i{font-size:1.2rem;color:#9fe3ee}

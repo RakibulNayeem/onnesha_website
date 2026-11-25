@@ -5,7 +5,7 @@
 <title>{% block title %}Panel{% endblock %} · Onnesha Panel</title>
 <meta name="robots" content="noindex">
 <script src="{% asset 'js/theme.js' %}"></script>
-<link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+<link rel="icon" type="image/png" href="{% static 'img/logo-new/favicon-64.png' %}">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -14,7 +14,7 @@
 </head>
 <body class="pbody">
 <aside class="psb">
-  <a class="pbrand" href="{% url 'panel_home' %}"><img src="{% static 'img/logo.png' %}" alt=""><span>Onnesha<small>Staff panel</small></span></a>
+  <a class="pbrand" href="{% url 'panel_home' %}"><img src="{% static 'img/logo-new/mark.svg' %}" alt=""><span>Onnesha<small>Staff panel</small></span></a>
   <nav>
     <a href="{% url 'panel_home' %}" class="{% if section == 'home' %}on{% endif %}"><i class="bi bi-grid-1x2"></i>Dashboard</a>
     <a href="{% url 'panel_questions' %}" class="{% if section == 'questions' and not request.GET.status %}on{% endif %}"><i class="bi bi-list-check"></i>Questions</a>
